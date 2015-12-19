@@ -1,0 +1,40 @@
+#!/usr/bin/env sage
+"""delirium -- a reducer of differential equations for multiloop master integrals
+
+Usage:
+  delirium read [-o <file_output>] <file_input>
+
+Options:
+  -o <file_output>  output file name
+
+Arguments:
+  <file_input>      input file name
+"""
+import logging
+from   docopt_dispatch import dispatch as docopt_dispatch
+
+from   delirium import __author__, __version__
+from   delirium.io import matrix_read
+
+logging.basicConfig(
+    format='{levelname} [{asctime}] {message:<80} "{pathname}:{funcName}", line {lineno}',
+    style = '{',
+    datefmt='%Y-%m-%d %I:%M:%S',
+    level=logging.INFO,
+)
+logger = logging.getLogger('delirium')
+
+def main():
+    print('\033[35m'+'Delirium v'+__version__+'\033[0m')
+    print("Author: "+__author__+", Institute of Nuclear Physics, Krakow (Poland)")
+    docopt_dispatch(__doc__)
+
+@docopt_dispatch.on('read')
+def on_read(file_input, **kwargs):
+    with open(file_input, 'r') as f:
+        m = matrix_read(f)
+        print(m)
+
+if __name__ == '__main__':
+    main()
+
