@@ -7,7 +7,6 @@ install:
 test-all: test-func test-unit
 
 test-func: install
-# run ``python setup.py develop`` to avoid ImportError
 	@echo -e "\nRun Functional Tests"
 	@sage-python -m pytest ./test/
 

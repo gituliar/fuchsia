@@ -15,6 +15,9 @@ from   docopt_dispatch import dispatch as docopt_dispatch
 
 from   delirium import __author__, __version__
 from   delirium.io import matrix_read
+from   delirium.matrix import alphabet, singular_points
+
+from   sage.calculus.var import var
 
 logging.basicConfig(
     format='{levelname} [{asctime}] {message:<80} "{pathname}:{funcName}", line {lineno}',
@@ -33,7 +36,15 @@ def main():
 def on_read(file_input, **kwargs):
     with open(file_input, 'r') as f:
         m = matrix_read(f)
-        print(m)
+    print "\nNormal form:\n", m, "\n"
+
+    print "\nAlphabet:\n", alphabet(m, var('x')), "\n"
+
+    print "\nSingular points:\n", singular_points(m, var('x')), "\n"
+#    mj = m.jordan_form()
+#    print "\nJordan form:\n", mj, "\n"
+#    print mj.apply_map(lambda ex: ex.partial_fraction(x)), "\n"
+    print("-="*50)
 
 if __name__ == '__main__':
     main()
