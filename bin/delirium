@@ -14,10 +14,7 @@ import logging
 from   docopt_dispatch import dispatch as docopt_dispatch
 
 from   delirium import __author__, __version__
-from   delirium.io import matrix_read
-from   delirium.matrix import alphabet, singular_points
-
-from   sage.calculus.var import var
+from   delirium.notebook import Notebook
 
 logging.basicConfig(
     format='{levelname} [{asctime}] {message:<80} "{pathname}:{funcName}", line {lineno}',
@@ -34,13 +31,16 @@ def main():
 
 @docopt_dispatch.on('read')
 def on_read(file_input, **kwargs):
+    nb = Notebook()
     with open(file_input, 'r') as f:
-        m = matrix_read(f)
+        m = nb.new_Matrix_from_file(f)
     print "\nNormal form:\n", m, "\n"
 
-    print "\nAlphabet:\n", alphabet(m, var('x')), "\n"
+    print "\nAlphabet:\n", nb.alphabet(m, 'x'), "\n"
 
-    print "\nSingular points:\n", singular_points(m, var('x')), "\n"
+    print "\nSingularities:\n", nb.singularities(m, 'x'), "\n"
+
+    print nb.matrix_coefficient(m, 'x')
 #    mj = m.jordan_form()
 #    print "\nJordan form:\n", mj, "\n"
 #    print mj.apply_map(lambda ex: ex.partial_fraction(x)), "\n"
