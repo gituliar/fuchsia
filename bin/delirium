@@ -2,7 +2,7 @@
 """delirium -- a reducer of differential equations for multiloop master integrals
 
 Usage:
-  delirium read [-o <file_output>] <file_input>
+  delirium valuation <file_input>
 
 Options:
   -o <file_output>  output file name
@@ -29,22 +29,15 @@ def main():
     print("Author: "+__author__+", Institute of Nuclear Physics, Krakow (Poland)")
     docopt_dispatch(__doc__)
 
-@docopt_dispatch.on('read')
-def on_read(file_input, **kwargs):
-    nb = Notebook()
+nb = Notebook()
+
+@docopt_dispatch.on('valuation')
+def on_valuation(file_input, **kwargs):
     with open(file_input, 'r') as f:
         m = nb.new_Matrix_from_file(f)
-    print "\nNormal form:\n", m, "\n"
-
-    print "\nAlphabet:\n", nb.alphabet(m, 'x'), "\n"
-
-    print "\nSingularities:\n", nb.singularities(m, 'x'), "\n"
-
-    print nb.matrix_coefficient(m, 'x')
-#    mj = m.jordan_form()
-#    print "\nJordan form:\n", mj, "\n"
-#    print mj.apply_map(lambda ex: ex.partial_fraction(x)), "\n"
-    print("-="*50)
+#    print "\nNormal form:\n", m, "\n"
+#    print "Alphabet:\n", nb.alphabet(m, 'x'), "\n"
+    print "\nMatrix valuation:", nb.valuation(m, 'x'), "\n"
 
 if __name__ == '__main__':
     main()

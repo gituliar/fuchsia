@@ -20,13 +20,13 @@ def test_matrix_coefficient():
         m = nb.new_Matrix_from_file(f)
     assert nb.matrix_coefficient(m, 'x') == (-2, matrix(SR, [[0, 0], [-1, 0]]))
 
-def test_rank():
+def test_valuation():
     with open('test/data/henn_324') as f:
         m = nb.new_Matrix_from_file(f)
-    assert nb.rank(m, 'x') == -2
+    assert nb.valuation(m, 'x') == -2
     with open('test/data/bar_ex1') as f:
         m = nb.new_Matrix_from_file(f)
-    assert nb.rank(m, 'x') == -9
+    assert nb.valuation(m, 'x') == -9
 
 def test_new_Matrix_from_file():
     with open('test/data/henn_324') as f:

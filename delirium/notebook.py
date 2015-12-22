@@ -45,7 +45,7 @@ class Notebook(object):
     def matrix_coefficient(self, m, x):
         """Return a leading coefficient of the matrix `m' at the point `x'."""
         x = var(x) if type(x) == str else x
-        r = self.rank(m, x)
+        r = self.valuation(m, x)
         data = []
         for expr in m.list():
             #expr = expr.partial_fraction(x)
@@ -70,8 +70,8 @@ class Notebook(object):
     def new_Matrix_from_list(self, ncol, nrow, data):
         return matrix(ncol, nrow, data)
 
-    def rank(self, m, x):
-        """Return a Poincare rank of the matrix `m' at the point `x'."""
+    def valuation(self, m, x):
+        """Return a valuation of the matrix `m' at the point `x'."""
         x = var(x) if type(x) == str else x
         vs = [e.low_degree(x) for e in m.list() if self.is_Expression(e)]
         result = min(vs)
