@@ -11,8 +11,9 @@ class Notebook(object):
     _parser = Parser(make_var=var)
 
     def alphabet(self, obj, x):
-        """Determine the alphabet of the object, i.e. a set of x-dependent
-        polynomials raised to a negative integer power.
+        """Determine the alphabet of the object, i.e. an expression or matrix.
+        An alphabet is a set of x-dependent polynomials raised to a negative
+        integer power.
 
         >>> nb = Notebook()
         >>> ex = nb.new_Expression_from_string('a/x + b/x^2 + c/(1+x)^2')
@@ -41,32 +42,21 @@ class Notebook(object):
     def is_Matrix(self, obj):
         return type(obj) is Matrix_symbolic_dense
 
-    def leading_singularity(self, obj, x):
-        x = var(x) if type(x) == str else x
-        result = None
-        if self.is_Expression(obj):
-            coeffs = obj.partial_fraction(obj, x).coefficients(x)
-            result = coeffs[0]
-        elif self.is_Matrix(obj):
-            coeffs = obj.list()[0].partial_fraction(x).coefficients(x)
-            result = coeffs[0]
-        return result
-
     def matrix_coefficient(self, m, x):
+        """Return a leading coefficient of the matrix `m' at the point `x'."""
         x = var(x) if type(x) == str else x
-        d = self.matrix_degree(m, x)
+        r = self.rank(m, x)
         data = []
         for expr in m.list():
-            #e = expr.partial_fraction(x)
-            e = expr
-            c = e.coefficient(x, d)
+            #expr = expr.partial_fraction(x)
+            c = expr.coefficient(x, r).substitute(x=0)
             data.append(c)
         result = self.new_Matrix_from_list(m.ncols(), m.nrows(), data)
-        return (d, result)
+        return (r, result)
 
-    def matrix_degree(self, m, x):
-        x = var(x) if type(x) == str else x
-        return min([e.partial_fraction(x).degree(x) for e in m.list() if self.is_Expression(e)])
+    def new_Expression_from_string(self, string):
+        expr = self._parser.parse(string)
+        return expr
 
     def new_Matrix_from_file(self, f):
         ncol, nrow = map(int, f.readline().split())
@@ -80,9 +70,12 @@ class Notebook(object):
     def new_Matrix_from_list(self, ncol, nrow, data):
         return matrix(ncol, nrow, data)
 
-    def new_Expression_from_string(self, string):
-        expr = self._parser.parse(string)
-        return expr
+    def rank(self, m, x):
+        """Return a Poincare rank of the matrix `m' at the point `x'."""
+        x = var(x) if type(x) == str else x
+        vs = [e.low_degree(x) for e in m.list() if self.is_Expression(e)]
+        result = min(vs)
+        return result
 
     def singularities(self, obj, x):
         if type(x) is str:
