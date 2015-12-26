@@ -2,7 +2,7 @@
 """delirium -- a reducer of differential equations for multiloop master integrals
 
 Usage:
-  delirium valuation <file_input>
+  delirium reduce_moser <file_input>
 
 Options:
   -o <file_output>  output file name
@@ -11,33 +11,33 @@ Arguments:
   <file_input>      input file name
 """
 import logging
+
 from   docopt_dispatch import dispatch as docopt_dispatch
+import sage.all
 
 from   delirium import __author__, __version__
-from   delirium.notebook import Notebook
+from   delirium.matrix import new_Matrix
+from   delirium.reducer import Reducer
 
 logging.basicConfig(
-    format='{levelname} [{asctime}] {message:<80} "{pathname}:{funcName}", line {lineno}',
-    style = '{',
+    format='%(levelname)s [%(asctime)s] %(message)s %(pathname)s:%(funcName)s, line %(lineno)s',
     datefmt='%Y-%m-%d %I:%M:%S',
     level=logging.INFO,
 )
-logger = logging.getLogger('delirium')
+log = logging.getLogger('delirium')
 
 def main():
     print('\033[35m'+'Delirium v'+__version__+'\033[0m')
     print("Author: "+__author__+", Institute of Nuclear Physics, Krakow (Poland)")
     docopt_dispatch(__doc__)
 
-nb = Notebook()
-
-@docopt_dispatch.on('valuation')
-def on_valuation(file_input, **kwargs):
+@docopt_dispatch.on('reduce_moser')
+def on_reduce_moser(file_input, **kwargs):
     with open(file_input, 'r') as f:
-        m = nb.new_Matrix_from_file(f)
-#    print "\nNormal form:\n", m, "\n"
-#    print "Alphabet:\n", nb.alphabet(m, 'x'), "\n"
-    print "\nMatrix valuation:", nb.valuation(m, 'x'), "\n"
+        m = new_Matrix(f)
+    log.info("Running Moser reduction.")
+    red = Reducer()
+    red.reduce_moser(m, 'x')
 
 if __name__ == '__main__':
     main()
