@@ -1,18 +1,24 @@
 import logging
 
-from   delirium.matrix import coefficient, degree_low, var
+from   delirium.matrix import coefficient_low, degree_low, dims, new_Matrix, var
 
 log = logging.getLogger('delirium')
 
-class Reducer(object):
+class ReductionFinder(object):
 
-    def reduce_moser(self, m, x):
+    def jordan_form(self, m, x):
         x = var(x)
-        print "\nInitial matrix A = \n", m, "\n"
+        mj = m.jordan_form()
 
-        dl = degree_low(m, x)
-        m0 = coefficient(m, x, dl)
-        print "Leading coeff A_0 =\n", m0, "\n"
+    def moser_form(self, m, x):
+        x = var(x)
+        m0 = coefficient_low(m, x)
+        log.info("\nA =\n" + str(m))
+        log.info("\nA_0 =\n" + str(m0))
+        mm = m
+        n = dims(m)[0]
+        t = new_Matrix([0]*n**2)
+        return mm, t
 
 #        print "\nMatrix valuation:", v, "\n"
 #        print "\nMatrix [0] eigenvalues:\n", m0.eigenvalues(), "\n"

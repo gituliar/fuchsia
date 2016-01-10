@@ -1,7 +1,7 @@
 import pytest
 
 from   delirium.matrix import (
-           alphabet, coefficient, degree_high, degree_low, new_Matrix, var)
+           alphabet, coefficient_low, degree_high, degree_low, new_Matrix, var)
 
 eps, x = var("eps, x")
 
@@ -10,10 +10,10 @@ def test_alphabet():
         m = new_Matrix(f)
     assert alphabet(m, x) == set([x-1, x, x+1])
 
-def test_coefficient():
+def test_coefficient_low():
     with open('test/data/henn_324') as f:
         m = new_Matrix(f)
-    assert coefficient(m, 'x') == new_Matrix([0, 0, -1, 0])
+    assert coefficient_low(m, 'x') == new_Matrix([0, 0, -1, 0])
 
 def test_degree():
     # test 01
