@@ -13,3 +13,10 @@ test-func: install
 test-unit: install
 	@echo -e "\nRun Unit Tests"
 	@sage-python -m pytest --doctest-modules ./delirium/
+
+test:
+	sage -python -mdoctest delirium.py
+	sage -python test_delirium.py
+
+clean:
+	rm -f *.pyc
