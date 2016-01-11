@@ -16,7 +16,8 @@ def alphabet(ex, x):
     """Return bases of all negative exponents in the `x'-polynomial `ex'.
 
     >>> ex = new_Expression('a/x + b/x^2 + c/(1+x)^2')
-    >>> alphabet(ex, 'x')
+    >>> al = alphabet(ex, 'x')
+    >>> from pprint import pprint; pprint(al)
     set([x, x + 1])"""
     x = var(x)
     result = set()
