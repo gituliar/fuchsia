@@ -26,7 +26,7 @@ def main():
     print('\033[35m'+'Delirium v'+__version__+'\033[0m')
     print """Authors:
     Oleksandr Gituliar, Institute of Nuclear Physics, Krakow (Poland)
-    magv, DNU, Dnipropetrovsk (Ukraine)
+    Vitaly Magerya
     """
     docopt_dispatch(__doc__)
 
