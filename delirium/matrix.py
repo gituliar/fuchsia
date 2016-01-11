@@ -127,8 +127,8 @@ def partial_fraction(m, x):
     return res
 
 def write_Matrix(f, m):
-    for row in m.rows():
-        for mij in row:
+    for col in m.columns():
+        for mij in col:
             f.write(str(mij))
             f.write('\n')
         f.write('\n')
