@@ -1,22 +1,20 @@
-.PHONY: install test-all test-unit
+.PHONY: clean install test
+
+DTESTS := ${wildcard delirium/*.py}
+UTESTS := ${wildcard test/test_*.py}
+.PHONY: $(DTESTS) $(UTESTS)
 
 install:
 	@date +"%y.%m.%d" > delirium/VERSION
 	@sudo sage-python setup.py develop
 
-test-all: test-func test-unit
+test: $(DTESTS) $(UTESTS)
 
-test-func: install
-	@echo -e "\nRun Functional Tests"
-	@sage-python -m pytest ./test/
+$(DTESTS): delirium/%.py:
+	sage-python -mdoctest delirium/$*.py
 
-test-unit: install
-	@echo -e "\nRun Unit Tests"
-	@sage-python -m pytest --doctest-modules ./delirium/
-
-test:
-	sage -python -mdoctest delirium.py
-	sage -python test_delirium.py
+$(UTESTS): test/%.py:
+	sage-python test/$*.py
 
 clean:
-	rm -f *.pyc
+	@rm -fr delirium/*.pyc delirium/__pycache__

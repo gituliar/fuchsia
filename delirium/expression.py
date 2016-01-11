@@ -1,9 +1,14 @@
+import logging
+
+import sage.all
 import sage.calculus.var
 from   sage.matrix.matrix_symbolic_dense import Matrix_symbolic_dense
 from   sage.misc.parser import Parser
 from   sage.symbolic.expression import Expression
 from   sage.symbolic.operators import mul_vararg
 from   sage.symbolic.ring import SR
+
+log = logging.getLogger('delirium')
 
 _parser = Parser(make_var=sage.calculus.var.var)
 
@@ -31,7 +36,11 @@ def is_Expression(obj):
 
 def new_Expression(obj):
     if type(obj) == str:
-        ex = new_Expression_from_string(obj)
+        try:
+            ex = new_Expression_from_string(obj)
+        except SyntaxError:
+            log.error(obj)
+            raise
     else:
         raise NotImplementedError
     return ex

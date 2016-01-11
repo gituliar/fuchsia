@@ -1,5 +1,6 @@
 import logging
 
+import sage.all
 from   sage.matrix.constructor import matrix
 
 from   delirium.expression import is_Expression, new_Expression, var
@@ -10,7 +11,6 @@ log = logging.getLogger('delirium')
 def _matrix_list_map(m, f):
     res = [f(item) for item in m.list()]
     return res
-
 
 def alphabet(m, x):
     res = set()
@@ -107,12 +107,12 @@ def new_Matrix(obj):
     return res
 
 def new_Matrix_from_file(f):
-    ncol, nrow = map(int, f.readline().split())
+#    ncol, nrow = map(int, f.readline().split())
     try:
-        data = [new_Expression(s) for s in f.readlines()]
+        data = [new_Expression(s) for s in f.readlines() if s.strip() != '']
     except SyntaxError:
         raise
-    m = new_Matrix_from_list(data)
+    m = new_Matrix_from_list(data).transpose()
     return m
 
 def new_Matrix_from_list(data):
@@ -121,6 +121,17 @@ def new_Matrix_from_list(data):
     assert n == ncol**2
     m = matrix(ncol, ncol, data)
     return m
+
+def partial_fraction(m, x):
+    res = m.apply_map(lambda obj: obj.partial_fraction(x) if is_Expression(obj) else obj)
+    return res
+
+def write_Matrix(f, m):
+    for row in m.rows():
+        for mij in row:
+            f.write(str(mij))
+            f.write('\n')
+        f.write('\n')
 
 def zero_cols(m):
     res, i = [], 1

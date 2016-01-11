@@ -1,3 +1,2 @@
 docopt-dispatch==0.0.2
-pytest==2.8.5
 sage==6.9
