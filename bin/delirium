@@ -17,7 +17,7 @@ from   docopt_dispatch import dispatch as docopt_dispatch
 import sage.all
 
 from   delirium import __author__, __version__
-from   delirium.matrix import degree_low, new_Matrix, partial_fraction, var, write_Matrix
+from   delirium.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
 from   delirium.reduction import reduce_at_one_point
 
 log = logging.getLogger('delirium')
@@ -33,7 +33,7 @@ def main():
 @docopt_dispatch.on('reduce_at_one_point')
 def on_reduce_at_one_point(file_input, **kwargs):
     with open(file_input, 'r') as f:
-        m = new_Matrix(f)
+        m = import_matrix(f)
     x = var('x')
     p = -1*degree_low(m, x)
     mm, t = reduce_at_one_point(m, x, 0, p)
@@ -41,7 +41,7 @@ def on_reduce_at_one_point(file_input, **kwargs):
     file_output = kwargs.get('o')
     if file_output is not None:
         with open(file_output, 'w') as f:
-            write_Matrix(f, mm)
+            export_matrix(f, mm)
     else:
         log.info("\nNew matrix\n" + str(mm))
         log.info("\nTransformation\n" + str(t))

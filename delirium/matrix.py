@@ -1,7 +1,7 @@
 import logging
 
 import sage.all
-from   sage.matrix.constructor import matrix
+from   sage.matrix.constructor import matrix as sage_matrix
 
 from   delirium.expression import is_Expression, new_Expression, var
 from   delirium.expression import alphabet as ex_alphabet
@@ -20,8 +20,7 @@ def alphabet(m, x):
 def coefficient(m, x, n):
     """Return a coefficient of the exponent x^n in the matrix `m'."""
     x = var(x)
-    data = _matrix_list_map(m, lambda ex: ex.coefficient(x, n).substitute(x=0))
-    res = new_Matrix(data)
+    res = m.apply_map(lambda ex: ex.coefficient(x, n).substitute(x=0))
     return res
 
 def coefficient_low(m, x, n=0):
@@ -47,6 +46,39 @@ def dims(m):
     """Return matrix size as (cols, rows)."""
     return m.dimensions()
 
+def matrix(data, nrows=None, ncols=None):
+    if (nrows and ncols) is None:
+        m = sage_matrix(data)
+    else:
+        m = sage_matrix(ncols, nrows, data)
+    m = m.transpose()
+    return m
+
+def export_matrix(f, m):
+    f.write("%%MatrixMarket matrix array symbolic general\n")
+    f.write("%d %d\n%%\n" % (m.nrows(), m.ncols()))
+    for col in m.columns():
+        for mij in col:
+            f.write(str(mij))
+            f.write('\n')
+        f.write('%\n')
+
+def import_matrix(f):
+    """Read a matrix from the file in the Matrix Market array format."""
+    while True:
+        s = f.readline()
+        if not s.startswith('%'):
+            break
+    nrows, ncols = map(int, s.split())
+
+    try:
+        data = [new_Expression(s) for s in f.readlines() if not s.startswith('%')]
+    except SyntaxError:
+        raise
+
+    m = matrix(data, nrows, ncols)
+    return m
+
 def fuchsian_form(m, x):
     if has_fuchsian_form_at_point(m, x):
         log.info("\nThe matrix already has a Fuchsian form.")
@@ -56,7 +88,7 @@ def fuchsian_form(m, x):
     log.info("\nIs A_0 nilpotent? " + str(is_nilpotent(m0)))
     log.info("\nA_0 =\n" + m0.str(unicode=True))
     mj, tj = jordan_form(m0, x)
-    mm, tm = m, new_Matrix([0]*n**2)
+    mm, tm = m, matrix([0]*n**2)
     return mm, tm
 
 def has_fuchsian_form(m, x):
@@ -97,41 +129,9 @@ def jordan_form(m, x):
     log.info("\nJordan transformation =\n" + str(tj))
     return mj, tj
 
-def new_Matrix(obj):
-    if type(obj) is list:
-        res = new_Matrix_from_list(obj)
-    elif type(obj) is file:
-        res = new_Matrix_from_file(obj)
-    else:
-        raise NotImplementedError
-    return res
-
-def new_Matrix_from_file(f):
-#    ncol, nrow = map(int, f.readline().split())
-    try:
-        data = [new_Expression(s) for s in f.readlines() if s.strip() != '']
-    except SyntaxError:
-        raise
-    m = new_Matrix_from_list(data).transpose()
-    return m
-
-def new_Matrix_from_list(data):
-    n = len(data)
-    ncol = int(n**0.5)
-    assert n == ncol**2
-    m = matrix(ncol, ncol, data)
-    return m
-
 def partial_fraction(m, x):
     res = m.apply_map(lambda obj: obj.partial_fraction(x) if is_Expression(obj) else obj)
     return res
-
-def write_Matrix(f, m):
-    for col in m.columns():
-        for mij in col:
-            f.write(str(mij))
-            f.write('\n')
-        f.write('\n')
 
 def zero_cols(m):
     res, i = [], 1
