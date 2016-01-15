@@ -218,6 +218,7 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
             [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
             for k in xrange(ncells)
         ])
+        L0 = L0.simplify_rational()
         L1 = matrix([
             [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
             for k in xrange(ncells)
@@ -246,5 +247,6 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         P = sum(u0_t[k]*vnt_t[k] for k in S) + u0_t[fi]*vnt_t[fi]
         T = balance(P, v, v2, x)
         M = transform(M, x, T)
+        M = M.simplify_rational()
         combinedT = combinedT * T
     return M, combinedT
