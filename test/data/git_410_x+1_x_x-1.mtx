@@ -1,0 +1,75 @@
+%%MatrixMarket matrix array symbolic general
+8 8
+%
+0
+(9*eps^2*x^3 - 3*eps*x^2 - 42*eps^2 + 9*eps*x - 17*eps)/(3*eps - 2) + 24*(3*eps^2 + eps)/((3*eps - 2)*(x + 1)) - (3*eps^2 + eps)/((3*eps - 2)*x)
+-3*(6*eps^3 - 5*eps^2 + eps)*x^3 - 6*eps^3 + 3*(6*eps^3 - 5*eps^2 + eps)*x^2 + 5*eps^2 + (6*eps^3 - 5*eps^2 + eps)*x - eps
+-6*eps^2 + (6*eps^2 - 5*eps + 1)*x + 5*eps - 1
+0
+0
+-36*eps^4 + 30*eps^3 - 6*eps^2 - 8*(6*eps^4 - 5*eps^3 + eps^2)/(x - 1)
+-36*eps^3 + 30*eps^2 + 6*(6*eps^3 - 5*eps^2 + eps)*x - 6*eps
+%
+-5*(342*eps^2 + 15*(3*eps - 2)*x - 333*eps + 70)/eps - 28*(183*eps^2 - 62*eps - 40)/(eps*(x + 1)) + 2*(360*eps^2 - 129*eps - 74)/(eps*(x - 1)) + 234*(9*eps^2 - 3*eps - 2)/(eps*x)
+-45*eps*x^2 - 3*(7*eps - 5)*x - 21*eps + 4*(61*eps + 20)/(x + 1) - (47*eps + 13)/x - 38
+-40*eps^3 + (67*eps^3 - 101*eps^2 + 48*eps - 7)*x^2 + 60*eps^2 - 2*(18*eps^3 - 27*eps^2 + 13*eps - 2)*x - 29*eps + 4
+-5*(18*eps^3 - 27*eps^2 + 13*eps - 2)/eps + 4*(18*eps^3 - 27*eps^2 + 13*eps - 2)/(eps*(x - 1))
+0
+-234*eps^4 + 369*eps^3 - 196*eps^2 - 3*(18*eps^4 - 27*eps^3 + 13*eps^2 - 2*eps)*x + 39*eps - 2*(216*eps^4 - 342*eps^3 + 183*eps^2 - 37*eps + 2)/(x - 1) + 2*(18*eps^4 - 27*eps^3 + 13*eps^2 - 2*eps)/x - 2
+0
+-270*eps^3 + 405*eps^2 - 195*eps + 4*(18*eps^3 - 27*eps^2 + 13*eps - 2)/(x + 1) + 4*(18*eps^3 - 27*eps^2 + 13*eps - 2)/x + 30
+%
+-15*(228*eps^2 + 5*(6*eps - 1)*x - 116*eps + 13)/(6*eps^3 - 5*eps^2 + eps) - 28*(426*eps^2 + 67*eps - 23)/((6*eps^3 - 5*eps^2 + eps)*(x + 1)) + 2*(432*eps^2 + 78*eps - 25)/((6*eps^3 - 5*eps^2 + eps)*(x - 1)) + 18*(450*eps^2 + 27*eps - 17)/((6*eps^3 - 5*eps^2 + eps)*x)
+-3*(15*(6*eps^2 - eps)*x^2 - 6*eps^2 + (18*eps^2 - 33*eps + 5)*x + 85*eps - 14)/(18*eps^3 - 27*eps^2 + 13*eps - 2) + 4*(426*eps^2 + 67*eps - 23)/((18*eps^3 - 27*eps^2 + 13*eps - 2)*(x + 1)) - (498*eps^2 + 19*eps - 17)/((18*eps^3 - 27*eps^2 + 13*eps - 2)*x)
+(11*eps - 1)*x^2 - (9*eps - 1)*x - 6*eps + 1
+-5*(6*eps - 1)/eps + 4*(6*eps - 1)/(eps*(x - 1))
+0
+-18*eps^2 + 3*eps - (84*eps^2 - 20*eps + 1)/(x - 1) + 4*(6*eps^2 - eps)/x
+0
+-90*eps - 4*(6*eps - 1)/(x + 1) + 16*(6*eps - 1)/x + 15
+%
+-3*(38*eps^2 + 5*eps*x - 9*eps)/(6*eps^2 - 5*eps + 1) - 84*(3*eps^2 + eps)/((6*eps^2 - 5*eps + 1)*(x + 1)) + 2*(12*eps^2 + 13*eps)/((6*eps^2 - 5*eps + 1)*(x - 1)) + 2*(19*eps^2 + 9*eps)/((6*eps^2 - 5*eps + 1)*x)
+-3*(3*eps^3*x^2 + 3*eps^3 + 2*eps^2 + (3*eps^3 - eps^2)*x)/(18*eps^3 - 27*eps^2 + 13*eps - 2) + 12*(3*eps^3 + eps^2)/((18*eps^3 - 27*eps^2 + 13*eps - 2)*(x + 1)) - (3*eps^3 + eps^2)/((18*eps^3 - 27*eps^2 + 13*eps - 2)*x)
+0
+-eps - 4*eps/(x - 1)
+0
+0
+7*eps^3/(x - 1) - 4*eps^3/x
+-3*eps^2
+%
+0
+0
+0
+0
+-(2*eps + 1)/(x - 1) - (2*eps + 1)/x
+0
+0
+0
+%
+0
+6*eps/(18*eps^3 - 27*eps^2 + 13*eps - 2) - 4*eps/((18*eps^3 - 27*eps^2 + 13*eps - 2)*(x + 1)) - 2*eps/((18*eps^3 - 27*eps^2 + 13*eps - 2)*x)
+0
+0
+0
+3*eps - 2*eps/(x - 1) - (2*eps + 1)/x
+4*eps/(x - 1) - 4*eps/x
+-8/(x + 1) + 8/x
+%
+0
+0
+0
+0
+0
+0
+-(2*eps + 1)/(x - 1) - (2*eps + 1)/x
+0
+%
+0
+0
+0
+0
+0
+0
+0
+-(2*eps + 1)/(x + 1) - (2*eps + 1)/x
+%

@@ -59,8 +59,6 @@ def singularities(ex, x):
         if x not in d.variables():
             continue
         result.add(d)
-#    elif self.is_Matrix(obj):
-#        [result.update(self.singularities(expr,x)) for expr in obj.list()]
     return result
 
 def var(x):
