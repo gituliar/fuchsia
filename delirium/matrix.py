@@ -55,13 +55,12 @@ def matrix(data, nrows=None, ncols=None):
     return m
 
 def export_matrix(f, m):
-    f.write("%%MatrixMarket matrix array symbolic general\n")
-    f.write("%d %d\n%%\n" % (m.nrows(), m.ncols()))
+    f.write("%%MatrixMarket matrix array Maple[symbolic] general\n")
+    f.write("%d %d\n" % (m.nrows(), m.ncols()))
     for col in m.columns():
         for mij in col:
-            f.write(str(mij))
+            f.write(str(mij).replace(' ', ''))
             f.write('\n')
-        f.write('%\n')
 
 def import_matrix(f):
     """Read a matrix from the file in the Matrix Market array format."""
