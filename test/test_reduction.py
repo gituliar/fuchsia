@@ -12,13 +12,13 @@ def randrat(x, maxrank=3):
     return randpoly(x, maxrank)/randpoly(x, maxrank)
 
 def randpolym(x, size, maxrank=3):
-    return Matrix([
+    return matrix([
         [randpoly(x, maxrank) for j in range(size)]
         for i in range(size)
     ])
 
 def randratm(x, size, maxrank=3):
-    return Matrix([
+    return matrix([
         [randrat(x, maxrank) for j in range(size)]
         for i in range(size)
     ])
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
     def test_balance_1(t):
         # balance(P, x1, x2, x)*balance(P, x2, x1, x) == I
         x = SR.var("x")
-        P = Matrix([[1, 1], [0, 0]])
+        P = matrix([[1, 1], [0, 0]])
         x1 = randint(-10, 10)
         x2 = randint(20, 30)
         b1 = balance(P, x1, x2, x)
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
     def test_balance_2(t):
         # balance(P, x1, oo, x)*balance(P, oo, x1, x) == I
         x = SR.var("x")
-        P = Matrix([[1, 1], [0, 0]])
+        P = matrix([[1, 1], [0, 0]])
         x1 = randint(-10, 10)
         b1 = balance(P, x1, oo, x)
         b2 = balance(P, oo, x1, x)
@@ -101,6 +101,32 @@ class Test(unittest.TestCase):
         M4_sing = singularities(M4, x)
         t.assertIn(0, M4_sing)
         t.assertEqual(M4_sing[0], 1)
-    
+
+    def test_fuchsianize_1(t):
+        x = SR.var("x")
+        M = matrix([
+            [1/x, 5, 0, 6],
+            [0, 2/x, 0, 0],
+            [0, 0, 3/x, 7],
+            [0, 0, 0, 4/x]
+        ])
+
+        u = matrix([
+            [0, Rational((3, 5)), Rational((4, 5)), 0],
+            [Rational((5, 13)), 0, 0, Rational((12, 13))]
+        ])
+        M = transform(M, x, balance(u.transpose()*u, 0, 1, x))
+        M = M.simplify_rational()
+
+        u = matrix([[8, 0, 15, 0]])/17
+        M = transform(M, x, balance(u.transpose()*u, 0, 2, x))
+        M = M.simplify_rational()
+
+        Mx, T = fuchsianize(M, x)
+        Mx = Mx.simplify_rational()
+        t.assertEqual(Mx, transform(M, x, T).simplify_rational())
+
+        t.assertTrue(all(exp == 1 for exp in singularities(Mx, x).values()))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

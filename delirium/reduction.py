@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from sage.all import *
+from random import Random
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,
@@ -186,68 +187,122 @@ def alg1(L0, jordan_cellsizes):
                 assert L0[j,k] == 0
     return fi, S, D
 
+def alg1x(A0, A1, x):
+    # We will rely on undocumented behavior of jordan_form() call:
+    # we will take it upon faith that it sorts Jordan cells by
+    # their size, and puts the largest ones closer to (0, 0).
+    A0J, U = A0.jordan_form(transformation=True)
+    invU = U.inverse()
+    A0J_cs = jordan_cell_sizes(A0J)
+    assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
+    ncells = len(A0J_cs)
+    nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
+    u0 = [U[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
+    v0t = [invU[sum(A0J_cs[:i+1])-1,:] for i in xrange(ncells)]
+    L0 = matrix([
+        [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
+        for k in xrange(ncells)
+    ])
+    L0 = L0.simplify_rational()
+    L1 = matrix([
+        [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
+        for k in xrange(ncells)
+    ])
+    assert (L1 - diagonal_matrix(
+            [0]*(ncells-nsimplecells) + [1]*nsimplecells)).is_zero()
+    #zero_rows = [i for i in xrange(A0.nrows()) if A0J[i,:].is_zero()]
+    #zero_cols = [j for j in xrange(A0.nrows()) if A0J[:,j].is_zero()]
+    #assert len(zero_rows) == len(zero_cols) == ncells
+    #_L0 = matrix_selection(invU*A1*U, zero_rows, zero_cols)
+    #assert (L0 - _L0).is_zero()
+    lam = SR.symbol()
+    if not (L0 - lam*L1).determinant().is_zero():
+        raise ValueError("matrix is irreducible")
+    fi, S, D = alg1(L0, A0J_cs)
+    I_E = identity_matrix(D.base_ring(), A0.nrows())
+    for i in xrange(ncells):
+        for j in xrange(ncells):
+            if not D[i,j].is_zero():
+                ni = sum(A0J_cs[:i])
+                nj = sum(A0J_cs[:j])
+                for k in xrange(min(A0J_cs[i], A0J_cs[j])):
+                    I_E[ni+k,nj+k] += D[i,j]
+    U_t = U*I_E
+    invU_t = U_t.inverse()
+    u0_t = [U_t[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
+    vnt_t = [invU_t[sum(A0J_cs[:i]),:] for i in xrange(ncells)]
+    S.add(fi)
+    return S, u0_t, vnt_t
+
 def reduce_at_one_point(M, x, v, p, v2=oo):
-    """Given a system of differential equations of the form dF/dx=M*J,
+    """Given a system of differential equations of the form dF/dx=M*F,
     with M being singular around x=v like so: lim(M, x=v)->C/(x-v)**p,
     try to find a transformation T, which will reduce p by 1 (but
-    possibly introduce another singularity at x=v2).
+    possibly introduce another singularity at x=v2). Return the
+    transformed M and T.
     """
     assert M.is_square()
     assert p > 1
     n = M.nrows()
-    lam = SR.symbol()
     combinedT = identity_matrix(n)
     while True:
         A0 = matrix_limit(M*(x-v)**p, x=v)
-        if A0.is_zero():
-            break
+        if A0.is_zero(): break
         A1 = matrix_limit((M - A0*(x-v)**(-p))*(x-v)**(p-1), x=v)
         assert matrix_is_nilpotent(A0)
-        # We will rely on undocumented behavior of jordan_form() call:
-        # we will take it upon faith that it sorts Jordan cells by
-        # their size, and puts the largest ones closer to (0, 0).
-        A0J, U = A0.jordan_form(transformation=True)
-        invU = U.inverse()
-        A0J_cs = jordan_cell_sizes(A0J)
-        assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
-        ncells = len(A0J_cs)
-        nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
-        u0 = [U[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
-        v0t = [invU[sum(A0J_cs[:i+1])-1,:] for i in xrange(ncells)]
-        L0 = matrix([
-            [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
-            for k in xrange(ncells)
-        ])
-        L0 = L0.simplify_rational()
-        L1 = matrix([
-            [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
-            for k in xrange(ncells)
-        ])
-        assert L1 == diagonal_matrix(
-                [0]*(ncells-nsimplecells) + [1]*nsimplecells)
-        #zero_rows = [i for i in xrange(n) if A0J[i,:].is_zero()]
-        #zero_cols = [j for j in xrange(n) if A0J[:,j].is_zero()]
-        #assert len(zero_rows) == len(zero_cols) == ncells
-        #_L0 = matrix_selection(invU*A1*U, zero_rows, zero_cols)
-        #assert (L0 - _L0).is_zero()
-        if not (L0 - lam*L1).determinant().is_zero():
-            raise ValueError("matrix is irreducible")
-        fi, S, D = alg1(L0, A0J_cs)
-        I_E = identity_matrix(D.base_ring(), n)
-        for i in xrange(ncells):
-            for j in xrange(ncells):
-                if not D[i,j].is_zero():
-                    ni = sum(A0J_cs[:i])
-                    nj = sum(A0J_cs[:j])
-                    for k in xrange(min(A0J_cs[i], A0J_cs[j])):
-                        I_E[ni+k,nj+k] += D[i,j]
-        U_t = U*I_E
-        invU_t = U_t.inverse()
-        u0_t = [U_t[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
-        vnt_t = [invU_t[sum(A0J_cs[:i]),:] for i in xrange(ncells)]
-        P = sum(u0_t[k]*vnt_t[k] for k in S) + u0_t[fi]*vnt_t[fi]
+        S, u0, vnt = alg1x(A0, A1, x)
+        P = sum(u0[k]*vnt[k] for k in S)
         T = balance(P, v, v2, x)
         M = transform(M, x, T)
         M = M.simplify_rational()
         combinedT = combinedT * T
+    combinedT = combinedT.simplify_rational()
+    return M, combinedT
+
+def any_integer(rng, ring, excuded):
+    r = 2
+    while True:
+        p = ring(rng.randint(-r, r))
+        if p not in excuded:
+            return p
+        r *= 2
+
+def fuchsianize(M, x, seed=0):
+    """Given a system of differential equations of the form dF/dx=M*F,
+    try to find a transformation T, which will reduce M to Fuchsian
+    form. Return the transformed M and T.
+
+    Note that such transformations are not unique; you can obtain
+    different ones by supplying different seeds.
+    """
+    assert M.is_square()
+    rng = Random(seed)
+    combinedT = identity_matrix(M.nrows())
+    singular_points = set()
+    reduction_points = []
+    for point, exponent in singularities(M, x).iteritems():
+        singular_points.add(point)
+        if exponent > 1:
+            reduction_points.append((point, exponent))
+    reduction_points.sort()
+    while len(reduction_points) > 0:
+        i = rng.randint(0, len(reduction_points) - 1)
+        point, exp = reduction_points[i]
+        A0 = matrix_limit(M*(x-point)**exp, x=point)
+        if A0.is_zero():
+            if exp <= 2:
+                del reduction_points[i]
+            else:
+                reduction_points[i] = (point, exp - 1)
+            continue
+        A1 = matrix_limit((M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
+        S, u0, vnt = alg1x(A0, A1, x)
+        point2 = any_integer(rng, M.base_ring(), singular_points)
+        P = sum(u0[k]*vnt[k] for k in S)
+        T = balance(P, point, point2, x)
+        M = transform(M, x, T)
+        M = M.simplify_rational()
+        singular_points.add(point2)
+        combinedT = combinedT * T
+    combinedT = combinedT.simplify_rational()
     return M, combinedT
