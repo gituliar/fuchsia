@@ -225,12 +225,13 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         ])
         assert L1 == diagonal_matrix(
                 [0]*(ncells-nsimplecells) + [1]*nsimplecells)
-        assert (L0 - lam*L1).determinant().is_zero()
         #zero_rows = [i for i in xrange(n) if A0J[i,:].is_zero()]
         #zero_cols = [j for j in xrange(n) if A0J[:,j].is_zero()]
         #assert len(zero_rows) == len(zero_cols) == ncells
         #_L0 = matrix_selection(invU*A1*U, zero_rows, zero_cols)
         #assert (L0 - _L0).is_zero()
+        if not (L0 - lam*L1).determinant().is_zero():
+            raise ValueError("matrix is irreducible")
         fi, S, D = alg1(L0, A0J_cs)
         I_E = identity_matrix(D.base_ring(), n)
         for i in xrange(ncells):
