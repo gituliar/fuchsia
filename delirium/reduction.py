@@ -135,6 +135,24 @@ def jordan_cell_sizes(J):
     assert sum(sizes) == J.nrows()
     return tuple(sizes)
 
+def fixed_solve_right(A, B):
+    """As of SageMath 6.10, 'Matrix.solve_right' method uses a broken
+    check for solution correctness; this function corrects that check.
+    """
+    C = A.solve_right(B, check=False)
+    if not (A*C - B).is_zero():
+        raise ValueError, "matrix equation has no solutions"
+    return C
+
+def fixed_solve_left(A, B):
+    """As of SageMath 6.10, 'Matrix.solve_left' method uses a broken
+    check for solution correctness; this function corrects that check.
+    """
+    C = A.solve_left(B, check=False)
+    if not (C*A - B).is_zero():
+        raise ValueError, "matrix equation has no solutions"
+    return C
+
 def alg1(L0, jordan_cellsizes):
     assert L0.is_square()
     ring = L0.base_ring()
@@ -161,7 +179,7 @@ def alg1(L0, jordan_cellsizes):
                     continue
                 Lx_beforei = Lx.submatrix(col=0, ncols=i)
                 try:
-                    c = Lx_beforei.solve_right(ai)
+                    c = fixed_solve_right(Lx_beforei, ai)
                 except ValueError:
                     # No solution found; vectors are independent.
                     continue
@@ -185,9 +203,12 @@ def alg1(L0, jordan_cellsizes):
         for k in xrange(N):
             if (j not in S) and ((k in S) or k == fi):
                 assert L0[j,k] == 0
-    return fi, S, D
+    S.add(fi)
+    return S, D
 
 def alg1x(A0, A1, x):
+    if not matrix_is_nilpotent(A0):
+        raise ValueError("matrix is irreducible (non-nilpotent residue)")
     # We will rely on undocumented behavior of jordan_form() call:
     # we will take it upon faith that it sorts Jordan cells by
     # their size, and puts the largest ones closer to (0, 0).
@@ -218,7 +239,7 @@ def alg1x(A0, A1, x):
     lam = SR.symbol()
     if not (L0 - lam*L1).determinant().is_zero():
         raise ValueError("matrix is irreducible")
-    fi, S, D = alg1(L0, A0J_cs)
+    S, D = alg1(L0, A0J_cs)
     I_E = identity_matrix(D.base_ring(), A0.nrows())
     for i in xrange(ncells):
         for j in xrange(ncells):
@@ -231,7 +252,6 @@ def alg1x(A0, A1, x):
     invU_t = U_t.inverse()
     u0_t = [U_t[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
     vnt_t = [invU_t[sum(A0J_cs[:i]),:] for i in xrange(ncells)]
-    S.add(fi)
     return S, u0_t, vnt_t
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
@@ -249,7 +269,6 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         A0 = matrix_limit(M*(x-v)**p, x=v)
         if A0.is_zero(): break
         A1 = matrix_limit((M - A0*(x-v)**(-p))*(x-v)**(p-1), x=v)
-        assert matrix_is_nilpotent(A0)
         S, u0, vnt = alg1x(A0, A1, x)
         P = sum(u0[k]*vnt[k] for k in S)
         T = balance(P, v, v2, x)
@@ -267,6 +286,20 @@ def any_integer(rng, ring, excuded):
             return p
         r *= 2
 
+def find_dual_basis_in_invariant_space(A, u):
+    """Find a set of v_i belonging to a left invariant subspace
+    of A, such that v_iT*u_j = delta(i, j).
+    """
+    for eigenval, eigenvects, evmult in A.eigenvectors_left():
+        W = matrix(eigenvects)
+        U = matrix([list(ui.transpose()[0]) for ui in u]).transpose()
+        try:
+            M = fixed_solve_left(W*U, identity_matrix(len(u)))
+            return [matrix(mw) for mw in M*W]
+        except ValueError:
+            pass
+    return None
+
 def fuchsianize(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
@@ -277,32 +310,40 @@ def fuchsianize(M, x, seed=0):
     """
     assert M.is_square()
     rng = Random(seed)
-    combinedT = identity_matrix(M.nrows())
-    singular_points = set()
-    reduction_points = []
-    for point, exponent in singularities(M, x).iteritems():
-        singular_points.add(point)
-        if exponent > 1:
-            reduction_points.append((point, exponent))
+    combinedT = identity_matrix(M.base_ring(), M.nrows())
+    exponent_map = singularities(M, x)
+    reduction_points = [p for p,e in exponent_map.iteritems() if e >= 2]
     reduction_points.sort()
     while len(reduction_points) > 0:
-        i = rng.randint(0, len(reduction_points) - 1)
-        point, exp = reduction_points[i]
-        A0 = matrix_limit(M*(x-point)**exp, x=point)
-        if A0.is_zero():
-            if exp <= 2:
-                del reduction_points[i]
+        pointidx = rng.randint(0, len(reduction_points) - 1)
+        point = reduction_points[pointidx]
+        exp = exponent_map[point]
+        while True:
+            A0 = matrix_limit(M*(x-point)**exp, x=point)
+            if A0.is_zero(): break
+            A1 = matrix_limit(
+                    (M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
+            S, u0, vnt = alg1x(A0, A1, x)
+            for p2, exp2 in exponent_map.iteritems():
+                if p2 == point: continue
+                B0 = matrix_limit(M*(x-p2)**exp2, x=p2)
+                assert not B0.is_zero()
+                vt = find_dual_basis_in_invariant_space(B0, [u0[k] for k in S])
+                if vt is not None:
+                    point2 = p2
+                    P = sum(u0[k]*vt[i] for i,k in enumerate(S))
+                    break
             else:
-                reduction_points[i] = (point, exp - 1)
-            continue
-        A1 = matrix_limit((M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
-        S, u0, vnt = alg1x(A0, A1, x)
-        point2 = any_integer(rng, M.base_ring(), singular_points)
-        P = sum(u0[k]*vnt[k] for k in S)
-        T = balance(P, point, point2, x)
-        M = transform(M, x, T)
-        M = M.simplify_rational()
-        singular_points.add(point2)
-        combinedT = combinedT * T
+                point2 = any_integer(rng, M.base_ring(), exponent_map)
+                P = sum(u0[k]*vnt[k] for k in S)
+            T = balance(P, point, point2, x)
+            M = transform(M, x, T)
+            M = M.simplify_rational()
+            combinedT = combinedT * T
+            if point2 not in exponent_map:
+                exponent_map[point2] = 1
+        exponent_map[point] = exp - 1
+        if exp <= 2:
+            del reduction_points[pointidx]
     combinedT = combinedT.simplify_rational()
     return M, combinedT
