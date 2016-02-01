@@ -170,16 +170,8 @@ def alg1(L0, jordan_cellsizes):
         c = None
         for i in xrange(0, N):
             if i not in S:
-                ai = Lx[:, i]
-                if ai.is_zero():
-                    fi = i
-                    c = zero_matrix(fi, 1)
-                    break
-                if i == 0:
-                    continue
-                Lx_beforei = Lx.submatrix(col=0, ncols=i)
                 try:
-                    c = fixed_solve_right(Lx_beforei, ai)
+                    c = fixed_solve_right(Lx[:,0:i], Lx[:,i])
                 except ValueError:
                     # No solution found; vectors are independent.
                     continue
