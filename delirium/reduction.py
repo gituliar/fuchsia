@@ -69,17 +69,6 @@ def matrix_limit(M, **kwargs):
     """
     return matrix([[limit(e, **kwargs) for e in row] for row in M])
 
-def matrix_selection(M, rows, cols):
-    """Create a matrix from specific rows and columns of M.
-    
-    Example:
-    >>> M = matrix([[11,12,13],[21,22,23],[31,32,33]])
-    >>> matrix_selection(M, [1, 0], [0, 2])
-    [21 23]
-    [11 13]
-    """
-    return matrix([[M[i,j] for j in cols] for i in rows])
-
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
 
@@ -212,7 +201,7 @@ def alg1x(A0, A1, x):
     #zero_rows = [i for i in xrange(A0.nrows()) if A0J[i,:].is_zero()]
     #zero_cols = [j for j in xrange(A0.nrows()) if A0J[:,j].is_zero()]
     #assert len(zero_rows) == len(zero_cols) == ncells
-    #_L0 = matrix_selection(invU*A1*U, zero_rows, zero_cols)
+    #_L0 = (invU*A1*U)[zero_rows, zero_cols]
     #assert (L0 - _L0).is_zero()
     lam = SR.symbol()
     if not (L0 - lam*L1).determinant().is_zero():
