@@ -120,7 +120,7 @@ def jordan_cell_sizes(J):
     assert sum(sizes) == J.nrows()
     return tuple(sizes)
 
-def fixed_solve_right(A, B):
+def solve_right_fixed(A, B):
     """As of SageMath 6.10, 'Matrix.solve_right' method uses a broken
     check for solution correctness; this function corrects that check.
     """
@@ -129,7 +129,7 @@ def fixed_solve_right(A, B):
         raise ValueError, "matrix equation has no solutions"
     return C
 
-def fixed_solve_left(A, B):
+def solve_left_fixed(A, B):
     """As of SageMath 6.10, 'Matrix.solve_left' method uses a broken
     check for solution correctness; this function corrects that check.
     """
@@ -156,7 +156,7 @@ def alg1(L0, jordan_cellsizes):
         for i in xrange(0, N):
             if i not in S:
                 try:
-                    c = fixed_solve_right(Lx[:,0:i], Lx[:,i])
+                    c = solve_right_fixed(Lx[:,0:i], Lx[:,i])
                 except ValueError:
                     # No solution found; vectors are independent.
                     continue
@@ -194,9 +194,10 @@ def alg1x(A0, A1, x):
     A0J_cs = jordan_cell_sizes(A0J)
     assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
     ncells = len(A0J_cs)
+    A0J_css = [sum(A0J_cs[:i]) for i in xrange(ncells + 1)]
     nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
-    u0 = [U[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
-    v0t = [invU[sum(A0J_cs[:i+1])-1,:] for i in xrange(ncells)]
+    u0 = [U[:,A0J_css[i]] for i in xrange(ncells)]
+    v0t = [invU[A0J_css[i+1]-1,:] for i in xrange(ncells)]
     L0 = matrix([
         [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
         for k in xrange(ncells)
@@ -221,15 +222,15 @@ def alg1x(A0, A1, x):
     for i in xrange(ncells):
         for j in xrange(ncells):
             if not D[i,j].is_zero():
-                ni = sum(A0J_cs[:i])
-                nj = sum(A0J_cs[:j])
+                ni = A0J_css[i]
+                nj = A0J_css[j]
                 for k in xrange(min(A0J_cs[i], A0J_cs[j])):
                     I_E[ni+k,nj+k] += D[i,j]
     U_t = U*I_E
     invU_t = U_t.inverse()
-    u0_t = [U_t[:,sum(A0J_cs[:i])] for i in xrange(ncells)]
-    vnt_t = [invU_t[sum(A0J_cs[:i]),:] for i in xrange(ncells)]
-    return S, u0_t, vnt_t
+    return \
+        U_t[:, [A0J_css[i] for i in S]], \
+        invU_t[[A0J_css[i] for i in S], :]
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -246,8 +247,8 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         A0 = matrix_limit(M*(x-v)**p, x=v)
         if A0.is_zero(): break
         A1 = matrix_limit((M - A0*(x-v)**(-p))*(x-v)**(p-1), x=v)
-        S, u0, vnt = alg1x(A0, A1, x)
-        P = sum(u0[k]*vnt[k] for k in S)
+        U, V = alg1x(A0, A1, x)
+        P = U*V
         T = balance(P, v, v2, x)
         M = transform(M, x, T)
         M = M.simplify_rational()
@@ -263,16 +264,16 @@ def any_integer(rng, ring, excluded):
             return p
         r *= 2
 
-def find_dual_basis_in_invariant_space(A, u):
-    """Find a set of v_i belonging to a left invariant subspace
-    of A, such that v_iT*u_j = delta(i, j).
+def find_dual_basis_in_invariant_space(A, U):
+    """Find matrix V, such that it's rows belong to a left
+    invariant space of A and form a dual basis with columns of U
+    (that is, V*U=I).
     """
     for eigenval, eigenvects, evmult in A.eigenvectors_left():
         W = matrix(eigenvects)
-        U = matrix([list(ui.transpose()[0]) for ui in u]).transpose()
         try:
-            M = fixed_solve_left(W*U, identity_matrix(len(u)))
-            return [matrix(mw) for mw in M*W]
+            M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
+            return M*W
         except ValueError:
             pass
     return None
@@ -300,19 +301,19 @@ def fuchsianize(M, x, seed=0):
             if A0.is_zero(): break
             A1 = matrix_limit(
                     (M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
-            S, u0, vnt = alg1x(A0, A1, x)
+            U, V = alg1x(A0, A1, x)
             for p2, exp2 in exponent_map.iteritems():
                 if p2 == point: continue
                 B0 = matrix_limit(M*(x-p2)**exp2, x=p2)
                 assert not B0.is_zero()
-                vt = find_dual_basis_in_invariant_space(B0, [u0[k] for k in S])
-                if vt is not None:
+                v = find_dual_basis_in_invariant_space(B0, U)
+                if v is not None:
                     point2 = p2
-                    P = sum(u0[k]*vt[i] for i,k in enumerate(S))
+                    P = U*v
                     break
             else:
                 point2 = any_integer(rng, M.base_ring(), exponent_map)
-                P = sum(u0[k]*vnt[k] for k in S)
+                P = U*V
             T = balance(P, point, point2, x)
             M = transform(M, x, T)
             M = M.simplify_rational()
