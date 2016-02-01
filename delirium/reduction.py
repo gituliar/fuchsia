@@ -95,21 +95,6 @@ def matrix_is_nilpotent(M):
             return False
     return True
 
-def delta_matrix(n, i, j):
-    """Return matrix M of size n, such that
-        M[k,l] == 1 if (k,l) == (i,j) else 0
-
-    Example:
-    >>> delta_matrix(3, 1, 2)
-    [0 0 0]
-    [0 0 1]
-    [0 0 0]
-    """
-    return matrix([
-        [1 if (k,l) == (i,j) else 0 for l in xrange(n)]
-        for k in xrange(n)
-    ])
-
 def jordan_cell_sizes(J):
     """Return a tuple of Jordan cell sizes from a matrix J in Jordan
     normal form.
@@ -230,7 +215,7 @@ def alg1x(A0, A1, x):
     #assert (L0 - _L0).is_zero()
     lam = SR.symbol()
     if not (L0 - lam*L1).determinant().is_zero():
-        raise ValueError("matrix is irreducible")
+        raise ValueError("matrix is Moser-irreducible")
     S, D = alg1(L0, A0J_cs)
     I_E = identity_matrix(D.base_ring(), A0.nrows())
     for i in xrange(ncells):
@@ -270,11 +255,11 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
-def any_integer(rng, ring, excuded):
+def any_integer(rng, ring, excluded):
     r = 2
     while True:
         p = ring(rng.randint(-r, r))
-        if p not in excuded:
+        if p not in excluded:
             return p
         r *= 2
 
@@ -306,7 +291,7 @@ def fuchsianize(M, x, seed=0):
     exponent_map = singularities(M, x)
     reduction_points = [p for p,e in exponent_map.iteritems() if e >= 2]
     reduction_points.sort()
-    while len(reduction_points) > 0:
+    while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
         exp = exponent_map[point]
