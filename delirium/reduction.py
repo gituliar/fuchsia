@@ -267,7 +267,7 @@ def find_dual_basis_in_invariant_space(A, U):
             pass
     return None
 
-def fuchsianize(M, x, seed=0):
+def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T.

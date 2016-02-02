@@ -3,18 +3,20 @@
 """delirium -- a reducer of differential equations for multiloop master integrals
 
 Usage:
-  delirium reduce (--lee | --maple | --moser) [-p <point>] [-o <file_output>] <file_input>
+  delirium reduce [--profile <file_stats>] (--lee | --maple | --moser) [-p <point>] [-o <file_output>] <file_input>
 
 Options:
-  --lee             use Lee algorithm (improved Moser algorithm)
-  --maple           use Maple's super_reduce routine from DETools module
-  --moser           use Moser algorithm
-  -o <file_output>  output file name
-  -p <point>        polinomial in x [default: x]
+  --lee                  use Lee algorithm (improved Moser algorithm)
+  --maple                use Maple's super_reduce routine from DETools module
+  --moser                use Moser algorithm
+  --profile <file_stats> profile and write statistics to <file_stats>
+  -o <file_output>       write result to <file_output>
+  -p <point>             polinomial in x [default: x]
 
 Arguments:
-  <file_input>      input file name
+  <file_input>           input file name
 """
+from   contextlib import contextmanager
 import logging
 
 from   docopt_dispatch import dispatch as docopt_dispatch
@@ -22,34 +24,53 @@ from   docopt_dispatch import dispatch as docopt_dispatch
 from   delirium import __version__
 from   delirium.maple import super_reduce
 from   delirium.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
-from   delirium.reduction import fuchsianize, reduce_at_one_point
+from   delirium.reduction import fuchsify, reduce_at_one_point
 
 log = logging.getLogger('delirium')
+
+
+@contextmanager
+def profile(file_stats):
+    if file_stats is None:
+        yield
+        return
+
+    import cProfile, pstats
+    profile = cProfile.Profile()
+    profile.enable()
+    try:
+        yield
+    finally:
+        profile.disable()
+        with open(file_stats, 'w') as f:
+            stats = pstats.Stats(profile, stream=f).sort_stats("cumulative")
+            stats.print_stats(50)
 
 def main():
     print('\033[35m'+'Delirium v'+__version__+'\033[0m')
     print """Authors:
-    Oleksandr Gituliar, Institute of Nuclear Physics, Krakow (Poland)
+    Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Krakow (Poland)
     Vitaly Magerya
     """
     docopt_dispatch(__doc__)
 
 @docopt_dispatch.on('reduce')
-def on_maple_reduce(file_input, **kwargs):
+def on_reduce(file_input, **kwargs):
     with open(file_input, 'r') as f:
         m = import_matrix(f)
 
-    point = kwargs.get('p')
-    x = var('x')
-    if kwargs.get('lee'):
-        mm, t = fuchsianize(m, x)
-    if kwargs.get('maple'):
-        mm, t = super_reduce(m, point)
-    if kwargs.get('moser'):
-        p = -1*degree_low(m, point)
-        mm, t = reduce_at_one_point(m, x, 0, p)
+    with profile(kwargs.get('profile')):
+        point = kwargs.get('p')
+        x = var('x')
+        if kwargs.get('lee'):
+            mm, t = fuchsify(m, x)
+        elif kwargs.get('maple'):
+            mm, t = super_reduce(m, point)
+        elif kwargs.get('moser'):
+            p = -1*degree_low(m, point)
+            mm, t = reduce_at_one_point(m, x, 0, p)
+        mm = partial_fraction(mm, x)
 
-    mm = partial_fraction(mm, x)
 
     file_output = kwargs.get('o')
     if file_output is not None:
@@ -59,5 +80,8 @@ def on_maple_reduce(file_input, **kwargs):
         print mm
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as error:
+        print error
 

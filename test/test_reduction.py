@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
         t.assertIn(0, M4_sing)
         t.assertEqual(M4_sing[0], 1)
 
-    def test_fuchsianize_1(t):
+    def test_fuchsify_1(t):
         x = SR.var("x")
         M = matrix([
             [1/x, 5, 0, 6],
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         M = transform(M, x, balance(u.transpose()*u, 0, 2, x))
         M = M.simplify_rational()
 
-        Mx, T = fuchsianize(M, x)
+        Mx, T = fuchsify(M, x)
         Mx = Mx.simplify_rational()
         t.assertEqual(Mx, transform(M, x, T).simplify_rational())
 
