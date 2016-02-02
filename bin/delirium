@@ -1,14 +1,16 @@
 #!/usr/bin/env sage
+# vi:filetype=python
 """delirium -- a reducer of differential equations for multiloop master integrals
 
 Usage:
-  delirium partial_fraction [-o <file_output>] <file_input>
-  delirium reduce_at_one_point [-o <file_output>] <file_input>
-  delirium maple_super_reduce [-p <point>] [-o <file_output>] <file_input>
+  delirium reduce (--lee | --maple | --moser) [-p <point>] [-o <file_output>] <file_input>
 
 Options:
-  -p <point>        polinomial in x [default: x]
+  --lee             use Lee algorithm (improved Moser algorithm)
+  --maple           use Maple's super_reduce routine from DETools module
+  --moser           use Moser algorithm
   -o <file_output>  output file name
+  -p <point>        polinomial in x [default: x]
 
 Arguments:
   <file_input>      input file name
@@ -16,12 +18,11 @@ Arguments:
 import logging
 
 from   docopt_dispatch import dispatch as docopt_dispatch
-import sage.all
 
 from   delirium import __version__
 from   delirium.maple import super_reduce
 from   delirium.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
-from   delirium.reduction import reduce_at_one_point
+from   delirium.reduction import fuchsianize, reduce_at_one_point
 
 log = logging.getLogger('delirium')
 
@@ -33,29 +34,21 @@ def main():
     """
     docopt_dispatch(__doc__)
 
-@docopt_dispatch.on('maple_super_reduce')
-def on_maple_super_reduce(file_input, **kwargs):
+@docopt_dispatch.on('reduce')
+def on_maple_reduce(file_input, **kwargs):
     with open(file_input, 'r') as f:
         m = import_matrix(f)
 
-    x = var('x')
     point = kwargs.get('p')
-    mm, t = super_reduce(m, point)
-    mm = partial_fraction(mm, x)
-
-    file_output = kwargs.get('o')
-    if file_output is not None:
-        with open(file_output, 'w') as f:
-            export_matrix(f, mm)
-
-@docopt_dispatch.on('reduce_at_one_point')
-def on_reduce_at_one_point(file_input, **kwargs):
-    with open(file_input, 'r') as f:
-        m = import_matrix(f)
-
     x = var('x')
-    p = -1*degree_low(m, x)
-    mm, t = reduce_at_one_point(m, x, 0, p)
+    if kwargs.get('lee'):
+        mm, t = fuchsianize(m, x)
+    if kwargs.get('maple'):
+        mm, t = super_reduce(m, point)
+    if kwargs.get('moser'):
+        p = -1*degree_low(m, point)
+        mm, t = reduce_at_one_point(m, x, 0, p)
+
     mm = partial_fraction(mm, x)
 
     file_output = kwargs.get('o')
@@ -63,8 +56,7 @@ def on_reduce_at_one_point(file_input, **kwargs):
         with open(file_output, 'w') as f:
             export_matrix(f, mm)
     else:
-        log.info("\nNew matrix\n" + str(mm))
-        log.info("\nTransformation\n" + str(t))
+        print mm
 
 if __name__ == '__main__':
     main()
