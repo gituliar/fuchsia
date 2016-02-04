@@ -13,7 +13,7 @@ def transform(M, x, T):
 
 def balance(P, x1, x2, x):
     assert P.is_square()
-    assert (P*P - P).is_zero()
+    #assert (P*P - P).is_zero()
     assert x1 != x2
     coP = identity_matrix(P.nrows()) - P
     if x1 == oo:
@@ -114,7 +114,19 @@ def solve_right_fixed(A, B):
     check for solution correctness; this function corrects that check.
     """
     C = A.solve_right(B, check=False)
-    if not (A*C - B).is_zero():
+    if C.nrows() and C.ncols():
+        # Sometimes 'solve_right' returns a giant expression,
+        # which can be simplified into a tiny one; without this
+        # simplification 'is_zero' call below may take forever
+        # to finish.
+        #
+        # Note that the condition above is there to make sure
+        # that an empty matrix is not passed into 'simplify_rational',
+        # otherwise you'll get this error:
+        #   TypeError: unable to make sense of Maxima expression
+        #   'matrix()' in Sage
+        C = C.simplify_rational()
+    if not (A*C - B).simplify_rational().is_zero():
         raise ValueError, "matrix equation has no solutions"
     return C
 
@@ -122,10 +134,7 @@ def solve_left_fixed(A, B):
     """As of SageMath 6.10, 'Matrix.solve_left' method uses a broken
     check for solution correctness; this function corrects that check.
     """
-    C = A.solve_left(B, check=False)
-    if not (C*A - B).is_zero():
-        raise ValueError, "matrix equation has no solutions"
-    return C
+    return solve_right_fixed(A.transpose(), B.transpose()).transpose()
 
 def alg1(L0, jordan_cellsizes):
     assert L0.is_square()
