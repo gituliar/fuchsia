@@ -62,6 +62,26 @@ class Test(unittest.TestCase):
         t.assertEqual((b1*b2).simplify_rational(), identity_matrix(P.nrows()))
         t.assertEqual((b2*b1).simplify_rational(), identity_matrix(P.nrows()))
 
+    def test_balance_transform_1(t):
+        x = SR.var("x")
+        M = randpolym(x, 2)
+        P = matrix([[1, 1], [0, 0]])
+        x1 = randint(-10, 10)
+        x2 = randint(20, 30)
+        b1 = balance(P, x1, x2, x)
+
+        M1 = balance_transform(M, P, x1, x2, x)
+        M2 = transform(M, x, balance(P, x1, x2, x))
+        t.assertEqual(M1.simplify_rational(), M2.simplify_rational())
+
+        M1 = balance_transform(M, P, x1, oo, x)
+        M2 = transform(M, x, balance(P, x1, oo, x))
+        t.assertEqual(M1.simplify_rational(), M2.simplify_rational())
+
+        M1 = balance_transform(M, P, oo, x2, x)
+        M2 = transform(M, x, balance(P, oo, x2, x))
+        t.assertEqual(M1.simplify_rational(), M2.simplify_rational())
+
     def test_reduce_at_one_point_1(t):
         x = SR.var("x")
         M0 = matrix([

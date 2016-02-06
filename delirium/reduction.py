@@ -23,6 +23,23 @@ def balance(P, x1, x2, x):
     else:
         return coP + (x - x2)/(x - x1)*P
 
+def balance_transform(M, P, x1, x2, x):
+    """Same thing as transform(M, x, balance(P, x1, x2, x)), but faster."""
+    assert P.is_square()
+    #assert (P*P - P).is_zero()
+    assert x1 != x2
+    coP = identity_matrix(P.nrows()) - P
+    if x1 == oo:
+        k = -(x - x2)
+        d = -1
+    elif x2 == oo:
+        k = -1/(x - x1)
+        d = 1/(x - x1)**2
+    else:
+        k = (x - x2)/(x - x1)
+        d = (x2 - x1)/(x - x1)**2
+    return (coP + 1/k*P)*M*(coP + k*P) - d/k*P
+
 def singularities(M, x):
     """Find values of x around which rational matrix M has
     a singularity; return a dictionary with {val: k} entries,
@@ -247,10 +264,9 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         A1 = matrix_limit((M - A0*(x-v)**(-p))*(x-v)**(p-1), x=v)
         U, V = alg1x(A0, A1, x)
         P = U*V
-        T = balance(P, v, v2, x)
-        M = transform(M, x, T)
+        M = balance_transform(M, P, v, v2, x)
         M = M.simplify_rational()
-        combinedT = combinedT * T
+        combinedT = combinedT * balance(P, v, v2, x)
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
@@ -313,10 +329,9 @@ def fuchsify(M, x, seed=0):
             else:
                 point2 = any_integer(rng, M.base_ring(), exponent_map)
                 P = U*V
-            T = balance(P, point, point2, x)
-            M = transform(M, x, T)
+            M = balance_transform(M, P, point, point2, x)
             M = M.simplify_rational()
-            combinedT = combinedT * T
+            combinedT = combinedT * balance(P, point, point2, x)
             if point2 not in exponent_map:
                 exponent_map[point2] = 1
         exponent_map[point] = exp - 1
