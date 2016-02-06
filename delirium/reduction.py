@@ -86,6 +86,12 @@ def matrix_limit(M, **kwargs):
     """
     return matrix([[limit(e, **kwargs) for e in row] for row in M])
 
+def matrix_taylor0(M, x, point, exp):
+    return matrix([
+        [taylor(e, x, 0, 0) for e in row]
+        for row in M.subs(x=x+point)*x**exp
+    ])
+
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
 
@@ -314,7 +320,7 @@ def fuchsify(M, x, seed=0):
         point = reduction_points[pointidx]
         exp = exponent_map[point]
         while True:
-            A0 = matrix_limit(M*(x-point)**exp, x=point)
+            A0 = matrix_taylor0(M, x, point, exp)
             if A0.is_zero(): break
             A1 = matrix_limit(
                     (M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
@@ -323,7 +329,7 @@ def fuchsify(M, x, seed=0):
             for p2 in singular_points:
                 if p2 == point: continue
                 exp2 = exponent_map[p2]
-                B0 = matrix_limit(M*(x-p2)**exp2, x=p2)
+                B0 = matrix_taylor0(M, x, p2, exp2)
                 assert not B0.is_zero()
                 v = find_dual_basis_spanning_left_invariant_subspace(B0, U)
                 if v is not None:
@@ -333,6 +339,7 @@ def fuchsify(M, x, seed=0):
             else:
                 point2 = any_integer(rng, M.base_ring(), exponent_map)
                 P = U*V
+            P = P.simplify_rational()
             M = balance_transform(M, P, point, point2, x)
             M = M.simplify_rational()
             combinedT = combinedT * balance(P, point, point2, x)
