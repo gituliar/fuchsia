@@ -307,6 +307,8 @@ def fuchsify(M, x, seed=0):
     exponent_map = singularities(M, x)
     reduction_points = [p for p,e in exponent_map.iteritems() if e >= 2]
     reduction_points.sort()
+    singular_points = exponent_map.keys()
+    singular_points.sort()
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
@@ -317,8 +319,10 @@ def fuchsify(M, x, seed=0):
             A1 = matrix_limit(
                     (M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
             U, V = alg1x(A0, A1, x)
-            for p2, exp2 in exponent_map.iteritems():
+            rng.shuffle(singular_points)
+            for p2 in singular_points:
                 if p2 == point: continue
+                exp2 = exponent_map[p2]
                 B0 = matrix_limit(M*(x-p2)**exp2, x=p2)
                 assert not B0.is_zero()
                 v = find_dual_basis_spanning_left_invariant_subspace(B0, U)
@@ -334,6 +338,7 @@ def fuchsify(M, x, seed=0):
             combinedT = combinedT * balance(P, point, point2, x)
             if point2 not in exponent_map:
                 exponent_map[point2] = 1
+                singular_points.append(point2)
         exponent_map[point] = exp - 1
         if exp <= 2:
             del reduction_points[pointidx]
