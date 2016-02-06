@@ -262,19 +262,20 @@ def any_integer(rng, ring, excluded):
             return p
         r *= 2
 
-def find_dual_basis_in_invariant_space(A, U):
-    """Find matrix V, such that it's rows belong to a left
-    invariant space of A and form a dual basis with columns of U
-    (that is, V*U=I).
+def find_dual_basis_spanning_left_invariant_subspace(A, U):
+    """Find matrix V, such that it's rows span a left invariant
+    subspace of A and form a dual basis with columns of U (that
+    is, V*U=I).
     """
+    evlist = []
     for eigenval, eigenvects, evmult in A.eigenvectors_left():
-        W = matrix(eigenvects)
-        try:
-            M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
-            return M*W
-        except ValueError:
-            pass
-    return None
+        evlist.extend(eigenvects)
+    W = matrix(evlist)
+    try:
+        M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
+        return M*W
+    except ValueError:
+        return None
 
 def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -304,7 +305,7 @@ def fuchsify(M, x, seed=0):
                 if p2 == point: continue
                 B0 = matrix_limit(M*(x-p2)**exp2, x=p2)
                 assert not B0.is_zero()
-                v = find_dual_basis_in_invariant_space(B0, U)
+                v = find_dual_basis_spanning_left_invariant_subspace(B0, U)
                 if v is not None:
                     point2 = p2
                     P = U*v
