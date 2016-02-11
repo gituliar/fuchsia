@@ -1,6 +1,18 @@
-#!/usr/bin/env python
-from sage.all import *
-from random import Random
+"""
+    References:
+        [1] Roman Lee, arXiv:1411.0911
+"""
+from   itertools import combinations
+import logging
+
+from   sage.all import *
+from   sage.symbolic.assumptions import assume
+from   random import Random
+
+from   delirium.matrix import (cross_product, dot_product, eigenvectors_left, eigenvectors_right,
+           partial_fraction)
+
+logger = logging.getLogger('delirium')
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,
@@ -85,6 +97,9 @@ def matrix_limit(M, **kwargs):
     [1 0]
     """
     return matrix([[limit(e, **kwargs) for e in row] for row in M])
+
+def matrix_residue(m, x, x0):
+    return matrix_limit(m*(x-x0), x=x0)
 
 def matrix_taylor0(M, x, point, exp):
     return matrix([
@@ -299,7 +314,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U):
     except ValueError:
         return None
 
-def fuchsify(M, x, seed=0):
+def fuchsify(M, x, seed=1):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T.
@@ -351,3 +366,143 @@ def fuchsify(M, x, seed=0):
             del reduction_points[pointidx]
     combinedT = combinedT.simplify_rational()
     return M, combinedT
+
+def _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2):
+
+    def find_eval_by_cond(a0_ev, b0_ev, cond):
+        for a0_eval, a0_evecs, a0_evmult in a0_ev:
+            for b0_eval, b0_evecs, b0_evmult in b0_ev:
+                if not cond(a0_eval, b0_eval):
+                    continue
+                for a0_evec in a0_evecs:
+                    for b0_evec in b0_evecs:
+                        if dot_product(a0_evec, b0_evec) == 1:
+                            return a0_eval, a0_evec, b0_eval, b0_evec 
+        return None, None, None, None
+
+    a0_evl, b0_evr = eigenvectors_left(a0), eigenvectors_right(b0)
+    a0_eval, a0_evec, b0_eval, b0_evec = find_eval_by_cond(a0_evl, b0_evr, cond1)
+
+    if (a0_evec and b0_evec) is None:
+        a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
+        a0_eval, a0_evec, b0_eval, b0_evec = find_eval_by_cond(a0_evr, b0_evl, cond2)
+
+        if (a0_evec and b0_evec) is None:
+            return None
+
+    P = cross_product(a0_evec, b0_evec)
+    if cond1(a0_eval, b0_eval):
+        T0 = balance(P, x2, x1, x)
+    elif cond2(a0_eval, b0_eval):
+        T0 = balance(P, x1, x2, x)
+
+    return T0
+
+def find_balance(a0, b0, x, x1, x2):
+    """Check if the Fuchsian point x1 can be balanced with the singular point x2.
+    If so, return the transformatin T0, othervise return None.
+
+    The algorithm is described in [1, Definition 5].
+    """
+    eps = var("eps")
+    cond1 = lambda a0_eval, b0_eval: b0_eval < -0.5
+    cond2 = lambda a0_eval, b0_eval: b0_eval >= 0.5
+
+    T0 = _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2)
+    return T0
+
+
+def find_mutual_balance(a0, b0, x, x1, x2):
+    """Check if two Fuchsian points x1 and x2 can be mutually balanced.
+    If so, return the transformatin T0, othervise return None.
+
+    The algorithm is described in [1, Definition 6].
+    """
+    cond1 = lambda a0_eval, b0_eval: a0_eval >= 0.5 and b0_eval < 0.5
+    cond2 = lambda a0_eval, b0_eval: a0_eval < 0.5 and b0_eval >= 0.5
+
+    T0 = _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2)
+    return T0
+
+
+def normalize(m, x, fuchs_points):
+
+    def print_eigenvalues(m, points):
+        for xi in points:
+            mi = matrix_residue(m, x, xi)
+            logger.info("  x = %d:" % xi)
+            logger.info("      %s" % str(mi.eigenvalues()).replace("\n"," "))
+            #logger.info("      %s" % str(eigenvectors_left(mi)).replace("\n"," "))
+            #logger.info("      %s" % str(eigenvectors_right(mi)).replace("\n"," "))
+
+    mm = partial_fraction(m, x)
+
+    eps = var('eps')
+    m = partial_fraction(m, x)
+    logger.info("The initial matrix:\n%s" % str(m))
+
+    T = identity_matrix(m.base_ring(), m.nrows())
+
+    for x0 in fuchs_points:
+
+        points = singularities(m, x).keys()
+        apparent_points = [p for p in points if p not in fuchs_points]
+        print points, fuchs_points, apparent_points
+        for x2 in apparent_points:
+            while True:
+                logger.info("Balance a singular point x = %d with a Fuchsian point x = %d" % (x2, x0))
+    
+                a0, b0 = matrix_residue(m, x, x0), matrix_residue(m, x, x2)
+                logger.info("Eigenvalues:")
+                points = singularities(m, x).keys()
+                print_eigenvalues(m, points)
+    
+                T0 = find_balance(a0, b0, x, x0, x2)
+                if T0 is None:
+                    logger.info("No balance found!")
+                    break
+                else:
+                    m = transform(m, x, T0)
+                    m = partial_fraction(m, x)
+                    T = T * T0
+                    points = singularities(m, x).keys()
+                    apparent_points = list(set(points) - set(fuchs_points))
+                    if x2 not in apparent_points:
+                        logger.info("A singular point x = %d succesfully balanced!\n" % x2)
+                        break
+                    else:
+                        logger.info("Balance found!\n")
+
+    points = singularities(m, x).keys()
+    for x1, x2 in combinations(fuchs_points, 2):
+        logger.info("Mutually balance Fuchsian points x = %d and x = %d" % (x1, x2))
+        while True:
+            a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
+            logger.info("Eigenvalues:")
+            points = singularities(m, x).keys()
+            print_eigenvalues(m, points)
+
+            T0 = find_mutual_balance(a0, b0, x, x1, x2)
+            if T0 is None:
+                logger.info("No balance found!")
+                break
+            else:
+                m = transform(m, x, T0)
+                m = partial_fraction(m, x)
+                T = T * T0
+                points = singularities(m, x).keys()
+                apparent_points = list(set(points) - set(fuchs_points))
+                if (x1 not in points) or (x2 not in points):
+                    logger.info("Fuchsian points x = %d and x = %d succesfully balanced!\n" % (x1, x2))
+                    logger.info("Remaining singular points:")
+                    print_eigenvalues(m, points)
+                    break
+                else:
+                    logger.info("Balance found!\n")
+
+    mm = transform(mm, x, T)
+    mm = partial_fraction(mm, x)
+
+    logger.info("\nThe transformation matrix:\n%s" % str(T))
+
+    return mm, T

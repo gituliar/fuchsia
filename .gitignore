@@ -1,4 +1,6 @@
 *.pyc
+*.swn
+*.swo
 *.swp
 *.egg-info
 .cache

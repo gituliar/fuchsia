@@ -7,7 +7,7 @@ eps, x = var("eps, x")
 
 class Test(unittest.TestCase):
     def test_alphabet(t):
-        with open('test/data/git_410.mtx') as f:
+        with open('examples/git_410.mtx') as f:
             m = import_matrix(f)
         t.assertEqual(
             alphabet(m, x),
