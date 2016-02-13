@@ -96,10 +96,20 @@ def matrix_limit(M, **kwargs):
     """
     return matrix([[limit(e, **kwargs) for e in row] for row in M])
 
-def matrix_residue(m, x, x0):
-    return matrix_limit(m*(x-x0), x=x0)
-
 def matrix_taylor0(M, x, point, exp):
+    """Return the leading coefficient of Taylor expansion of a matrix
+    M at x=point, assuming that M(x->point)~1/(x-point)**exp.
+
+    This is the same as, but faster than, calculating the limit
+    manually:
+
+        matrix_limit(M*(x-point)**exp, x=point)
+
+    Example:
+    >>> x = var('x')
+    >>> matrix_taylor0(matrix([[x/(x-1), 1/x, x, 1]]), x, 1, 1)
+    [1 0 0 0]
+    """
     return matrix([
         [taylor(e, x, 0, 0) for e in row]
         for row in M.subs(x=x+point)*x**exp
@@ -426,7 +436,7 @@ def normalize(m, x, fuchs_points):
 
     def print_eigenvalues(m, points):
         for xi in points:
-            mi = matrix_residue(m, x, xi)
+            mi = matrix_taylor0(m, x, xi, 1)
             logger.info("  x = %d:" % xi)
             logger.info("      %s" % str(mi.eigenvalues()).replace("\n"," "))
             #logger.info("      %s" % str(mi.eigenvectors_left()).replace("\n"," "))
@@ -448,7 +458,8 @@ def normalize(m, x, fuchs_points):
             while True:
                 logger.info("Balance a singular point x = %d with a Fuchsian point x = %d" % (x2, x0))
     
-                a0, b0 = matrix_residue(m, x, x0), matrix_residue(m, x, x2)
+                a0 = matrix_taylor0(m, x, x0, 1)
+                b0 = matrix_taylor0(m, x, x2, 1)
                 logger.info("Eigenvalues:")
                 points = singularities(m, x).keys()
                 print_eigenvalues(m, points)
@@ -473,7 +484,8 @@ def normalize(m, x, fuchs_points):
     for x1, x2 in combinations(fuchs_points, 2):
         logger.info("Mutually balance Fuchsian points x = %d and x = %d" % (x1, x2))
         while True:
-            a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
+            a0 = matrix_taylor0(m, x, x1, 1)
+            b0 = matrix_taylor0(m, x, x2, 1)
             logger.info("Eigenvalues:")
             points = singularities(m, x).keys()
             print_eigenvalues(m, points)
