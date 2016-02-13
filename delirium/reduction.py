@@ -6,11 +6,9 @@ from   itertools import combinations
 import logging
 
 from   sage.all import *
-from   sage.symbolic.assumptions import assume
 from   random import Random
 
-from   delirium.matrix import (cross_product, dot_product, eigenvectors_left, eigenvectors_right,
-           partial_fraction)
+from   delirium.matrix import (cross_product, dot_product, partial_fraction)
 
 logger = logging.getLogger('delirium')
 
@@ -380,11 +378,11 @@ def _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2):
                             return a0_eval, a0_evec, b0_eval, b0_evec 
         return None, None, None, None
 
-    a0_evl, b0_evr = eigenvectors_left(a0), eigenvectors_right(b0)
+    a0_evl, b0_evr = a0.eigenvectors_left(), b0.eigenvectors_right()
     a0_eval, a0_evec, b0_eval, b0_evec = find_eval_by_cond(a0_evl, b0_evr, cond1)
 
     if (a0_evec and b0_evec) is None:
-        a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
+        a0_evr, b0_evl = a0.eigenvectors_right(), b0.eigenvectors_left()
         a0_eval, a0_evec, b0_eval, b0_evec = find_eval_by_cond(a0_evr, b0_evl, cond2)
 
         if (a0_evec and b0_evec) is None:
@@ -404,7 +402,6 @@ def find_balance(a0, b0, x, x1, x2):
 
     The algorithm is described in [1, Definition 5].
     """
-    eps = var("eps")
     cond1 = lambda a0_eval, b0_eval: b0_eval < -0.5
     cond2 = lambda a0_eval, b0_eval: b0_eval >= 0.5
 
@@ -432,12 +429,11 @@ def normalize(m, x, fuchs_points):
             mi = matrix_residue(m, x, xi)
             logger.info("  x = %d:" % xi)
             logger.info("      %s" % str(mi.eigenvalues()).replace("\n"," "))
-            #logger.info("      %s" % str(eigenvectors_left(mi)).replace("\n"," "))
-            #logger.info("      %s" % str(eigenvectors_right(mi)).replace("\n"," "))
+            #logger.info("      %s" % str(mi.eigenvectors_left()).replace("\n"," "))
+            #logger.info("      %s" % str(mi.eigenvectors_right()).replace("\n"," "))
 
     mm = partial_fraction(m, x)
 
-    eps = var('eps')
     m = partial_fraction(m, x)
     logger.info("The initial matrix:\n%s" % str(m))
 

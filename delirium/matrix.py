@@ -1,9 +1,7 @@
 import logging
 
-import numpy
 import sage.all
 from   sage.matrix.constructor import matrix as sage_matrix
-from   scipy.linalg import eig as scipy_eigenvectors
 
 from   delirium.expression import is_Expression, new_Expression, var
 from   delirium.expression import alphabet as ex_alphabet
@@ -47,29 +45,6 @@ def degree_low(m, x):
 def dims(m):
     """Return matrix size as (cols, rows)."""
     return m.dimensions()
-
-def eigenvectors(m, left=False, right=False):
-    """
-    Examples:
-    >>> x = var('x')
-    >>> m = matrix([[x,0,0], [0,0,0], [0,0,0]])
-    >>> eigenvectors(m, right=True)
-    [(x, [(1, 0, 0)], 1), (0, [(0, 1, 0), (0, 0, 1)], 2)]
-    """
-#    from   sage.rings.rational_field import QQ
-#    if is_numeric(m):
-#        m = m.change_ring(QQ)
-
-    if left is True:
-        return m.eigenvectors_left()
-    if right is True:
-        return m.eigenvectors_right()
-
-def eigenvectors_left(m):
-    return eigenvectors(m, left=True, right=False)
-
-def eigenvectors_right(m):
-    return eigenvectors(m, left=False, right=True)
 
 def matrix(data, nrows=None, ncols=None):
     if (nrows and ncols) is None:
@@ -132,20 +107,6 @@ def is_Matrix(obj):
 def is_nilpotent(m):
     res = is_zero(m.eigenvalues())
     return res
-
-#def is_numeric(m):
-#    """
-#    Examples:
-#    >>> x = var('x')
-#    >>> is_numeric(matrix([[1,2], [3,4]]))
-#    True
-#    >>> is_numeric(matrix([[1,2], [x,4]]))
-#    False
-#    """
-#    for ex in m.list():
-#        if is_Expression(ex) and ex.operands():
-#            return False
-#    return True
 
 def is_zero(obj):
     if type(obj) in (list, tuple):
