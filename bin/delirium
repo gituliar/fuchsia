@@ -4,7 +4,7 @@
 
 Usage:
   delirium reduce [--profile <file_stats>] (--lee | --maple | --moser | --normalize) [-p <point>] [-o <file_output>] <file_input>
-  delirium normalize [--profile <file_stats>] --regular <points> -o <file_output> <file_input>
+  delirium normalize [--profile <file_stats>] -o <file_output> <file_input>
 
 Options:
   --lee                  use Lee algorithm (improved Moser algorithm)
@@ -12,7 +12,6 @@ Options:
   --moser                use Moser algorithm
   --normalize            normalize eigenvalues
   --profile <file_stats> profile and write statistics to <file_stats>
-  --regular <points>     a list of regular singularities
   -o <file_output>       write result to <file_output>
   -p <point>             polinomial in x [default: x]
 
@@ -64,8 +63,7 @@ def on_normalize(file_input, **kwargs):
 
     with profile(kwargs.get('profile')):
         x = var('x')
-        regular_points = map(int, kwargs.get('regular').split(','))
-        mm, t = normalize(m, x, regular_points)
+        mm, t = normalize(m, x)
         mm = partial_fraction(mm, x)
 
 

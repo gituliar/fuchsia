@@ -8,7 +8,7 @@ import logging
 from   sage.all import *
 from   random import Random
 
-from   delirium.matrix import (cross_product, dot_product, partial_fraction)
+from   delirium.matrix import (cross_product, dot_product)
 
 logger = logging.getLogger('delirium')
 
@@ -375,6 +375,20 @@ def fuchsify(M, x, seed=1):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
+def is_singularity_apparent(M0):
+    """Return True if a matrix residue M0 corresponds to an
+    apparent singularity, False otherwise.
+
+    The actual test checks if M0 is a diagonalizable matrix with
+    integer eigenvalues.
+    """
+    for eigenval, eigenvects, evmult in M0.eigenvectors_right():
+        if len(eigenvects) != evmult:
+            return False
+        if not eigenval.is_integer():
+            return False
+    return True
+
 def _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2):
 
     def find_eval_by_cond(a0_ev, b0_ev, cond):
@@ -431,8 +445,7 @@ def find_mutual_balance(a0, b0, x, x1, x2):
     T0 = _find_balance_helper(a0, b0, x, x1, x2, cond1, cond2)
     return T0
 
-
-def normalize(m, x, fuchs_points):
+def normalize(m, x):
 
     def print_eigenvalues(m, points):
         for xi in points:
@@ -442,11 +455,12 @@ def normalize(m, x, fuchs_points):
             #logger.info("      %s" % str(mi.eigenvectors_left()).replace("\n"," "))
             #logger.info("      %s" % str(mi.eigenvectors_right()).replace("\n"," "))
 
-    mm = partial_fraction(m, x)
-
-    m = partial_fraction(m, x)
     logger.info("The initial matrix:\n%s" % str(m))
 
+    fuchs_points = [
+            p for p,e in singularities(m, x).iteritems()
+            if not is_singularity_apparent(matrix_taylor0(m, x, p, e))
+    ]
     T = identity_matrix(m.base_ring(), m.nrows())
 
     for x0 in fuchs_points:
@@ -470,7 +484,6 @@ def normalize(m, x, fuchs_points):
                     break
                 else:
                     m = transform(m, x, T0)
-                    m = partial_fraction(m, x)
                     T = T * T0
                     points = singularities(m, x).keys()
                     apparent_points = list(set(points) - set(fuchs_points))
@@ -496,7 +509,6 @@ def normalize(m, x, fuchs_points):
                 break
             else:
                 m = transform(m, x, T0)
-                m = partial_fraction(m, x)
                 T = T * T0
                 points = singularities(m, x).keys()
                 apparent_points = list(set(points) - set(fuchs_points))
@@ -508,9 +520,6 @@ def normalize(m, x, fuchs_points):
                 else:
                     logger.info("Balance found!\n")
 
-    mm = transform(mm, x, T)
-    mm = partial_fraction(mm, x)
-
     logger.info("\nThe transformation matrix:\n%s" % str(T))
 
-    return mm, T
+    return m, T
