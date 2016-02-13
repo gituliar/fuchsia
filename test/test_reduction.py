@@ -148,5 +148,41 @@ class Test(unittest.TestCase):
 
         t.assertTrue(all(exp == 1 for exp in singularities(Mx, x).values()))
 
+    def test_normalize_1(t):
+        # Test with one apparent singularity.
+        x = SR.var("x")
+        M = matrix([
+            [1/x, 5/(x-1), 0, 6/(x-1)],
+            [0, 2/x, 0, 0],
+            [0, 0, 3/x, 7/(x-1)],
+            [6/(x-1), 0, 0, 3/x]
+        ])
+
+        N, T = normalize(M, x)
+        N = N.simplify_rational()
+        t.assertEqual(N, transform(M, x, T).simplify_rational())
+        for point, exp in singularities(N, x).iteritems():
+            R = matrix_taylor0(N, x, point, exp)
+            evlist = R.eigenvalues()
+            t.assertEqual(evlist, [0]*len(evlist))
+
+    def test_normalize_2(t):
+        # Test with both singularities being apparent.
+        x = SR.var("x")
+        M = matrix([
+            [1/x, 5/(x-1), 0, 6/(x-1)],
+            [0, 2/(x-1), 0, 0],
+            [0, 0, 3/x, 7/(x-1)],
+            [6/(x-1), 0, 0, 3/x]
+        ])
+
+        N, T = normalize(M, x)
+        N = N.simplify_rational()
+        t.assertEqual(N, transform(M, x, T).simplify_rational())
+        for point, exp in singularities(N, x).iteritems():
+            R = matrix_taylor0(N, x, point, exp)
+            evlist = R.eigenvalues()
+            t.assertEqual(evlist, [0]*len(evlist))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
