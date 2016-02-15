@@ -104,23 +104,23 @@ class Test(unittest.TestCase):
 
         M2_sing = singularities(M2, x)
         t.assertIn(0, M2_sing)
-        t.assertEqual(M2_sing[0], 3)
+        t.assertEqual(M2_sing[0], 2)
 
-        M3, T23 = reduce_at_one_point(M2, x, 0, 3)
+        M3, T23 = reduce_at_one_point(M2, x, 0, 2)
         M3 = M3.simplify_rational()
         t.assertEqual(M3, transform(M2, x, T23).simplify_rational())
 
         M3_sing = singularities(M3, x)
         t.assertIn(0, M3_sing)
-        t.assertEqual(M3_sing[0], 2)
+        t.assertEqual(M3_sing[0], 1)
 
-        M4, T34 = reduce_at_one_point(M3, x, 0, 2)
+        M4, T34 = reduce_at_one_point(M3, x, 0, 1)
         M4 = M4.simplify_rational()
         t.assertEqual(M4, transform(M3, x, T34).simplify_rational())
 
         M4_sing = singularities(M4, x)
         t.assertIn(0, M4_sing)
-        t.assertEqual(M4_sing[0], 1)
+        t.assertEqual(M4_sing[0], 0)
 
     def test_fuchsify_1(t):
         x = SR.var("x")
@@ -146,41 +146,41 @@ class Test(unittest.TestCase):
         Mx = Mx.simplify_rational()
         t.assertEqual(Mx, transform(M, x, T).simplify_rational())
 
-        t.assertTrue(all(exp == 1 for exp in singularities(Mx, x).values()))
+        t.assertTrue(all(p == 0 for p in singularities(Mx, x).values()))
 
     def test_normalize_1(t):
-        # Test with one apparent singularity.
+        # Test with apparent singularities at 0 and oo, but not at 1.
         x = SR.var("x")
         M = matrix([
             [1/x, 5/(x-1), 0, 6/(x-1)],
             [0, 2/x, 0, 0],
             [0, 0, 3/x, 7/(x-1)],
-            [6/(x-1), 0, 0, 3/x]
+            [6/(x-1), 0, 0, 1/x]
         ])
 
         N, T = normalize(M, x)
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
-        for point, exp in singularities(N, x).iteritems():
-            R = matrix_taylor0(N, x, point, exp)
+        for point, prank in singularities(N, x).iteritems():
+            R = matrix_c0(N, x, point, prank)
             evlist = R.eigenvalues()
             t.assertEqual(evlist, [0]*len(evlist))
 
     def test_normalize_2(t):
-        # Test with both singularities being apparent.
+        # Test with apparent singularities at 0, 1, and oo.
         x = SR.var("x")
         M = matrix([
             [1/x, 5/(x-1), 0, 6/(x-1)],
             [0, 2/(x-1), 0, 0],
             [0, 0, 3/x, 7/(x-1)],
-            [6/(x-1), 0, 0, 3/x]
+            [6/(x-1), 0, 0, 1/x]
         ])
 
         N, T = normalize(M, x)
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
-        for point, exp in singularities(N, x).iteritems():
-            R = matrix_taylor0(N, x, point, exp)
+        for point, prank in singularities(N, x).iteritems():
+            R = matrix_c0(N, x, point, prank)
             evlist = R.eigenvalues()
             t.assertEqual(evlist, [0]*len(evlist))
 

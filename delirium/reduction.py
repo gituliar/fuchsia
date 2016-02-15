@@ -50,25 +50,45 @@ def balance_transform(M, P, x1, x2, x):
         d = (x2 - x1)/(x - x1)**2
     return (coP + 1/k*P)*M*(coP + k*P) - d/k*P
 
+def limit_fixed(expr, x, lim):
+    """Return a limit of expr when x->lim.
+
+    The standard 'limit()' function of SageMath does not allow
+    you to specify the variable, only it's name as a keyword
+    argument. If you have a variable, and not it's name, use
+    this function instead.
+    """
+    l = maxima_calculus.sr_limit(expr, x, lim)
+    return expr.parent()(l)
+
+def poincare_rank_at_oo(M, x):
+    """Return Poincare rank of matrix M at x=Infinity.
+
+    Examples:
+    >>> x = var("x")
+    >>> poincare_rank_at_oo(matrix([[x, 1, 1/x]]), x)
+    2
+    >>> poincare_rank_at_oo(matrix([[1]]), x)
+    1
+    >>> poincare_rank_at_oo(matrix([[1/x]]), x)
+    0
+    """
+    return max([
+        limit_fixed(log(expr)/log(x), x, oo) + 1
+        for expr in M.list() if not expr.is_zero()
+    ])
+
 def singularities(M, x):
     """Find values of x around which rational matrix M has
-    a singularity; return a dictionary with {val: k} entries,
-    such that:
-        lim(M, x->val) -> C/(x-val)**k
-
-    Note 1: use matrix_limit(M*(x-val)**k, x=val) to find C.
-
-    Note 2: singularity at x->infinity is not reported.
+    a singularity; return a dictionary with {val: p} entries,
+    where p is the Poincare rank of M at x=val.
 
     Example:
     >>> x, y = var("x y")
     >>> M = matrix([[1/x, 0], [1/(x+y)**3, 1/(x+y)]])
     >>> s = singularities(M, x)
     >>> from pprint import pprint; pprint(s)
-    {0: 1, -y: 3}
-    >>> matrix_limit(M*(x+y)**3, x=-y)
-    [0 0]
-    [1 0]
+    {0: 0, -y: 2, +Infinity: 0}
     """
     result = {}
     for expr in M.list():
@@ -81,29 +101,18 @@ def singularities(M, x):
         for sol, k in zip(solutions, ks):
             val = sol[x]
             if val in result:
-                result[val] = max(result[val], k)
+                result[val] = max(result[val], k - 1)
             else:
-                result[val] = k
+                result[val] = k - 1
+    p = poincare_rank_at_oo(M, x)
+    if p >= 0:
+        result[oo] = p
     return result
 
-def matrix_limit(M, **kwargs):
-    """Same as limit(), but works on matrices.
-
-    Example:
-    >>> x = var('x')
-    >>> matrix_limit(matrix([[sin(x)/x, x]]), x=0)
-    [1 0]
-    """
-    return matrix([[limit(e, **kwargs) for e in row] for row in M])
-
 def matrix_taylor0(M, x, point, exp):
-    """Return the leading coefficient of Taylor expansion of a matrix
-    M at x=point, assuming that M(x->point)~1/(x-point)**exp.
-
-    This is the same as, but faster than, calculating the limit
-    manually:
-
-        matrix_limit(M*(x-point)**exp, x=point)
+    """Return the 0-th coefficient of Taylor expansion of
+    a matrix M around a finite point x=point, assuming that
+    M(x->point)~1/(x-point)**exp.
 
     Example:
     >>> x = var('x')
@@ -114,6 +123,65 @@ def matrix_taylor0(M, x, point, exp):
         [taylor(e, x, 0, 0) for e in row]
         for row in M.subs({x: x+point})*x**exp
     ])
+
+def matrix_taylor1(M, x, point, exp):
+    """Return the 1-th coefficient of Taylor expansion of
+    a matrix M around a finite point x=point, assuming that
+    M(x->point)~1/(x-point)**exp.
+
+    Example:
+    >>> x = var('x')
+    >>> matrix_taylor1(matrix([[x/(x-1), 1/x, x, 1]]), x, 0, 1)
+    [0 0 0 1]
+    """
+    return matrix([
+        [taylor(e, x, 0, 1).coefficient(x) for e in row]
+        for row in M.subs({x: x+point})*x**exp
+    ])
+
+def matrix_c0(M, x, point, p):
+    """Return the 0-th coefficient of M's expansion at x=point,
+    assuming Poincare rank of M at that point is p.
+
+    Examples:
+    >>> x = var("x")
+    >>> m = matrix([[1/x, 1/x**2], [1, 1/(x-1)]])
+    >>> matrix_c0(m, x, 0, 1)
+    [0 1]
+    [0 0]
+    >>> matrix_c0(m, x, 1, 0)
+    [0 0]
+    [0 1]
+    >>> matrix_c0(m, x, oo, 1)
+    [0 0]
+    [1 0]
+    >>> matrix_c0(m*x, x, oo, 2)
+    [0 0]
+    [1 0]
+    """
+    if point == oo:
+        return matrix_taylor0(M.subs({x: 1/x}), x, 0, p-1)
+    else:
+        return matrix_taylor0(M, x, point, p+1)
+
+def matrix_c1(M, x, point, p):
+    """Return the 1-st coefficient of M's expansion at x=point,
+    assuming Poincare rank of M at that point is p.
+
+    Examples:
+    >>> x = var("x")
+    >>> m = matrix([[1/x, 1/x**2], [1, 1/(x-1)]])
+    >>> matrix_c1(m, x, 0, 1)
+    [1 0]
+    [0 0]
+    >>> matrix_c1(m, x, oo, 1)
+    [1 0]
+    [0 1]
+    """
+    if point == oo:
+        return matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
+    else:
+        return matrix_taylor1(M, x, point, p+1)
 
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
@@ -278,19 +346,19 @@ def alg1x(A0, A1, x):
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,
-    with M being singular around x=v like so: lim(M, x=v)->C/(x-v)**p,
+    with M having a singularity around x=v with Poincare rank p,
     try to find a transformation T, which will reduce p by 1 (but
     possibly introduce another singularity at x=v2). Return the
     transformed M and T.
     """
     assert M.is_square()
-    assert p > 1
+    assert p > 0
     n = M.nrows()
-    combinedT = identity_matrix(n)
+    combinedT = identity_matrix(M.base_ring(), n)
     while True:
-        A0 = matrix_limit(M*(x-v)**p, x=v)
+        A0 = matrix_c0(M, x, v, p)
         if A0.is_zero(): break
-        A1 = matrix_limit((M - A0*(x-v)**(-p))*(x-v)**(p-1), x=v)
+        A1 = matrix_c1(M, x, v, p)
         U, V = alg1x(A0, A1, x)
         P = U*V
         M = balance_transform(M, P, v, v2, x)
@@ -322,7 +390,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U):
     except ValueError:
         return None
 
-def fuchsify(M, x, seed=1):
+def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T.
@@ -333,26 +401,25 @@ def fuchsify(M, x, seed=1):
     assert M.is_square()
     rng = Random(seed)
     combinedT = identity_matrix(M.base_ring(), M.nrows())
-    exponent_map = singularities(M, x)
-    reduction_points = [p for p,e in exponent_map.iteritems() if e >= 2]
+    poincare_map = singularities(M, x)
+    reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
     reduction_points.sort()
-    singular_points = exponent_map.keys()
+    singular_points = poincare_map.keys()
     singular_points.sort()
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
-        exp = exponent_map[point]
+        prank = poincare_map[point]
         while True:
-            A0 = matrix_taylor0(M, x, point, exp)
+            A0 = matrix_c0(M, x, point, prank)
             if A0.is_zero(): break
-            A1 = matrix_limit(
-                    (M-A0*(x-point)**(-exp))*(x-point)**(exp-1), x=point)
+            A1 = matrix_c1(M, x, point, prank)
             U, V = alg1x(A0, A1, x)
             rng.shuffle(singular_points)
             for p2 in singular_points:
                 if p2 == point: continue
-                exp2 = exponent_map[p2]
-                B0 = matrix_taylor0(M, x, p2, exp2)
+                prank2 = poincare_map[p2]
+                B0 = matrix_c0(M, x, p2, prank2)
                 assert not B0.is_zero()
                 v = find_dual_basis_spanning_left_invariant_subspace(B0, U)
                 if v is not None:
@@ -360,17 +427,17 @@ def fuchsify(M, x, seed=1):
                     P = U*v
                     break
             else:
-                point2 = any_integer(rng, M.base_ring(), exponent_map)
+                point2 = any_integer(rng, M.base_ring(), poincare_map)
                 P = U*V
             P = P.simplify_rational()
             M = balance_transform(M, P, point, point2, x)
             M = M.simplify_rational()
             combinedT = combinedT * balance(P, point, point2, x)
-            if point2 not in exponent_map:
-                exponent_map[point2] = 1
+            if point2 not in poincare_map:
+                poincare_map[point2] = 1
                 singular_points.append(point2)
-        exponent_map[point] = exp - 1
-        if exp <= 2:
+        poincare_map[point] = prank - 1
+        if prank <= 1:
             del reduction_points[pointidx]
     combinedT = combinedT.simplify_rational()
     return M, combinedT
@@ -449,8 +516,8 @@ def normalize(m, x):
 
     def print_eigenvalues(m, points):
         for xi in points:
-            mi = matrix_taylor0(m, x, xi, 1)
-            logger.info("  x = %d:" % xi)
+            mi = matrix_c0(m, x, xi, 0)
+            logger.info("  x = %s:" % xi)
             logger.info("      %s" % str(mi.eigenvalues()).replace("\n"," "))
             #logger.info("      %s" % str(mi.eigenvectors_left()).replace("\n"," "))
             #logger.info("      %s" % str(mi.eigenvectors_right()).replace("\n"," "))
@@ -458,8 +525,8 @@ def normalize(m, x):
     logger.info("The initial matrix:\n%s" % str(m))
 
     fuchs_points = [
-            p for p,e in singularities(m, x).iteritems()
-            if not is_singularity_apparent(matrix_taylor0(m, x, p, e))
+            pt for pt,p in singularities(m, x).iteritems()
+            if not is_singularity_apparent(matrix_c0(m, x, pt, p))
     ]
     T = identity_matrix(m.base_ring(), m.nrows())
 
@@ -470,10 +537,10 @@ def normalize(m, x):
         print points, fuchs_points, apparent_points
         for x2 in apparent_points:
             while True:
-                logger.info("Balance a singular point x = %d with a Fuchsian point x = %d" % (x2, x0))
+                logger.info("Balance a singular point x = %s with a Fuchsian point x = %s" % (x2, x0))
     
-                a0 = matrix_taylor0(m, x, x0, 1)
-                b0 = matrix_taylor0(m, x, x2, 1)
+                a0 = matrix_c0(m, x, x0, 0)
+                b0 = matrix_c0(m, x, x2, 0)
                 logger.info("Eigenvalues:")
                 points = singularities(m, x).keys()
                 print_eigenvalues(m, points)
@@ -488,17 +555,17 @@ def normalize(m, x):
                     points = singularities(m, x).keys()
                     apparent_points = list(set(points) - set(fuchs_points))
                     if x2 not in apparent_points:
-                        logger.info("A singular point x = %d succesfully balanced!\n" % x2)
+                        logger.info("A singular point x = %s succesfully balanced!\n" % x2)
                         break
                     else:
                         logger.info("Balance found!\n")
 
     points = singularities(m, x).keys()
     for x1, x2 in combinations(fuchs_points, 2):
-        logger.info("Mutually balance Fuchsian points x = %d and x = %d" % (x1, x2))
+        logger.info("Mutually balance Fuchsian points x = %s and x = %s" % (x1, x2))
         while True:
-            a0 = matrix_taylor0(m, x, x1, 1)
-            b0 = matrix_taylor0(m, x, x2, 1)
+            a0 = matrix_c0(m, x, x1, 0)
+            b0 = matrix_c0(m, x, x2, 0)
             logger.info("Eigenvalues:")
             points = singularities(m, x).keys()
             print_eigenvalues(m, points)
@@ -513,7 +580,7 @@ def normalize(m, x):
                 points = singularities(m, x).keys()
                 apparent_points = list(set(points) - set(fuchs_points))
                 if (x1 not in points) or (x2 not in points):
-                    logger.info("Fuchsian points x = %d and x = %d succesfully balanced!\n" % (x1, x2))
+                    logger.info("Fuchsian points x = %s and x = %s succesfully balanced!\n" % (x1, x2))
                     logger.info("Remaining singular points:")
                     print_eigenvalues(m, points)
                     break
