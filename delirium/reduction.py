@@ -112,7 +112,7 @@ def matrix_taylor0(M, x, point, exp):
     """
     return matrix([
         [taylor(e, x, 0, 0) for e in row]
-        for row in M.subs(x=x+point)*x**exp
+        for row in M.subs({x: x+point})*x**exp
     ])
 
 def matrix_is_nilpotent(M):
