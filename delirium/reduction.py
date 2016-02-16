@@ -590,3 +590,53 @@ def normalize(m, x):
     logger.info("\nThe transformation matrix:\n%s" % str(T))
 
     return m, T
+
+def factor_epsilon(M, x, epsilon, seed=0):
+    """Given a normalized Fuchsian system of differential equations:
+        dF/dx = M(x,epsilon)*F,
+    try to find a transformation that will factor out an epsilon
+    from M. Return a transformed M (proportional to epsilon) and T.
+    """
+    n = M.nrows()
+    rng = Random(seed)
+    mu = SR.symbol()
+    T_symbols = [SR.symbol() for i in xrange(n*n)]
+    T = matrix(SR, n, n, T_symbols)
+    eqs = []
+    for point, prank in singularities(M, x).iteritems():
+        assert prank == 0
+        R = matrix_c0(M, x, point, 0)
+        eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
+        eqs.extend(eq.list())
+    for solution in solve(eqs, T_symbols, solution_dict=True):
+        # What follows is a kludge, but SageMath (as of 7.0)
+        # can't handle symbolic temporary variables properly.
+        # Here's an example:
+        #     sage: t = SR.symbol(); t
+        #     symbol11660
+        #     sage: sol = solve(t*2=4, t, solution_dict=True)[0]; sol
+        #     {symbol11660: 2}
+        #     sage: t in sol
+        #     False
+        T = matrix([[solution[SR.symbols[str(e)]] for e in row] for row in T])
+        if not T.is_invertible():
+            continue
+        # Right now T likely has a number of free variables in
+        # it, we can set them to arbibtrary values, as long as
+        # it'll make T invertible.
+        while True:
+            try:
+                sT = T.subs([
+                    e==rng.randint(-99, 99)
+                    for e in T.variables() if e != epsilon
+                ])
+                sT = sT.simplify_rational()
+                M = transform(M, x, sT)
+            except (ZeroDivisionError, ValueError):
+                continue
+            break
+        # We're leaking a bunch of temprary variables here,
+        # which accumulate in SR.variables, but do I care?
+        return M, sT
+        # No, I don't.
+    raise ValueError("can not factor epsilon")

@@ -184,5 +184,15 @@ class Test(unittest.TestCase):
             evlist = R.eigenvalues()
             t.assertEqual(evlist, [0]*len(evlist))
 
+    def test_factor_epsilon_1(t):
+        x = SR.var("x")
+        e = SR.var("epsilon")
+        M = matrix([[1/x, 0, 0], [0, 2/x, 0], [0, 0, 3/x]])*e
+        M = transform(M, x, matrix([[1, 1, 0], [0, 1, 0],[1+2*e, 0, e]]))
+        F,T = factor_epsilon(M, x, e)
+        F = F.simplify_rational()
+        for f in F.list():
+            t.assertEqual(limit_fixed(f, e, 0), 0)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
