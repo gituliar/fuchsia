@@ -73,10 +73,16 @@ def poincare_rank_at_oo(M, x):
     >>> poincare_rank_at_oo(matrix([[1/x]]), x)
     0
     """
-    return max([
-        limit_fixed(log(expr)/log(x), x, oo) + 1
-        for expr in M.list() if not expr.is_zero()
-    ])
+    p = -1
+    for expr in (M.subs({x: 1/x})/x**2).list():
+        if x not in expr.variables():
+            continue
+        solutions, ks = solve(Integer(1)/expr, x,
+                solution_dict=True, multiplicities=True)
+        for sol, k in zip(solutions, ks):
+            if sol[x] == 0:
+                p = max(p, k - 1)
+    return p
 
 def singularities(M, x):
     """Find values of x around which rational matrix M has
