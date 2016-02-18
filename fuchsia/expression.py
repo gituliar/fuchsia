@@ -8,7 +8,7 @@ from   sage.symbolic.expression import Expression
 from   sage.symbolic.operators import mul_vararg
 from   sage.symbolic.ring import SR
 
-log = logging.getLogger('delirium')
+log = logging.getLogger('fuchsia')
 
 _parser = Parser(make_var=sage.calculus.var.var)
 

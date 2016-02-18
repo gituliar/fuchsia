@@ -1,7 +1,7 @@
 from sage.interfaces.maple import maple
 
-from delirium.expression import new_Expression
-from delirium.matrix import matrix
+from fuchsia.expression import new_Expression
+from fuchsia.matrix import matrix
 
 def super_reduce(m, point):
     data = ', '.join(str(ex) for ex in m.list())

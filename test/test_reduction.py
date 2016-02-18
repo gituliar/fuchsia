@@ -3,7 +3,7 @@
 import unittest
 from random import randint
 
-from delirium.reduction import *
+from fuchsia.reduction import *
 
 def randpoly(x, maxrank=3):
     return sum(randint(-3, 3)*x**i for i in range(maxrank + 1))

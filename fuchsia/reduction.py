@@ -8,9 +8,9 @@ import logging
 from   sage.all import *
 from   random import Random
 
-from   delirium.matrix import (cross_product, dot_product)
+from   fuchsia.matrix import (cross_product, dot_product)
 
-logger = logging.getLogger('delirium')
+logger = logging.getLogger('fuchsia')
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,

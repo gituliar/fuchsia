@@ -3,10 +3,10 @@ import logging
 import sage.all
 from   sage.matrix.constructor import matrix as sage_matrix
 
-from   delirium.expression import is_Expression, new_Expression, var
-from   delirium.expression import alphabet as ex_alphabet
+from   fuchsia.expression import is_Expression, new_Expression, var
+from   fuchsia.expression import alphabet as ex_alphabet
 
-log = logging.getLogger('delirium')
+log = logging.getLogger('fuchsia')
 
 def _matrix_list_map(m, f):
     res = [f(item) for item in m.list()]

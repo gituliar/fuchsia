@@ -4,7 +4,7 @@ for x1 in "x" "x+1" "x-1";
 do
   i1=$1
   o1=${i1}_$x1
-  cmd="delirium reduce --maple -o $o1.mtx -p $x1 $i1.mtx"
+  cmd="fuchsia reduce --maple -o $o1.mtx -p $x1 $i1.mtx"
   echo $cmd
   time $cmd
   for x2 in "x" "x+1" "x-1";
@@ -13,7 +13,7 @@ do
     then
       i2=${o1}
       o2=${i2}_$x2
-      cmd="delirium reduce --maple -o $o2.mtx -p $x2 $i2.mtx"
+      cmd="fuchsia reduce --maple -o $o2.mtx -p $x2 $i2.mtx"
       echo $cmd
       time $cmd
       for x3 in "x" "x+1" "x-1";
@@ -22,7 +22,7 @@ do
         then
           i3=${o2}
           o3=${i3}_$x3
-          cmd="delirium reduce --maple -o $o3.mtx -p $x3 $i3.mtx"
+          cmd="fuchsia reduce --maple -o $o3.mtx -p $x3 $i3.mtx"
           echo $cmd
           time $cmd
         fi

@@ -1,20 +1,20 @@
 .PHONY: clean install test
 
-DTESTS := ${wildcard delirium/*.py}
+DTESTS := ${wildcard fuchsia/*.py}
 UTESTS := ${wildcard test/test_*.py}
 .PHONY: $(DTESTS) $(UTESTS)
 
 install:
-	@date +"%y.%m.%d" > delirium/VERSION
+	@date +"%y.%m.%d" > fuchsia/VERSION
 	@sudo sage -python setup.py develop
 
 test: $(DTESTS) $(UTESTS)
 
-$(DTESTS): delirium/%.py:
-	sage -python -mdoctest delirium/$*.py
+$(DTESTS): fuchsia/%.py:
+	env SAGE_PATH=$(CURDIR) sage -python -mdoctest fuchsia/$*.py
 
 $(UTESTS): test/%.py:
-	sage -python test/$*.py
+	env SAGE_PATH=$(CURDIR) sage -python test/$*.py
 
 clean:
-	@rm -fr delirium/*.pyc delirium/__pycache__
+	@rm -fr fuchsia/*.pyc fuchsia/__pycache__

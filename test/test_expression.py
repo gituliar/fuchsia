@@ -1,6 +1,6 @@
 import unittest
 
-from   delirium.expression import alphabet, new_Expression, var
+from   fuchsia.expression import alphabet, new_Expression, var
 
 x = var("x")
 

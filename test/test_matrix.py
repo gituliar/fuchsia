@@ -1,6 +1,6 @@
 import unittest
 
-from   delirium.matrix import (
+from   fuchsia.matrix import (
            alphabet, coefficient_low, degree_high, degree_low, import_matrix, matrix, var)
 
 eps, x = var("eps, x")

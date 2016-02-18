@@ -1,10 +1,10 @@
 #!/usr/bin/env sage
 # vi:filetype=python
-"""delirium -- a reducer of differential equations for multiloop master integrals
+"""fuchsia -- a reducer of differential equations for multiloop master integrals
 
 Usage:
-  delirium reduce [--profile <file_stats>] (--lee | --maple | --normalize) [-p <point>] [-o <file_output>] <file_input>
-  delirium normalize [--profile <file_stats>] -o <file_output> <file_input>
+  fuchsia reduce [--profile <file_stats>] (--lee | --maple | --normalize) [-p <point>] [-o <file_output>] <file_input>
+  fuchsia normalize [--profile <file_stats>] -o <file_output> <file_input>
 
 Options:
   --lee                  use Lee algorithm (improved Moser algorithm)
@@ -22,12 +22,12 @@ import logging
 
 from   docopt_dispatch import dispatch as docopt_dispatch
 
-from   delirium import __version__
-from   delirium.maple import super_reduce
-from   delirium.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
-from   delirium.reduction import fuchsify, normalize
+from   fuchsia import __version__
+from   fuchsia.maple import super_reduce
+from   fuchsia.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
+from   fuchsia.reduction import fuchsify, normalize
 
-log = logging.getLogger('delirium')
+log = logging.getLogger('fuchsia')
 
 
 @contextmanager
@@ -48,7 +48,7 @@ def profile(file_stats):
             stats.print_stats(50)
 
 def main():
-    print('\033[35m'+'Fuchsia v'+__version__+'\033[0m')
+    print('\033[35;1mFuchsia v%s\033[0m' % __version__)
     print """Authors:
     Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Krakow (Poland)
     Vitaly Magerya
