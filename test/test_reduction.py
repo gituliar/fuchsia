@@ -194,5 +194,17 @@ class Test(unittest.TestCase):
         for f in F.list():
             t.assertEqual(limit_fixed(f, e, 0), 0)
 
+    def test_simplify_by_jordanification(t):
+        x = SR.var("x")
+        M = matrix([
+            [4/(x+1), -1/(6*x*(x+1)), -1/(3*x*(x+1))],
+            [6*(13*x+6)/(x*(x+1)),-5*(x+3)/(3*x*(x+1)),2*(x-6)/(3*x*(x+1))],
+            [-63*(x-1)/(x*(x+1)), (5*x-9)/(6*x*(x+1)), -(x-18)/(3*x*(x+1))]
+        ]).simplify_rational()
+        MM, T = simplify_by_jordanification(M, x)
+        MM = MM.simplify_rational()
+        t.assertEqual(MM, transform(M, x, T).simplify_rational())
+        t.assertLess(matrix_complexity(MM), matrix_complexity(M))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

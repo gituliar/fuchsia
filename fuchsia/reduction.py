@@ -2,6 +2,7 @@
     References:
         [1] Roman Lee, arXiv:1411.0911
 """
+from   collections import defaultdict
 from   itertools import combinations
 import logging
 
@@ -646,3 +647,90 @@ def factor_epsilon(M, x, epsilon, seed=0):
         return M, sT
         # No, I don't.
     raise ValueError("can not factor epsilon")
+
+def matrix_complexity(M):
+    return len(str(M.list()))
+
+def simplify_by_jordanification(M, x):
+    """Try to simplify matrix M by constant transformations that
+    transform M's residues into their Jordan forms. Return the
+    simplified matrix and the transformation. If none of the
+    attempted transformations reduce M's complexity (as measured
+    by 'matrix_complexity()'), return the original matrix and
+    the identity transformation.
+    """
+    minM = M
+    minC = matrix_complexity(M)
+    minT = identity_matrix(M.base_ring(), M.nrows())
+    for point, prank in singularities(M, x).iteritems():
+        R = matrix_c0(M, x, point, prank)
+        J, T = R.jordan_form(transformation=True)
+        MM = transform(M, x, T).simplify_rational()
+        C = matrix_complexity(MM)
+        if C < minC:
+            minM = MM
+            minC = C
+            minT = T
+    return minM, minT
+
+def common_factor(expressions, filter):
+    """Factorize given expressions, select those factors for
+    which 'filter(factor)' is True, and return the product of
+    factors common to all the expressions.
+
+    Examples:
+    >>> x = var("x")
+    >>> common_factor([x*x-1, x+1], lambda f: True)
+    x + 1
+    >>> common_factor([1/x**2, 2/x**3, 3/x**4], lambda f: True)
+    x^(-2)
+
+    Note that if there is a mix of positive and negative exponents
+    of a given factor, this function will use (one of) the most
+    frequently occurring exponent:
+    >>> common_factor([x, 1/x, 2/x**2, 3/x], lambda f: True)
+    1/x
+    """
+    factor2exp2count = defaultdict(lambda: defaultdict(lambda: 0))
+    for i, expr in enumerate(expressions):
+        factors = dict(expr.factor_list())
+        for factor, n in factors.iteritems():
+            if not filter(factor): continue
+            if factor in factor2exp2count:
+                factor2exp2count[factor][n] += 1
+            else:
+                if i > 0: factor2exp2count[factor][0] = i
+                factor2exp2count[factor][n] = 1
+        for factor, exps in factor2exp2count.iteritems():
+            if factor not in factors:
+                exps[0] += 1
+    result = SR(1)
+    for factor, exp2count in factor2exp2count.iteritems():
+        exps = exp2count.keys()
+        minn = min(exps)
+        maxn = max(exps)
+        if minn > 0: result *= factor**minn
+        if maxn < 0: result *= factor**maxn
+        if minn <= 0 and maxn >= 0:
+            bestn = max(exps, key=lambda exp: exp2count[exp])
+            result *= factor**bestn
+    return result
+
+def simplify_by_factorization(M, x):
+    """Try to simplify matrix M by a constant transformation
+    that extracts common factors found in M (if any). Return
+    the simplified matrix and the transformation.
+    """
+    n = M.nrows()
+    T = identity_matrix(M.base_ring(), n)
+    factors = []
+    for i in xrange(n):
+        factor = common_factor(
+            [M[i,k] for k in xrange(n) if i != k and not M[i,k].is_zero()] +
+            [1/M[k,i] for k in xrange(n) if k != i and not M[k,i].is_zero()],
+            lambda e: x not in e.variables())
+        if factor != 1:
+            dT = identity_matrix(M.base_ring(), n)
+            dT[i,i] = T[i,i] = factor
+            M = transform(M, x, dT)
+    return M, T
