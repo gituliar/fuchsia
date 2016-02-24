@@ -182,10 +182,7 @@ def matrix_taylor1(M, x, point, exp):
 
 def matrix_c0(M, x, point, p):
     """Return the 0-th coefficient of M's expansion at x=point,
-    assuming Poincare rank of M at that point is p. If point
-    is +Infinity, return minus the coefficient at the highest
-    power of x (the minus sign is there so if p is zero, you'd
-    obtain the correct value of matrix residue at any point).
+    assuming Poincare rank of M at that point is p.
 
     Examples:
     >>> x = var("x")
@@ -197,8 +194,8 @@ def matrix_c0(M, x, point, p):
     [0 0]
     [0 1]
     >>> matrix_c0(m, x, oo, 1)
-    [ 0  0]
-    [-1  0]
+    [0 0]
+    [1 0]
     >>> matrix_c0(m*x, x, oo, 2)
     [0 0]
     [1 0]
