@@ -2,7 +2,6 @@ import logging
 
 import sage.all
 import sage.calculus.var
-from   sage.matrix.matrix_symbolic_dense import Matrix_symbolic_dense
 from   sage.misc.parser import Parser
 from   sage.symbolic.expression import Expression
 from   sage.symbolic.operators import mul_vararg
@@ -32,7 +31,7 @@ def alphabet(ex, x):
             result.add(pt)
     return result
 
-def is_Expression(obj):
+def is_expression(obj):
     return type(obj) is Expression
 
 def new_Expression(obj):

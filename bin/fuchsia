@@ -4,15 +4,17 @@
 
 Usage:
   fuchsia reduce [--profile <file_stats>] (--lee | --maple | --normalize) [-p <point>] [-o <file_output>] <file_input>
-  fuchsia normalize [--profile <file_stats>] -o <file_output> <file_input>
+  fuchsia normalize [--profile <file_stats>] [-v debug | info] -m <output> -t <output> <file_input>
 
 Options:
   --lee                  use Lee algorithm (improved Moser algorithm)
   --maple                use Maple's super_reduce routine from DETools module
   --normalize            normalize eigenvalues
   --profile <file_stats> profile and write statistics to <file_stats>
-  -o <file_output>       write result to <file_output>
+  -m <output>            new matrix m
+  -t <output>            transformation matrix
   -p <point>             polinomial in x [default: x]
+  -v <level>             verbosity level [default: info]
 
 Arguments:
   <file_input>           input file name
@@ -27,7 +29,7 @@ from   fuchsia.maple import super_reduce
 from   fuchsia.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
 from   fuchsia.reduction import fuchsify, normalize
 
-log = logging.getLogger('fuchsia')
+logger = logging.getLogger('fuchsia')
 
 
 @contextmanager
@@ -57,21 +59,24 @@ def main():
 
 @docopt_dispatch.on('normalize')
 def on_normalize(file_input, **kwargs):
+    verbosity = kwargs.get('v')
+    if verbosity == 'debug':
+        logger.setLevel(logging.DEBUG)
+    elif verbosity == 'info':
+        logger.setLevel(logging.INFO)
+
     with open(file_input, 'r') as f:
         m = import_matrix(f)
 
     with profile(kwargs.get('profile')):
         x = var('x')
-        mm, t = normalize(m, x)
-        mm = partial_fraction(mm, x)
+        m, t = normalize(m, x)
+        m = partial_fraction(m, x)
 
-
-    file_output = kwargs.get('o')
-    if file_output is not None:
-        with open(file_output, 'w') as f:
-            export_matrix(f, mm)
-    else:
-        print mm
+    with open(kwargs.get('m'), 'w') as f:
+        export_matrix(f, m)
+    with open(kwargs.get('t'), 'w') as f:
+        export_matrix(f, t)
 
 @docopt_dispatch.on('reduce')
 def on_reduce(file_input, **kwargs):

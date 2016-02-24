@@ -3,7 +3,7 @@
 for x1 in "x" "x+1" "x-1";
 do
   i1=$1
-  o1=${i1}_$x1
+  o1=${i1}_maple_$x1
   cmd="fuchsia reduce --maple -o $o1.mtx -p $x1 $i1.mtx"
   echo $cmd
   time $cmd

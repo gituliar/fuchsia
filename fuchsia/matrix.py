@@ -2,8 +2,9 @@ import logging
 
 import sage.all
 from   sage.matrix.constructor import matrix as sage_matrix
+from   sage.matrix.matrix_symbolic_dense import Matrix_symbolic_dense
 
-from   fuchsia.expression import is_Expression, new_Expression, var
+from   fuchsia.expression import is_expression, new_Expression, var
 from   fuchsia.expression import alphabet as ex_alphabet
 
 log = logging.getLogger('fuchsia')
@@ -31,14 +32,14 @@ def coefficient_low(m, x, n=0):
 def degree_high(m, x):
     """Return the highest integer exponent of the base `x' in the matrix `m'."""
     x = var(x)
-    ds = _matrix_list_map(m, lambda ex: ex.degree(x) if is_Expression(ex) else None)
+    ds = _matrix_list_map(m, lambda ex: ex.degree(x) if is_expression(ex) else None)
     res = max(ds)
     return res
 
 def degree_low(m, x):
     """Return the lowest integer exponent of the base `x' in the matrix `m'."""
     x = var(x)
-    ds = _matrix_list_map(m, lambda ex: ex.low_degree(x) if is_Expression(ex) else None)
+    ds = _matrix_list_map(m, lambda ex: ex.low_degree(x) if is_expression(ex) else None)
     res = min(ds)
     return res
 
@@ -101,7 +102,7 @@ def has_fuchsian_form(m, x):
 def has_fuchsian_form_at_point(m, x):
     return degree_low(m, x) >= -1
 
-def is_Matrix(obj):
+def is_matrix(obj):
     return type(obj) is Matrix_symbolic_dense
 
 def is_nilpotent(m):
@@ -110,16 +111,14 @@ def is_nilpotent(m):
 
 def is_zero(obj):
     if type(obj) in (list, tuple):
-        res = True
         for item in obj:
             if item != 0:
-                res = False
-                break
+                return False
     elif is_Matrix(obj):
-        res = is_zero(obj.list())
+        return is_zero(obj.list())
     else:
         raise NotImplementedError
-    return res
+    return True
 
 def jordan_form(m, x):
     x = var(x)
@@ -129,7 +128,7 @@ def jordan_form(m, x):
     return mj, tj
 
 def partial_fraction(m, x):
-    res = m.apply_map(lambda obj: obj.partial_fraction(x) if is_Expression(obj) else obj)
+    res = m.apply_map(lambda obj: obj.partial_fraction(x) if hasattr(obj, 'partial_fraction') else obj)
     return res
 
 def zero_cols(m):
