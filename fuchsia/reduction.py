@@ -207,10 +207,7 @@ def matrix_c0(M, x, point, p):
 
 def matrix_c1(M, x, point, p):
     """Return the 1-st coefficient of M's expansion at x=point,
-    assuming Poincare rank of M at that point is p. If point is
-    +Infinity, return minus the coefficient at the second-to-highest
-    power of x (the minus sign is there to keep symmetry with
-    'matrix_c0').
+    assuming Poincare rank of M at that point is p.
 
     Examples:
     >>> x = var("x")
@@ -219,11 +216,11 @@ def matrix_c1(M, x, point, p):
     [1 0]
     [0 0]
     >>> matrix_c1(m, x, oo, 1)
-    [-1  0]
-    [ 0 -1]
+    [1 0]
+    [0 1]
     """
     if point == oo:
-        return -matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
+        return matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
     else:
         return matrix_taylor1(M, x, point, p+1)
 
