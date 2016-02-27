@@ -6,7 +6,6 @@ UTESTS := ${wildcard test/test_*.py}
 .PHONY: $(DTESTS) $(FTESTS) $(UTESTS)
 
 install:
-	@date +"%y.%m.%d" > fuchsia/VERSION
 	@sudo sage -python setup.py develop
 
 test: $(DTESTS) $(FTESTS) $(UTESTS)
