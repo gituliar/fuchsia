@@ -524,9 +524,9 @@ def normalize(m, x, eps, seed=0):
     T = identity_matrix(m.base_ring(), m.nrows())
     while not is_normalized(m, x, eps):
         points = singularities(m, x).keys()
-        balances = find_balances(m, x)
+        balances = find_balances(m, x, eps)
 
-        b = select_balance(balances, rng)
+        b = select_balance(balances, eps, rng)
         logger.info("Use balance:\n    %s" % b)
 
         t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
@@ -558,7 +558,7 @@ def normalize(m, x, eps, seed=0):
     logger.info("Transformation matrix:\n    %s" % '\n    '.join([str(ex) for ex in T.list()]))
     return m, T
 
-def find_balances(m, x):
+def find_balances(m, x, eps):
     points = singularities(m, x).keys()
     balances = []
     for x1, x2 in permutations(points, 2):
@@ -579,28 +579,30 @@ def find_balances(m, x):
         if is_singularity_fuchsian(a0) and is_singularity_fuchsian(b0):
             logging.debug("Conditions:\n  #1: a0_eval_r <  1/2 && b0_eval_l >= 1/2\n  #2: a0_eval_l >= 1/2 && b0_eval_r <  1/2")
             balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) < 0.5 and limit(b0_eval, eps=0) >= 0.5,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) >= 0.5 and limit(b0_eval, eps=0) < 0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < 0.5 \
+                        and limit_fixed(b0_eval, eps, 0) >= 0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5 \
+                        and limit_fixed(b0_eval, eps, 0) < 0.5,
             )
             balances_x1_x2 = [["ff"] + balance for balance in balances_x1_x2]
         # See [1, Definition 5]
         elif is_singularity_fuchsian(a0) and is_singularity_apparent(b0):
             balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) < -0.5,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) >= 0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
             )
             balances_x1_x2 = [["fa"] + balance for balance in balances_x1_x2]
         # See [1, Definition 5]
         elif is_singularity_apparent(a0) and is_singularity_fuchsian(b0):
             balances_x1_x2 = find_balances_helper(b0, a0, x, x2, x1,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) < -0.5,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) >= 0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
             )
             balances_x1_x2 = [["fa"] + balance for balance in balances_x1_x2]
         else:
             balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) < -0.5,
-                lambda a0_eval, b0_eval: limit(a0_eval, eps=0) >= 0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
+                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
             )
             balances_x1_x2 = [["aa"] + balance for balance in balances_x1_x2]
 
@@ -613,12 +615,14 @@ def find_balances(m, x):
         #x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = balance
     return balances
 
-def select_balance(balances, rng):
+def select_balance(balances, eps, rng):
     for b in balances:
         t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
-        if (cond == 1) and bool(limit(a0_eval, eps=0) < 0) and bool(limit(b0_eval, eps=0) > 0):
+        if (cond == 1) and limit_fixed(a0_eval, eps, 0) < 0 and \
+                limit_fixed(b0_eval, eps, 0) > 0:
             return b
-        elif (cond == 2) and bool(limit(a0_eval, eps=0) > 0) and bool(limit(b0_eval, eps=0) < 0):
+        elif (cond == 2) and limit_fixed(a0_eval, eps, 0) > 0 and \
+                limit_fixed(b0_eval, eps, 0) < 0:
             return b
     return rng.choice(balances)
 
