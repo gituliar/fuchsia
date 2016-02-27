@@ -14,3 +14,7 @@ logging.basicConfig(
 __author__ = "Oleksandr Gituliar"
 __author_email__ = "oleksandr.gituliar@ifj.edu.pl"
 __version__ = open(path.join(path.dirname(__file__),"VERSION")).readline().rstrip('\n')
+try:
+    __hash__ = open(path.join(path.dirname(__file__),"HASH")).readline().rstrip('\n')
+except IOError:
+    __hash__ = "unknown"
