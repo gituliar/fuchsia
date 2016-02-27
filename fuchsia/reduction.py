@@ -158,13 +158,6 @@ def matrix_taylor0(M, x, point, exp):
         for row in M.subs({x: x+point})*x**exp
     ])
 
-def matrix_residue(m, x, x0):
-    m0 = matrix_c0(m, x, x0, 0)
-    if x0 == oo:
-        return -m0
-    else:
-        return m0
-
 def matrix_taylor1(M, x, point, exp):
     """Return the 1-th coefficient of Taylor expansion of
     a matrix M around a finite point x=point, assuming that
@@ -182,7 +175,8 @@ def matrix_taylor1(M, x, point, exp):
 
 def matrix_c0(M, x, point, p):
     """Return the 0-th coefficient of M's expansion at x=point,
-    assuming Poincare rank of M at that point is p.
+    assuming Poincare rank of M at that point is p. If point is
+    +Infinity, return the coefficient at the highest power of x.
 
     Examples:
     >>> x = var("x")
@@ -207,7 +201,9 @@ def matrix_c0(M, x, point, p):
 
 def matrix_c1(M, x, point, p):
     """Return the 1-st coefficient of M's expansion at x=point,
-    assuming Poincare rank of M at that point is p.
+    assuming Poincare rank of M at that point is p. If point is
+    +Infinity, return the coefficient at the second-to-highest
+    power of x.
 
     Examples:
     >>> x = var("x")
@@ -223,6 +219,26 @@ def matrix_c1(M, x, point, p):
         return matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
     else:
         return matrix_taylor1(M, x, point, p+1)
+
+def matrix_residue(M, x, x0):
+    """Return matrix residue of M at x=x0, assuming that M's
+    Poincare rank at x=x0 is zero.
+
+    Example:
+    >>> x = var("x")
+    >>> m = matrix([[1/x, 2/x], [3/x, 4/x]])
+    >>> matrix_residue(m, x, 0)
+    [1 2]
+    [3 4]
+    >>> matrix_residue(m, x, oo)
+    [-1 -2]
+    [-3 -4]
+    """
+    m0 = matrix_c0(M, x, x0, 0)
+    if x0 == oo:
+        return -m0
+    else:
+        return m0
 
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
