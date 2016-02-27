@@ -1,10 +1,18 @@
-#!/usr/bin/env python
-
 import unittest
 
 from fuchsia.reduction import *
 
 class Test(unittest.TestCase):
+
+    def test_is_normalized_1(t):
+        x = SR.var("x")
+        e = SR.var("epsilon")
+        t.assertFalse(is_normalized(matrix([[1/x/2]]), x, e))
+        t.assertFalse(is_normalized(matrix([[-1/x/2]]), x, e))
+        t.assertTrue (is_normalized(matrix([[1/x/3]]), x, e))
+        t.assertFalse(is_normalized(matrix([[x]]), x, e))
+        t.assertFalse(is_normalized(matrix([[1/x**2]]), x, e))
+        t.assertTrue (is_normalized(matrix([[(e+1/3)/x-1/2/(x-1)]]), x, e))
 
     def test_normalize_1(t):
         # Test with apparent singularities at 0 and oo, but not at 1.
@@ -41,6 +49,20 @@ class Test(unittest.TestCase):
             R = matrix_c0(N, x, point, prank)
             evlist = R.eigenvalues()
             t.assertEqual(evlist, [0]*len(evlist))
+
+    def test_normalize_3(t):
+        # Test with non-zero normalized eigenvalues
+        x = SR.var("x")
+        e = SR.var("epsilon")
+        M = matrix([
+            [(1-e)/x, 0],
+            [0, (1+e)/3/x]
+        ])
+
+        N, T = normalize(M, x, e)
+        N = N.simplify_rational()
+        t.assertEqual(N, transform(M, x, T).simplify_rational())
+        t.assertTrue(is_normalized(N, x, e))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

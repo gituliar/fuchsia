@@ -71,20 +71,16 @@ def balance_transform(M, P, x1, x2, x):
     mm = partial_fraction(mm, x)
     return mm
 
-def limit_fixed(obj, x, lim):
-    """Return a limit of obj when x->lim.
+def limit_fixed(expr, x, lim):
+    """Return a limit of expr when x->lim.
 
     The standard 'limit()' function of SageMath does not allow
     you to specify the variable, only it's name as a keyword
     argument. If you have a variable, and not it's name, use
     this function instead.
     """
-    if is_matrix(obj):
-        return obj.apply_map(lambda ex: limit_fixed(ex, x, lim))
-    elif type(obj) is list:
-        return [limit_fixed(ex, x, lim) for ex in obj]
-    l = maxima_calculus.sr_limit(obj, x, lim)
-    return obj.parent()(l)
+    l = maxima_calculus.sr_limit(expr, x, lim)
+    return expr.parent()(l)
 
 def poincare_rank_at_oo(M, x):
     """Return Poincare rank of matrix M at x=Infinity.
@@ -525,6 +521,8 @@ def normalize(m, x, eps, seed=0):
     while not is_normalized(m, x, eps):
         points = singularities(m, x).keys()
         balances = find_balances(m, x, eps)
+        if not balances:
+            raise ValueError("can not balance matrix")
 
         b = select_balance(balances, eps, rng)
         logger.info("Use balance:\n    %s" % b)
@@ -814,15 +812,24 @@ def fuchsian_points(m, x):
             points.append(x0)
     return points
 
-def is_normalized(m, x, eps):
-    points = singularities(m, x)
+def is_normalized(M, x, eps):
+    """Return True if (a Fuchsian) matrix M is normalized, that
+    is all the eigenvalues of it's residues lie in [-1/2, 1/2)
+    range (in limit eps->0). Return False otherwise.
+
+    Examples:
+    >>> x, e = var("x epsilon")
+    >>> is_normalized(matrix([[(1+e)/3/x, 0], [0, e/x]]), x, e)
+    True
+    """
+    points = singularities(M, x)
     for x0, p in points.iteritems():
         # m should also be Fuchsian
         if p > 0:
             return False
-        m0 = matrix_residue(m, x, x0)
-        evals = m0.eigenvalues()
-        evals = limit_fixed(evals, eps, 0)
-        if not is_zero(evals):
-            return False
+        M0 = matrix_residue(M, x, x0)
+        for ev in M0.eigenvalues():
+            ev = limit_fixed(ev, eps, 0)
+            if not (Rational((-1, 2)) <= ev and ev < Rational((1, 2))):
+                return False
     return True
