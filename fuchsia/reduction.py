@@ -5,7 +5,7 @@
 from   collections import defaultdict
 from   itertools import permutations
 import logging
-from   random import Random, choice
+from   random import Random
 
 from   sage.all import *
 
@@ -517,8 +517,9 @@ def is_singularity_fuchsian(m0):
     return not is_singularity_apparent(m0)
 
 
-def normalize(m, x, eps):
+def normalize(m, x, eps, seed=0):
     m = partial_fraction(m, x)
+    rng = Random(seed)
     f_points = fuchsian_points(m, x)
     logger.debug("Fuchsian points:\n    %s" % f_points)
 
@@ -527,7 +528,7 @@ def normalize(m, x, eps):
         points = singularities(m, x).keys()
         balances = find_balances(m, x)
 
-        b = select_balance(balances)
+        b = select_balance(balances, rng)
         logger.info("Use balance:\n    %s" % b)
 
         t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
@@ -614,17 +615,14 @@ def find_balances(m, x):
         #x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = balance
     return balances
 
-
-def select_balance(balances):
+def select_balance(balances, rng):
     for b in balances:
         t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if (cond == 1) and bool(limit(a0_eval, eps=0) < 0) and bool(limit(b0_eval, eps=0) > 0):
             return b
         elif (cond == 2) and bool(limit(a0_eval, eps=0) > 0) and bool(limit(b0_eval, eps=0) < 0):
             return b
-    return choice(balances)
-
-
+    return rng.choice(balances)
 
 def find_balances_helper(a0, b0, x, x1, x2, cond1, cond2):
 
