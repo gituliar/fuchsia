@@ -100,10 +100,8 @@ def poincare_rank_at_oo(M, x):
     """
     p = -1
     for expr in (M.subs({x: 1/x})/x**2).list():
-        expr = partial_fraction(expr, x, var('eps'))
         if x not in expr.variables():
             continue
-#        print "expr = ", expr, "\n", expr.partial_fraction(x)
         solutions, ks = solve(Integer(1)/expr, x,
                 solution_dict=True, multiplicities=True)
         for sol, k in zip(solutions, ks):
@@ -123,9 +121,9 @@ def singularities(M, x):
     >>> from pprint import pprint; pprint(s)
     {0: 0, -y: 2, +Infinity: 0}
     """
+    M = M.simplify_rational()
     result = {}
     for expr in M.list():
-        expr = partial_fraction(expr, x, var('eps'))
         if x not in expr.variables():
             # If expression is constant in x, no singularity is present.
             # In particular, this prevents solve(1/0) calls.
@@ -635,8 +633,7 @@ def find_balances_helper(a0, b0, x, x1, x2, cond1, cond2):
                     continue
                 for a0_evec in a0_evecs:
                     for b0_evec in b0_evecs:
-                        scale = dot_product(a0_evec, b0_evec)
-                        scale = partial_fraction(scale, x, var('eps'))
+                        scale = dot_product(a0_evec, b0_evec).simplify_rational()
                         balance = [a0_eval, b0_eval, a0_evec, b0_evec, scale]
                         if scale == 0:
                             logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
