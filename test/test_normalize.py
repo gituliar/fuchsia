@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        N, T = normalize(M, x)
+        N, T = normalize(M, x, SR.var("epsilon"))
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():
@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        N, T = normalize(M, x)
+        N, T = normalize(M, x, SR.var("epsilon"))
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():

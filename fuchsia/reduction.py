@@ -517,7 +517,7 @@ def is_singularity_fuchsian(m0):
     return not is_singularity_apparent(m0)
 
 
-def normalize(m, x, eps=var('eps')):
+def normalize(m, x, eps):
     m = partial_fraction(m, x)
     f_points = fuchsian_points(m, x)
     logger.debug("Fuchsian points:\n    %s" % f_points)

@@ -70,7 +70,8 @@ def on_normalize(file_input, **kwargs):
 
     with profile(kwargs.get('profile')):
         x = var('x')
-        m, t = normalize(m, x)
+        epsilon = var('eps')
+        m, t = normalize(m, x, epsilon)
         m = partial_fraction(m, x)
 
     with open(kwargs.get('m'), 'w') as f:
