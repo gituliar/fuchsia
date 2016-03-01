@@ -1,0 +1,25 @@
+
+% Page layout definitions
+% ----------------------
+  \newlength{\dinwidth} \newlength{\dinmargin}
+  \setlength{\dinwidth}{21.0cm}   %width of A4 paper
+  \setlength{\textheight}{23.9cm} %height of text
+  \setlength{\textwidth}{15.7cm}  %width of text
+% Now calculate the margin as 0.5*(paperwidth-textwidth}
+  \setlength{\dinmargin}{\dinwidth}     
+  \addtolength{\dinmargin}{-\textwidth} 
+  \setlength{\dinmargin}{0.5\dinmargin}
+% For twoside prints you often want the oddsidemargin to be larger
+% than the evensidemargin because staples or punchholes endup at the
+% lefthand side of odd numbered pages 
+  \setlength{\oddsidemargin}{1.2\dinmargin}
+  \setlength{\evensidemargin}{0.8\dinmargin}
+% Latex defines the margin one inch from the paper border 
+  \addtolength{\oddsidemargin}{-1in}
+  \addtolength{\evensidemargin}{-1in}
+%
+  \setlength{\marginparwidth}{0.9\dinmargin} \setlength{\itemsep}{0mm}
+  \setlength{\parsep}{0mm} \marginparsep 8pt \marginparpush 5pt
+  \topmargin -42pt \headheight 12pt \headsep 30pt \footskip 24pt
+  \parskip 2mm \parindent 0mm \font\bollox=cmmib10 scaled \magstep4
+ 
