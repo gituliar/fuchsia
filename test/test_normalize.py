@@ -64,5 +64,16 @@ class Test(unittest.TestCase):
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         t.assertTrue(is_normalized(N, x, e))
 
+    def test_normalize_4(t):
+        # Test with non-zero normalized eigenvalues
+        x, e = SR.var("x eps")
+        M = matrix([
+            [1/x/2, 0],
+            [0, 0]
+        ])
+
+        with t.assertRaises(ValueError):
+            N, T = normalize(M, x, e)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

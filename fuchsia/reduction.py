@@ -441,7 +441,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U):
     except ValueError:
         return None
 
-def fuchsify(M, x, seed=0):
+def fuchsify(M, x, seed=3):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T.
@@ -507,27 +507,32 @@ def is_singularity_apparent(M0):
             return False
     return True
 
-def is_singularity_fuchsian(m0):
-    return not is_singularity_apparent(m0)
-
-
 def normalize(m, x, eps, seed=0):
     m = partial_fraction(m, x)
-    rng = Random(seed)
     f_points = fuchsian_points(m, x)
     logger.debug("Fuchsian points:\n    %s" % f_points)
 
     T = identity_matrix(m.base_ring(), m.nrows())
+    select_balance_state = {"random": Random(seed)}
     while not is_normalized(m, x, eps):
         points = singularities(m, x).keys()
-        balances = find_balances(m, x, eps)
-        if not balances:
-            raise ValueError("can not balance matrix")
+        if INFO:
+            logger.info("Eigenvalues:")
+            for x0 in points:
+                m0 = matrix_residue(m, x, x0)
+                print("    x = %s:" % x0)
+                print("        %s" % str(m0.eigenvalues()).replace("\n"," "))
+                print("        l: %s" % str(m0.eigenvectors_left()).replace("\n"," "))
+                print("        r: %s" % str(m0.eigenvectors_right()).replace("\n"," "))
 
-        b = select_balance(balances, eps, rng)
+        balances = find_balances(m, x, eps)
+        b = select_balance(balances, eps, select_balance_state)
+        if b is None:
+            logger.info("Can not balance matrix")
+            raise ValueError
         logger.info("Use balance:\n    %s" % b)
 
-        t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
+        cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if cond == 1:
             P = partial_fraction(cross_product(a0_evec, b0_evec) / scale, eps)
             T0 = balance(P, x1, x2, x)
@@ -540,17 +545,9 @@ def normalize(m, x, eps, seed=0):
 
         m = transform(m, x, T0)
         m = partial_fraction(m, x, eps, x)
-        assert is_fuchsian(m, x)
         if INFO:
             logger.info("Old matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
             logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
-            logger.info("Eigenvalues:")
-            for x0 in points:
-                m0 = matrix_residue(m, x, x0)
-                print("    x = %s:" % x0)
-                print("        %s" % str(m0.eigenvalues()).replace("\n"," "))
-                print("        l: %s" % str(m0.eigenvectors_left()).replace("\n"," "))
-                print("        r: %s" % str(m0.eigenvectors_right()).replace("\n"," "))
         T = partial_fraction(T*T0, x, eps, x)
 
     logger.info("Transformation matrix:\n    %s" % '\n    '.join([str(ex) for ex in T.list()]))
@@ -573,93 +570,69 @@ def find_balances(m, x, eps):
                 print("        l: %s" % str(mi.eigenvectors_left()).replace("\n"," "))
                 print("        r: %s" % str(mi.eigenvectors_right()).replace("\n"," "))
 
-        # See [1, Definition 6]
-        if is_singularity_fuchsian(a0) and is_singularity_fuchsian(b0):
-            logging.debug("Conditions:\n  #1: a0_eval_r <  1/2 && b0_eval_l >= 1/2\n  #2: a0_eval_l >= 1/2 && b0_eval_r <  1/2")
-            balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < 0.5 \
-                        and limit_fixed(b0_eval, eps, 0) >= 0.5,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5 \
-                        and limit_fixed(b0_eval, eps, 0) < 0.5,
-            )
-            balances_x1_x2 = [["ff"] + balance for balance in balances_x1_x2]
-        # See [1, Definition 5]
-        elif is_singularity_fuchsian(a0) and is_singularity_apparent(b0):
-            balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
-            )
-            balances_x1_x2 = [["fa"] + balance for balance in balances_x1_x2]
-        # See [1, Definition 5]
-        elif is_singularity_apparent(a0) and is_singularity_fuchsian(b0):
-            balances_x1_x2 = find_balances_helper(b0, a0, x, x2, x1,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
-            )
-            balances_x1_x2 = [["fa"] + balance for balance in balances_x1_x2]
-        else:
-            balances_x1_x2 = find_balances_helper(a0, b0, x, x1, x2,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5,
-                lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5,
-            )
-            balances_x1_x2 = [["aa"] + balance for balance in balances_x1_x2]
 
-        balances += balances_x1_x2
+        logging.debug("Use condition #1")
+        a0_evr, b0_evl = a0.eigenvectors_right(), b0.eigenvectors_left()
+        balances_1 = find_balances_by_cond(a0_evr, b0_evl, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5)
+        balances_1 = [[1, x1, x2] + balance for balance in balances_1]
+        balances += balances_1
+    
+        logging.debug("Use condition #2")
+        a0_evl, b0_evr = a0.eigenvectors_left(), b0.eigenvectors_right()
+        balances_2 = find_balances_by_cond(a0_evl, b0_evr, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5)
+        balances_2 = [[2, x1, x2] + balance for balance in balances_2]
+        balances += balances_2
 
     if INFO:
-        logger.info("Found balances (#type, #cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):")
+        logger.info("Found balances (#cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):")
         for balance in balances:
             print "    %s" % (balance,)
-        #x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = balance
     return balances
 
-def select_balance(balances, eps, rng):
+def find_balances_by_cond(a0_ev, b0_ev, cond):
+    res = []
+    for a0_eval, a0_evecs, a0_evmult in a0_ev:
+        for b0_eval, b0_evecs, b0_evmult in b0_ev:
+            if not cond(a0_eval, b0_eval):
+                logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s" % (a0_eval, b0_eval))
+                continue
+            for a0_evec in a0_evecs:
+                for b0_evec in b0_evecs:
+                    scale = dot_product(a0_evec, b0_evec).simplify_rational()
+                    balance = [a0_eval, b0_eval, a0_evec, b0_evec, scale]
+                    if scale == 0:
+                        logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
+                        continue
+                    logger.debug("Balance found:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
+                    res.append(balance)
+    return res
+
+def select_balance(balances, eps, state):
     for b in balances:
-        t, cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
-        if (cond == 1) and limit_fixed(a0_eval, eps, 0) < 0 and \
-                limit_fixed(b0_eval, eps, 0) > 0:
+        cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
+        if (cond == 1) and limit_fixed(a0_eval, eps, 0) < -0.5 and \
+                limit_fixed(b0_eval, eps, 0) >= 0.5:
             return b
-        elif (cond == 2) and limit_fixed(a0_eval, eps, 0) > 0 and \
-                limit_fixed(b0_eval, eps, 0) < 0:
+        elif (cond == 2) and limit_fixed(a0_eval, eps, 0) >= 0.5 and \
+                limit_fixed(b0_eval, eps, 0) < -0.5:
             return b
-    return rng.choice(balances)
 
-def find_balances_helper(a0, b0, x, x1, x2, cond1, cond2):
+    x0 = state.get("x0")
+    if x0 is None:
+        for b in balances:
+            cond, x1, x2, ev1, ev2 = b[:5]
+            if cond == 1:
+                x0 = x2
+                break
+            if cond == 2:
+                x0 = x1
+                break
+        logger.info("Select x0 = %s" % x0)
+        state["x0"] = x0
 
-    def find_balances_by_cond(a0_ev, b0_ev, cond):
-        res = []
-        for a0_eval, a0_evecs, a0_evmult in a0_ev:
-            for b0_eval, b0_evecs, b0_evmult in b0_ev:
-                if not cond(a0_eval, b0_eval):
-                    logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s" % (a0_eval, b0_eval))
-                    continue
-                for a0_evec in a0_evecs:
-                    for b0_evec in b0_evecs:
-                        scale = dot_product(a0_evec, b0_evec).simplify_rational()
-                        balance = [a0_eval, b0_eval, a0_evec, b0_evec, scale]
-                        if scale == 0:
-                            logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
-                            continue
-                        logger.debug("Balance found:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
-                        res.append(balance)
-        return res
-
-    balances = []
-
-    logging.debug("Use condition #1")
-    a0_evr, b0_evl = a0.eigenvectors_right(), b0.eigenvectors_left()
-    balances_1 = find_balances_by_cond(a0_evr, b0_evl, cond1)
-    balances_1 = [[1, x1, x2] + balance for balance in balances_1]
-    balances += balances_1
-
-    logging.debug("Use condition #2")
-    a0_evl, b0_evr = a0.eigenvectors_left(), b0.eigenvectors_right()
-    balances_2 = find_balances_by_cond(a0_evl, b0_evr, cond2)
-    balances_2 = [[2, x1, x2] + balance for balance in balances_2]
-    balances += balances_2
-
-    return balances
-
+    balances_x0 = [b for b in balances if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
+    b = state["random"].choice(balances_x0) if balances_x0 else None
+    return b
 
 def factor_epsilon(M, x, epsilon, seed=0):
     """Given a normalized Fuchsian system of differential equations:
@@ -797,12 +770,6 @@ def simplify_by_factorization(M, x):
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
     return M, T
-
-def is_fuchsian(m, x):
-    for x0, p in singularities(m, x).iteritems():
-        if p > 0:
-            return False
-    return True
 
 def fuchsian_points(m, x):
     points = []
