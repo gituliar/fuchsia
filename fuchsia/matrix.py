@@ -63,6 +63,10 @@ def export_matrix(f, m):
             f.write(str(mij).replace(' ', ''))
             f.write('\n')
 
+def export_matrix_to_file(filename, m):
+    with open(filename, 'w') as f:
+        export_matrix(f, m)
+
 def import_matrix(f):
     """Read a matrix from the file in the Matrix Market array format."""
     while True:
@@ -78,6 +82,10 @@ def import_matrix(f):
 
     m = matrix(data, nrows, ncols)
     return m
+
+def import_matrix_from_file(filename):
+    with open(filename, 'r') as f:
+        return import_matrix(f)
 
 def fuchsian_form(m, x):
     if has_fuchsian_form_at_point(m, x):
