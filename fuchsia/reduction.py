@@ -441,7 +441,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U):
     except ValueError:
         return None
 
-def fuchsify(M, x, seed=3):
+def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T.
