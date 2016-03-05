@@ -13,19 +13,17 @@ from   fuchsia.expression import is_expression
 from   fuchsia.matrix import cross_product, dot_product, is_matrix, is_zero
 
 logger = logging.getLogger('fuchsia')
-#logger.setLevel(logging.DEBUG)
-DEBUG = logger.getEffectiveLevel() == logging.DEBUG
-INFO  = logger.getEffectiveLevel() in [logging.DEBUG, logging.INFO]
-
+DEBUG = logger.getEffectiveLevel() <= logging.DEBUG
+INFO  = logger.getEffectiveLevel() <= logging.INFO
 
 def partial_fraction(obj, *args):
     if is_matrix(obj):
         obj = obj.apply_map(lambda ex: partial_fraction(ex, *args))
     elif is_expression(obj):
         for var in args:
-            obj = obj.partial_fraction(var) if hasattr(obj, "partial_fraction") else obj
+            obj = obj.partial_fraction(var) \
+                    if hasattr(obj, "partial_fraction") else obj
     return obj
-
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,
@@ -35,7 +33,6 @@ def transform(M, x, T):
     Note: M' = inverse(T)*(M*T - dT/dx)
     """
     mm = T.inverse()*(M*T - derivative(T, x))
-    mm = partial_fraction(mm, x)
     return mm
 
 def balance(P, x1, x2, x):
@@ -49,7 +46,6 @@ def balance(P, x1, x2, x):
         b = coP - 1/(x - x1)*P
     else:
         b = coP + (x - x2)/(x - x1)*P
-    b = partial_fraction(b, x)
     return b
 
 def balance_transform(M, P, x1, x2, x):
@@ -68,7 +64,6 @@ def balance_transform(M, P, x1, x2, x):
         k = (x - x2)/(x - x1)
         d = (x2 - x1)/(x - x1)**2
     mm = (coP + 1/k*P)*M*(coP + k*P) - d/k*P
-    mm = partial_fraction(mm, x)
     return mm
 
 def limit_fixed(expr, x, lim):
@@ -426,7 +421,7 @@ def any_integer(rng, ring, excluded):
             return p
         r *= 2
 
-def find_dual_basis_spanning_left_invariant_subspace(A, U):
+def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
     """Find matrix V, such that it's rows span a left invariant
     subspace of A and form a dual basis with columns of U (that
     is, V*U=I).
@@ -434,6 +429,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U):
     evlist = []
     for eigenval, eigenvects, evmult in A.eigenvectors_left():
         evlist.extend(eigenvects)
+    rng.shuffle(evlist)
     W = matrix(evlist)
     try:
         M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
@@ -451,12 +447,20 @@ def fuchsify(M, x, seed=0):
     """
     assert M.is_square()
     rng = Random(seed)
-    combinedT = identity_matrix(M.base_ring(), M.nrows())
     poincare_map = singularities(M, x)
+    def iter_reductions(p1, U):
+        for p2, prank2 in poincare_map.iteritems():
+            if p2 == p1: continue
+            B0 = matrix_c0(M, x, p2, prank2)
+            assert not B0.is_zero()
+            v = find_dual_basis_spanning_left_invariant_subspace(B0, U, rng)
+            if v is None: continue
+            P = (U*v).simplify_rational()
+            M2 = balance_transform(M, P, p1, p2, x).simplify_rational()
+            yield p2, P, M2
+    combinedT = identity_matrix(M.base_ring(), M.nrows())
     reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
     reduction_points.sort()
-    singular_points = poincare_map.keys()
-    singular_points.sort()
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
@@ -466,27 +470,23 @@ def fuchsify(M, x, seed=0):
             if A0.is_zero(): break
             A1 = matrix_c1(M, x, point, prank)
             U, V = alg1x(A0, A1, x)
-            rng.shuffle(singular_points)
-            for p2 in singular_points:
-                if p2 == point: continue
-                prank2 = poincare_map[p2]
-                B0 = matrix_c0(M, x, p2, prank2)
-                assert not B0.is_zero()
-                v = find_dual_basis_spanning_left_invariant_subspace(B0, U)
-                if v is not None:
-                    point2 = p2
-                    P = U*v
-                    break
-            else:
+            try:
+                point2, P, M = min(iter_reductions(point, U), \
+                        key=lambda (point2, P, M2): matrix_complexity(M2))
+            except ValueError as e:
                 point2 = any_integer(rng, M.base_ring(), poincare_map)
-                P = U*V
-            P = P.simplify_rational()
-            M = balance_transform(M, P, point, point2, x)
-            M = M.simplify_rational()
+                P = (U*V).simplify_rational()
+                M = balance_transform(M, P, point, point2, x)
+                M = M.simplify_rational()
+                logger.info(
+                        "Will introduce an apparent singularity at %s.",
+                        point2)
+            logger.debug(
+                    "Applying balance between %s and %s with projector:\n%s",
+                    point, point2, P)
             combinedT = combinedT * balance(P, point, point2, x)
             if point2 not in poincare_map:
                 poincare_map[point2] = 1
-                singular_points.append(point2)
         poincare_map[point] = prank - 1
         if prank <= 1:
             del reduction_points[pointidx]
@@ -769,7 +769,7 @@ def simplify_by_factorization(M, x):
             dT = identity_matrix(M.base_ring(), n)
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
-    return M, T
+    return M.simplify_rational(), T
 
 def fuchsian_points(m, x):
     points = []
