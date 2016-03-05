@@ -509,9 +509,6 @@ def is_singularity_apparent(M0):
 
 def normalize(m, x, eps, seed=0):
     m = partial_fraction(m, x)
-    f_points = fuchsian_points(m, x)
-    logger.debug("Fuchsian points:\n    %s" % f_points)
-
     T = identity_matrix(m.base_ring(), m.nrows())
     select_balance_state = {"random": Random(seed)}
     while not is_normalized(m, x, eps):
@@ -770,14 +767,6 @@ def simplify_by_factorization(M, x):
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
     return M.simplify_rational(), T
-
-def fuchsian_points(m, x):
-    points = []
-    for x0, p in singularities(m, x).iteritems():
-        m0 = matrix_c0(m, x, x0, p)
-        if not is_singularity_apparent(m0):
-            points.append(x0)
-    return points
 
 def is_normalized(M, x, eps):
     """Return True if (a Fuchsian) matrix M is normalized, that
