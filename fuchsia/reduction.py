@@ -512,15 +512,15 @@ def normalize(m, x, eps, seed=0):
     T = identity_matrix(m.base_ring(), m.nrows())
     select_balance_state = {"random": Random(seed)}
     while not is_normalized(m, x, eps):
-        points = singularities(m, x).keys()
         if INFO:
+            points = singularities(m, x).keys()
             logger.info("Eigenvalues:")
             for x0 in points:
                 m0 = matrix_residue(m, x, x0)
-                print("    x = %s:" % x0)
-                print("        %s" % str(m0.eigenvalues()).replace("\n"," "))
-                print("        l: %s" % str(m0.eigenvectors_left()).replace("\n"," "))
-                print("        r: %s" % str(m0.eigenvectors_right()).replace("\n"," "))
+                logger.info("    x = %s:", x0)
+                logger.info("        %s", str(m0.eigenvalues()).replace("\n"," "))
+                logger.info("        l: %s", str(m0.eigenvectors_left()).replace("\n"," "))
+                logger.info("        r: %s", str(m0.eigenvectors_right()).replace("\n"," "))
 
         balances = find_balances(m, x, eps)
         b = select_balance(balances, eps, select_balance_state)
@@ -543,7 +543,6 @@ def normalize(m, x, eps, seed=0):
         m = transform(m, x, T0)
         m = partial_fraction(m, x, eps, x)
         if INFO:
-            logger.info("Old matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
             logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
         T = partial_fraction(T*T0, x, eps, x)
 
@@ -552,11 +551,16 @@ def normalize(m, x, eps, seed=0):
 
 def find_balances(m, x, eps):
     points = singularities(m, x).keys()
+    residues = [matrix_residue(m, x, pt) for pt in points]
+    left_evectors = [r.eigenvectors_left() for r in residues]
+    right_evectors = [r.eigenvectors_right() for r in residues]
     balances = []
-    for x1, x2 in permutations(points, 2):
+    for i1, i2 in permutations(range(len(points)), 2):
+        x1, x2 = points[i1], points[i2]
+        a0, b0 = residues[i1], residues[i2]
+        a0_evr, b0_evr = right_evectors[i1], right_evectors[i2]
+        a0_evl, b0_evl = left_evectors[i1], left_evectors[i2]
         logger.debug("Looking for the balance\n    x1 = %s\n    x2 = %s" % (x1, x2))
-        a0 = matrix_residue(m, x, x1)
-        b0 = matrix_residue(m, x, x2)
         if DEBUG:
             logger.debug("Res(m, x = %s)\n%s" % (x1, a0))
             print("\nRes(m, x = %s)\n%s" % (x2, b0))
@@ -569,13 +573,11 @@ def find_balances(m, x, eps):
 
 
         logging.debug("Use condition #1")
-        a0_evr, b0_evl = a0.eigenvectors_right(), b0.eigenvectors_left()
         balances_1 = find_balances_by_cond(a0_evr, b0_evl, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5)
         balances_1 = [[1, x1, x2] + balance for balance in balances_1]
         balances += balances_1
     
         logging.debug("Use condition #2")
-        a0_evl, b0_evr = a0.eigenvectors_left(), b0.eigenvectors_right()
         balances_2 = find_balances_by_cond(a0_evl, b0_evr, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5)
         balances_2 = [[2, x1, x2] + balance for balance in balances_2]
         balances += balances_2
