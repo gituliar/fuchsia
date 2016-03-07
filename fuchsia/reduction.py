@@ -451,8 +451,11 @@ def fuchsify(M, x, seed=0):
     def iter_reductions(p1, U):
         for p2, prank2 in poincare_map.iteritems():
             if p2 == p1: continue
-            B0 = matrix_c0(M, x, p2, prank2)
-            assert not B0.is_zero()
+            while prank2 >= 0:
+                B0 = matrix_c0(M, x, p2, prank2)
+                if not B0.is_zero(): break
+                poincare_map[p2] = prank2 = prank2 - 1
+            if prank2 < 0: continue
             v = find_dual_basis_spanning_left_invariant_subspace(B0, U, rng)
             if v is None: continue
             P = (U*v).simplify_rational()
@@ -465,6 +468,9 @@ def fuchsify(M, x, seed=0):
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
         prank = poincare_map[point]
+        if prank < 1:
+            del reduction_points[pointidx]
+            continue
         while True:
             A0 = matrix_c0(M, x, point, prank)
             if A0.is_zero(): break
@@ -488,8 +494,6 @@ def fuchsify(M, x, seed=0):
             if point2 not in poincare_map:
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
-        if prank <= 1:
-            del reduction_points[pointidx]
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 

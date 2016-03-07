@@ -144,7 +144,31 @@ class Test(unittest.TestCase):
         Mx = Mx.simplify_rational()
         t.assertEqual(Mx, transform(M, x, T).simplify_rational())
 
-        t.assertTrue(all(p == 0 for p in singularities(Mx, x).values()))
+        pranks = singularities(Mx, x).values()
+        t.assertEqual(pranks, [0]*len(pranks))
+
+    def test_fuchsify_2(t):
+        x = SR.var("x")
+        M = matrix([
+            [0, 1/x/(x-1), 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ])
+        u = matrix([[6, 3, 2, 0]])/7
+        P = u.transpose()*u
+        M = balance_transform(M, P, 1, 0, x).simplify_rational()
+        M = balance_transform(M, P, 1, 0, x).simplify_rational()
+        M = balance_transform(M, P, 1, 0, x).simplify_rational()
+        M = balance_transform(M, P, 1, 0, x).simplify_rational()
+        M = balance_transform(M, P, 1, 0, x).simplify_rational()
+
+        MM, T = fuchsify(M, x)
+        MM = MM.simplify_rational()
+        t.assertEqual(MM, transform(M, x, T).simplify_rational())
+
+        pranks = singularities(MM, x).values()
+        t.assertEqual(pranks, [0]*len(pranks))
 
     def test_factor_epsilon_1(t):
         x = SR.var("x")
