@@ -637,6 +637,11 @@ def select_balance(balances, eps, state):
     b = state["random"].choice(balances_x0) if balances_x0 else None
     return b
 
+def gensym():
+    sym = SR.symbol()
+    SR.symbols[str(sym)] = sym
+    return sym
+
 def factor_epsilon(M, x, epsilon, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
@@ -645,8 +650,8 @@ def factor_epsilon(M, x, epsilon, seed=0):
     """
     n = M.nrows()
     rng = Random(seed)
-    mu = SR.symbol()
-    T_symbols = [SR.symbol() for i in xrange(n*n)]
+    mu = gensym()
+    T_symbols = [gensym() for i in xrange(n*n)]
     T = matrix(SR, n, n, T_symbols)
     eqs = []
     for point, prank in singularities(M, x).iteritems():
@@ -655,29 +660,20 @@ def factor_epsilon(M, x, epsilon, seed=0):
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
         eqs.extend(eq.list())
     for solution in solve(eqs, T_symbols, solution_dict=True):
-        # What follows is a kludge, but SageMath (as of 7.0)
-        # can't handle symbolic temporary variables properly.
-        # Here's an example:
-        #     sage: t = SR.symbol(); t
-        #     symbol11660
-        #     sage: sol = solve(t*2=4, t, solution_dict=True)[0]; sol
-        #     {symbol11660: 2}
-        #     sage: t in sol
-        #     False
-        T = matrix([[solution[SR.symbols[str(e)]] for e in row] for row in T])
-        if not T.is_invertible():
+        S = T.subs(solution)
+        if not S.is_invertible():
             continue
-        # Right now T likely has a number of free variables in
-        # it, we can set them to arbibtrary values, as long as
-        # it'll make T invertible.
+        # Right now S likely has a number of free variables in
+        # it; we can set them to arbibtrary values, as long as
+        # it'll make S invertible.
         while True:
             try:
-                sT = T.subs([
+                sT = S.subs([
                     e==rng.randint(-99, 99)
-                    for e in T.variables() if e != epsilon
+                    for e in S.variables() if e != epsilon
                 ])
                 sT = sT.simplify_rational()
-                M = transform(M, x, sT)
+                M = transform(M, x, sT).simplify_rational()
             except (ZeroDivisionError, ValueError):
                 continue
             break
