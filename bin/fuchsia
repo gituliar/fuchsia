@@ -1,33 +1,33 @@
 #!/usr/bin/env sage
 # vi:filetype=python
-"""fuchsia -- a reducer of differential equations for multiloop master integrals
+"""\033[35;1mFuchsia v%s\033[0m -- a tool for reducing differential equations for multiloop master integrals
 
-Usage:
-  fuchsia reduce [--profile <file_stats>] (--lee | --maple | --normalize) [-p <point>] [-o <file_output>] <file_input>
-  fuchsia normalize [--profile <file_stats>] [-v debug | info] -m <output> -t <output> <file_input>
+Authors:
+  Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
+  Vitaly Magerya
+
+\033[35;1mUsage:\033[0m
+  fuchsia (fuchsify | normalize | factorize) [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] [-m <file>] [-t <file>] <file>
 
 Options:
-  --lee                  use Lee algorithm (improved Moser algorithm)
-  --maple                use Maple's super_reduce routine from DETools module
-  --normalize            normalize eigenvalues
-  --profile <file_stats> profile and write statistics to <file_stats>
-  -m <output>            new matrix m
-  -t <output>            transformation matrix
-  -p <point>             polinomial in x [default: x]
-  -v <level>             verbosity level [default: info]
+  -x <var>           x variable name [default: x]
+  -e <var>           eps variable name [default: eps]
+  -m <file>          new matrix M after transformation
+  -t <file>          transformation matrix T
+  --log <level>      logger verbosity level [default: info]
+  --profile <file>   write profile statistics to <file_stats>
 
 Arguments:
-  <file_input>           input file name
+  <file>             matrix M
 """
 from   contextlib import contextmanager
 import logging
 
-from   docopt_dispatch import dispatch as docopt_dispatch
+from   docopt import docopt
 
 from   fuchsia import __hash__, __version__
-from   fuchsia.maple import super_reduce
-from   fuchsia.matrix import degree_low, export_matrix, import_matrix, partial_fraction, var
-from   fuchsia.reduction import fuchsify, normalize
+from   fuchsia.matrix import export_matrix_to_file, import_matrix_from_file, partial_fraction, var
+from   fuchsia.reduction import factor_epsilon, fuchsify, normalize
 
 logger = logging.getLogger('fuchsia')
 
@@ -49,61 +49,36 @@ def profile(file_stats):
             stats = pstats.Stats(profile, stream=f).sort_stats("cumulative")
             stats.print_stats(50)
 
-def main():
+def main(args):
     print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __hash__))
     print """Authors:
-    Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Krakow (Poland)
+    Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
     Vitaly Magerya
     """
-    docopt_dispatch(__doc__)
+    logger.setLevel({'debug': logging.DEBUG, 'info': logging.INFO}.get(args['--log']))
 
-@docopt_dispatch.on('normalize')
-def on_normalize(file_input, **kwargs):
-    verbosity = kwargs.get('v')
-    if verbosity == 'debug':
-        logger.setLevel(logging.DEBUG)
-    elif verbosity == 'info':
-        logger.setLevel(logging.INFO)
+    m = import_matrix_from_file(args['<file>'])
+    x = var(args['-x'])
+    eps = var(args['-e'])
 
-    with open(file_input, 'r') as f:
-        m = import_matrix(f)
+    with profile(args['--profile']):
+        if args['fuchsify']:
+            m, t = fuchsify(m, x)
+        elif args['normalize']:
+            m, t = normalize(m, x, eps)
+        elif args['factorize']:
+            m, t = factor_epsilon(m, x, eps)
 
-    with profile(kwargs.get('profile')):
-        x = var('x')
-        epsilon = var('eps')
-        m, t = normalize(m, x, epsilon)
+    if args['-m']:
         m = partial_fraction(m, x)
+        export_matrix_to_file(args['-m'], m)
+    if args['-t']:
+        t = partial_fraction(t, x)
+        export_matrix_to_file(args['-t'], t)
 
-    with open(kwargs.get('m'), 'w') as f:
-        export_matrix(f, m)
-    with open(kwargs.get('t'), 'w') as f:
-        export_matrix(f, t)
-
-@docopt_dispatch.on('reduce')
-def on_reduce(file_input, **kwargs):
-    with open(file_input, 'r') as f:
-        m = import_matrix(f)
-
-    with profile(kwargs.get('profile')):
-        point = kwargs.get('p')
-        x = var('x')
-        if kwargs.get('lee'):
-            mm, t = fuchsify(m, x)
-        elif kwargs.get('maple'):
-            mm, t = super_reduce(m, point)
-        mm = partial_fraction(mm, x)
-
-
-    file_output = kwargs.get('o')
-    if file_output is not None:
-        with open(file_output, 'w') as f:
-            export_matrix(f, mm)
-    else:
-        print mm
 
 if __name__ == '__main__':
     try:
-        main()
+        main(docopt(__doc__ % (__version__)))
     except Exception as error:
-        raise
-
+       raise
