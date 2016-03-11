@@ -1,8 +1,7 @@
 import os.path
 import unittest
 
-from   fuchsia.matrix import import_matrix_from_file, var
-from   fuchsia.reduction import fuchsify, transform, singularities
+from   fuchsia import import_matrix_from_file, var, fuchsify, transform, singularities
 
 class Test(unittest.TestCase):
     def assertFuchsifyWorks(t, filename):

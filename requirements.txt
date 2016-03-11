@@ -1,2 +1,2 @@
-docopt-dispatch==0.0.2
-sage>=6.9
+docopt
+sage=7.0

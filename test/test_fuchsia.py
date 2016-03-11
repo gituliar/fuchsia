@@ -1,7 +1,9 @@
 import unittest
-from random import randint
+from   random import randint
 
-from fuchsia.reduction import *
+from   fuchsia import (balance, balance_transform, identity_matrix, factor_epsilon, fuchsify,
+           limit_fixed, matrix, matrix_complexity, oo, Rational, reduce_at_one_point,
+           simplify_by_jordanification, singularities, transform, var)
 
 def randpoly(x, maxrank=3):
     return sum(randint(-3, 3)*x**i for i in range(maxrank + 1))
@@ -24,14 +26,14 @@ def randratm(x, size, maxrank=3):
 class Test(unittest.TestCase):
     def test_transform_1(t):
         # transform(M, x, I) == M
-        x = SR.var("x")
+        x = var("x")
         M = randpolym(x, 3)
         MM = transform(M, x, identity_matrix(M.nrows()))
         t.assertEqual(MM, M)
 
     def test_transform_2(t):
         # transform(transform(M, x, I), x, I^-1) == M
-        x = SR.var("x")
+        x = var("x")
         M = randpolym(x, 2)
         T = randpolym(x, 2)
         invT = T.inverse()
@@ -41,7 +43,7 @@ class Test(unittest.TestCase):
 
     def test_balance_1(t):
         # balance(P, x1, x2, x)*balance(P, x2, x1, x) == I
-        x = SR.var("x")
+        x = var("x")
         P = matrix([[1, 1], [0, 0]])
         x1 = randint(-10, 10)
         x2 = randint(20, 30)
@@ -52,7 +54,7 @@ class Test(unittest.TestCase):
 
     def test_balance_2(t):
         # balance(P, x1, oo, x)*balance(P, oo, x1, x) == I
-        x = SR.var("x")
+        x = var("x")
         P = matrix([[1, 1], [0, 0]])
         x1 = randint(-10, 10)
         b1 = balance(P, x1, oo, x)
@@ -61,7 +63,7 @@ class Test(unittest.TestCase):
         t.assertEqual((b2*b1).simplify_rational(), identity_matrix(P.nrows()))
 
     def test_balance_transform_1(t):
-        x = SR.var("x")
+        x = var("x")
         M = randpolym(x, 2)
         P = matrix([[1, 1], [0, 0]])
         x1 = randint(-10, 10)
@@ -81,7 +83,7 @@ class Test(unittest.TestCase):
         t.assertEqual(M1.simplify_rational(), M2.simplify_rational())
 
     def test_reduce_at_one_point_1(t):
-        x = SR.var("x")
+        x = var("x")
         M0 = matrix([
             [1/x, 4, 0, 5],
             [0, 2/x, 0, 0],
@@ -121,7 +123,7 @@ class Test(unittest.TestCase):
         t.assertEqual(M4_sing[0], 0)
 
     def test_fuchsify_1(t):
-        x = SR.var("x")
+        x = var("x")
         M = matrix([
             [1/x, 5, 0, 6],
             [0, 2/x, 0, 0],
@@ -148,7 +150,7 @@ class Test(unittest.TestCase):
         t.assertEqual(pranks, [0]*len(pranks))
 
     def test_fuchsify_2(t):
-        x = SR.var("x")
+        x = var("x")
         M = matrix([
             [0, 1/x/(x-1), 0, 0],
             [0, 0, 0, 0],
@@ -171,8 +173,8 @@ class Test(unittest.TestCase):
         t.assertEqual(pranks, [0]*len(pranks))
 
     def test_factor_epsilon_1(t):
-        x = SR.var("x")
-        e = SR.var("epsilon")
+        x = var("x")
+        e = var("epsilon")
         M = matrix([[1/x, 0, 0], [0, 2/x, 0], [0, 0, 3/x]])*e
         M = transform(M, x, matrix([[1, 1, 0], [0, 1, 0],[1+2*e, 0, e]]))
         F,T = factor_epsilon(M, x, e)
@@ -181,7 +183,7 @@ class Test(unittest.TestCase):
             t.assertEqual(limit_fixed(f, e, 0), 0)
 
     def test_simplify_by_jordanification(t):
-        x = SR.var("x")
+        x = var("x")
         M = matrix([
             [4/(x+1), -1/(6*x*(x+1)), -1/(3*x*(x+1))],
             [6*(13*x+6)/(x*(x+1)),-5*(x+3)/(3*x*(x+1)),2*(x-6)/(3*x*(x+1))],

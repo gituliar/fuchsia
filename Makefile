@@ -1,19 +1,22 @@
-.PHONY: clean install test
+.PHONY: build clean install test
 
-DTESTS := ${wildcard fuchsia/*.py}
-UTESTS := ${wildcard test/test_*.py}
-.PHONY: $(DTESTS) $(FTESTS) $(UTESTS)
+TESTS := ${wildcard test/test_*.py}
+.PHONY: fuchsia.py $(TESTS)
 
 install:
-	@sudo sage -python setup.py develop
+	sage -python setup.py develop
 
-test: $(DTESTS) $(FTESTS) $(UTESTS)
-
-$(DTESTS): fuchsia/%.py:
-	env SAGE_PATH=$(CURDIR) sage -python -mdoctest fuchsia/$*.py
-
-$(UTESTS): test/%.py:
-	env SAGE_PATH=$(CURDIR) sage -python test/$*.py
+build:
+	sage -python setup.py build_py
 
 clean:
-	@rm -fr fuchsia/*.pyc fuchsia/__pycache__
+	@rm -fr build dist fuchsia/*.pyc fuchsia/__pycache__ fuchsia.egg-info
+
+
+test: fuchsia.py $(TESTS)
+
+fuchsia.py:
+	sage -python -mdoctest fuchsia.py
+
+$(TESTS): test/%.py:
+	sage -python test/$*.py

@@ -5,19 +5,35 @@
 from   collections import defaultdict
 from   itertools import permutations
 import logging
+import os.path as path
 from   random import Random
 
 from   sage.all import *
+from   sage.all import Expression, Rational
+from   sage.matrix.matrix import is_Matrix
+from   sage.misc.parser import Parser
 
-from   fuchsia.expression import is_expression
-from   fuchsia.matrix import cross_product, dot_product, is_matrix, is_zero
-
+logging.basicConfig(
+    format='\033[32m%(levelname)s [%(asctime)s]\033[0m\n%(message)s',
+#    format='\033[32m%(levelname)s [%(asctime)s]\033[0m %(pathname)s:%(funcName)s, line %(lineno)s %(message)s\n',
+#    format='%(levelname)s [%(asctime)s] %(message)s %(pathname)s:%(funcName)s, line %(lineno)s',
+    datefmt='%Y-%m-%d %I:%M:%S',
+)
 logger = logging.getLogger('fuchsia')
 DEBUG = logger.getEffectiveLevel() <= logging.DEBUG
 INFO  = logger.getEffectiveLevel() <= logging.INFO
 
+__author__ = "Oleksandr Gituliar, Vitaly Magerya"
+__author_email__ = "oleksandr.gituliar@ifj.edu.pl"
+__version__ = open(path.join(path.dirname(__file__),"VERSION")).readline().rstrip('\n')
+try:
+    __commit__ = open(path.join(path.dirname(__file__),"COMMIT")).readline().rstrip('\n')
+except IOError:
+    __commit__ = "unknown"
+
+
 def partial_fraction(obj, *args):
-    if is_matrix(obj):
+    if is_Matrix(obj):
         obj = obj.apply_map(lambda ex: partial_fraction(ex, *args))
     elif is_expression(obj):
         for var in args:
@@ -518,13 +534,14 @@ def normalize(m, x, eps, seed=0):
     while not is_normalized(m, x, eps):
         if INFO:
             points = singularities(m, x).keys()
-            logger.info("Eigenvalues:")
+            msg = "Eigenvalues:\n"
             for x0 in points:
                 m0 = matrix_residue(m, x, x0)
-                logger.info("    x = %s:", x0)
-                logger.info("        %s", str(m0.eigenvalues()).replace("\n"," "))
-                logger.info("        l: %s", str(m0.eigenvectors_left()).replace("\n"," "))
-                logger.info("        r: %s", str(m0.eigenvectors_right()).replace("\n"," "))
+                msg += "    x = %s:\n" % x0
+                msg += "        %s\n" % str(m0.eigenvalues()).replace("\n"," ")
+                msg += "        l: %s\n" % str(m0.eigenvectors_left()).replace("\n"," ")
+                msg += "        r: %s\n" % str(m0.eigenvectors_right()).replace("\n"," ")
+            logger.info(msg)
 
         balances = find_balances(m, x, eps)
         b = select_balance(balances, eps, select_balance_state)
@@ -540,15 +557,15 @@ def normalize(m, x, eps, seed=0):
         else:
             P = partial_fraction(cross_product(b0_evec, a0_evec) / scale, eps)
             T0 = balance(P, x2, x1, x)
-        T0 = partial_fraction(T0, x, eps, x)
+        T0 = partial_fraction(T0, x)
         logger.debug("P  =\n%s" % (P,))
         logger.debug("T0 =\n%s" % (T0,))
 
         m = transform(m, x, T0)
-        m = partial_fraction(m, x, eps, x)
+        m = partial_fraction(m, x)
         if INFO:
             logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
-        T = partial_fraction(T*T0, x, eps, x)
+        T = partial_fraction(T*T0, x)
 
     logger.info("Transformation matrix:\n    %s" % '\n    '.join([str(ex) for ex in T.list()]))
     return m, T
@@ -791,3 +808,74 @@ def is_normalized(M, x, eps):
             if not (Rational((-1, 2)) <= ev and ev < Rational((1, 2))):
                 return False
     return True
+
+# matrix.py
+
+def export_matrix(f, m):
+    f.write("%%MatrixMarket matrix array Maple[symbolic] general\n")
+    f.write("%d %d\n" % (m.nrows(), m.ncols()))
+    for col in m.columns():
+        for mij in col:
+            f.write(str(mij).replace(' ', ''))
+            f.write('\n')
+
+def export_matrix_to_file(filename, m):
+    with open(filename, 'w') as f:
+        export_matrix(f, m)
+
+def import_matrix(f):
+    """Read a matrix, stored in the MatrixMarket array format, from the file.
+
+    >>> with open('test/data/henn_324.mtx') as f:
+    ...     import_matrix(f).list()
+    [eps/x, -1/x^2, 0, eps/(x + 1)]
+    """
+    while True:
+        s = f.readline()
+        if not s.startswith('%'):
+            break
+    nrows, ncols = map(int, s.split())
+
+    try:
+        data = [new_Expression(s) for s in f.readlines() if not s.startswith('%')]
+    except SyntaxError:
+        raise
+
+    m = matrix(nrows, ncols, data)
+    return m
+
+def import_matrix_from_file(filename):
+    with open(filename, 'r') as f:
+        return import_matrix(f)
+
+def cross_product(v1, v2):
+    m1, m2 = matrix(v1), matrix(v2)
+    return m1.transpose() * m2
+
+def dot_product(v1, v2):
+    m1, m2 = matrix(v1), matrix(v2)
+    sp = m1 * m2.transpose()
+    return sp[0,0]
+
+# expression.py
+
+def is_expression(obj):
+    return type(obj) is Expression
+
+def new_Expression(obj):
+    if type(obj) == str:
+        try:
+            ex = new_Expression_from_string(obj)
+        except SyntaxError:
+            log.error(obj)
+            raise
+    else:
+        raise NotImplementedError
+    return ex
+
+
+_parser = Parser(make_var=var)
+
+def new_Expression_from_string(s):
+    ex = _parser.parse(s)
+    return ex
