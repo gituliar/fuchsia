@@ -1,7 +1,8 @@
 import unittest
 
 from   sage.all import SR
-from   fuchsia import is_normalized, matrix, matrix_c0, normalize, singularities, transform
+from   fuchsia import (is_normalized, matrix, matrix_c0, normalize,
+        singularities, transform, import_matrix_from_file, fuchsify)
 
 class Test(unittest.TestCase):
 
@@ -75,6 +76,17 @@ class Test(unittest.TestCase):
 
         with t.assertRaises(ValueError):
             N, T = normalize(M, x, e)
+
+    def test_normalize_5(t):
+        # An unnormalizable example by A. A. Bolibrukh
+        x, e = SR.var("x eps")
+        b = import_matrix_from_file("test/data/bolibrukh.mtx")
+        f, ft = fuchsify(b, x)
+        f_pranks = singularities(f, x).values()
+        t.assertEqual(f_pranks, [0]*len(f_pranks))
+
+        with t.assertRaises(ValueError):
+            n, nt = normalize(f, x, e)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
