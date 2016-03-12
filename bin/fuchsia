@@ -26,8 +26,9 @@ import logging
 from   docopt import docopt
 
 from   sage.all import SR
-from   fuchsia import (__commit__, __version__, export_matrix_to_file, import_matrix_from_file,
-           partial_fraction, factor_epsilon, fuchsify, normalize)
+from   fuchsia import (__commit__, __version__, export_matrix_to_file,
+        import_matrix_from_file, partial_fraction, factor_epsilon,
+        fuchsify, normalize, simplify_by_factorization)
 
 logger = logging.getLogger('fuchsia')
 
@@ -63,7 +64,9 @@ def main(args):
 
     with profile(args['--profile']):
         if args['fuchsify']:
-            m, t = fuchsify(m, x)
+            m, t1 = simplify_by_factorization(m, x)
+            m, t2 = fuchsify(m, x)
+            t = t1*t2
         elif args['normalize']:
             m, t = normalize(m, x, eps)
         elif args['factorize']:
