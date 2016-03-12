@@ -874,8 +874,7 @@ def new_Expression(obj):
         raise NotImplementedError
     return ex
 
-
-_parser = Parser(make_var=var)
+_parser = Parser(make_var=SR.var)
 
 def new_Expression_from_string(s):
     ex = _parser.parse(s)

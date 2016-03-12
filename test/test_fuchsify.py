@@ -1,12 +1,13 @@
 import os.path
 import unittest
 
-from   fuchsia import import_matrix_from_file, var, fuchsify, transform, singularities
+from   sage.all import SR
+from   fuchsia import import_matrix_from_file, fuchsify, transform, singularities
 
 class Test(unittest.TestCase):
     def assertFuchsifyWorks(t, filename):
         M = import_matrix_from_file(filename)
-        x = var("x")
+        x = SR.var("x")
         t.assertIn(x, M.variables())
         M_pranks = singularities(M, x).values()
         t.assertNotEqual(M_pranks, [0]*len(M_pranks))

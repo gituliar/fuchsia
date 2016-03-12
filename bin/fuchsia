@@ -25,8 +25,9 @@ import logging
 
 from   docopt import docopt
 
+from   sage.all import SR
 from   fuchsia import (__commit__, __version__, export_matrix_to_file, import_matrix_from_file,
-           partial_fraction, var, factor_epsilon, fuchsify, normalize)
+           partial_fraction, factor_epsilon, fuchsify, normalize)
 
 logger = logging.getLogger('fuchsia')
 
@@ -57,8 +58,8 @@ def main(args):
     logger.setLevel({'debug': logging.DEBUG, 'info': logging.INFO}.get(args['--log']))
 
     m = import_matrix_from_file(args['<file>'])
-    x = var(args['-x'])
-    eps = var(args['-e'])
+    x = SR.var(args['-x'])
+    eps = SR.var(args['-e'])
 
     with profile(args['--profile']):
         if args['fuchsify']:

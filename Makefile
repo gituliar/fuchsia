@@ -10,7 +10,7 @@ build:
 	sage -python setup.py build_py
 
 clean:
-	@rm -fr build dist fuchsia/*.pyc fuchsia/__pycache__ fuchsia.egg-info
+	@rm -fr build dist fuchsia.egg-info
 
 
 test: fuchsia.py $(TESTS)
@@ -19,4 +19,4 @@ fuchsia.py:
 	sage -python -mdoctest fuchsia.py
 
 $(TESTS): test/%.py:
-	env SAGE_PATH=$(CURDIR) sage -python test/$*.py
+	env SAGE_PATH="$(CURDIR)" sage -python test/$*.py
