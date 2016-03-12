@@ -14,7 +14,8 @@ class Test(unittest.TestCase):
         t.assertTrue (is_normalized(matrix([[1/x/3]]), x, e))
         t.assertFalse(is_normalized(matrix([[x]]), x, e))
         t.assertFalse(is_normalized(matrix([[1/x**2]]), x, e))
-        t.assertTrue (is_normalized(matrix([[(e+1/3)/x-1/2/(x-1)]]), x, e))
+        t.assertTrue (is_normalized( \
+                matrix([[(e+SR(1)/3)/x-SR(1)/2/(x-1)]]), x, e))
 
     def test_normalize_1(t):
         # Test with apparent singularities at 0 and oo, but not at 1.
