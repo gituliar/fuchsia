@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
 
     def test_import_export_1(t):
         a, b = SR.var("v1 v2")
-        M = matrix([[1, a, b], [a + b, 2, a/b]])
+        M = matrix([[1, a, b], [a + b, Rational((2, 3)), a/b]])
         fout = StringIO()
         export_matrix(fout, M)
         MM = import_matrix(StringIO(fout.getvalue()))

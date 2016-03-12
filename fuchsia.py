@@ -805,7 +805,7 @@ def export_matrix_to_file(filename, m):
     with open(filename, 'w') as f:
         export_matrix(f, m)
 
-_parser = Parser(make_var=SR.var)
+_parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
 
 def import_matrix(f):
     """Read and return a matrix, stored in the MatrixMarket
