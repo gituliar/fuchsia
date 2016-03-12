@@ -1,9 +1,12 @@
 import unittest
 from   random import randint
+from   StringIO import StringIO
 
-from   fuchsia import (balance, balance_transform, identity_matrix, factor_epsilon, fuchsify,
-           limit_fixed, matrix, matrix_complexity, oo, Rational, reduce_at_one_point,
-           simplify_by_jordanification, singularities, transform, var)
+from   fuchsia import (balance, balance_transform, identity_matrix,
+            import_matrix, export_matrix, factor_epsilon, fuchsify,
+            limit_fixed, matrix, matrix_complexity, oo, Rational,
+            reduce_at_one_point, simplify_by_jordanification,
+            singularities, transform, var)
 
 def randpoly(x, maxrank=3):
     return sum(randint(-3, 3)*x**i for i in range(maxrank + 1))
@@ -24,6 +27,14 @@ def randratm(x, size, maxrank=3):
     ])
 
 class Test(unittest.TestCase):
+    def test_import_export_1(t):
+        a, b = var("v1 v2")
+        M = matrix([[1, a, b], [a + b, 2, a/b]])
+        fout = StringIO()
+        export_matrix(fout, M)
+        MM = import_matrix(StringIO(fout.getvalue()))
+        t.assertEqual(M, MM)
+
     def test_transform_1(t):
         # transform(M, x, I) == M
         x = var("x")

@@ -827,8 +827,9 @@ def import_matrix(f):
     """Read a matrix, stored in the MatrixMarket array format, from the file.
 
     >>> with open('test/data/henn_324.mtx') as f:
-    ...     import_matrix(f).list()
-    [eps/x, -1/x^2, 0, eps/(x + 1)]
+    ...     import_matrix(f)
+    [      eps/x           0]
+    [     -1/x^2 eps/(x + 1)]
     """
     while True:
         s = f.readline()
@@ -841,7 +842,7 @@ def import_matrix(f):
     except SyntaxError:
         raise
 
-    m = matrix(nrows, ncols, data)
+    m = matrix(ncols, nrows, data).T
     return m
 
 def import_matrix_from_file(filename):

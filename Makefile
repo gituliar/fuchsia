@@ -19,4 +19,4 @@ fuchsia.py:
 	sage -python -mdoctest fuchsia.py
 
 $(TESTS): test/%.py:
-	sage -python test/$*.py
+	env SAGE_PATH=$(CURDIR) sage -python test/$*.py
