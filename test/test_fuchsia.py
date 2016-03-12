@@ -4,10 +4,10 @@ from   StringIO import StringIO
 
 from   sage.all import SR
 from   fuchsia import (balance, balance_transform, identity_matrix,
-            import_matrix, export_matrix, factor_epsilon, fuchsify,
-            limit_fixed, matrix, matrix_complexity, oo, Rational,
-            reduce_at_one_point, simplify_by_jordanification,
-            singularities, transform)
+            import_matrix, import_matrix_from_file, export_matrix,
+            factor_epsilon, fuchsify, limit_fixed, matrix,
+            matrix_complexity, oo, Rational, reduce_at_one_point,
+            simplify_by_jordanification, singularities, transform)
 
 def randpoly(x, maxrank=3):
     return sum(randint(-3, 3)*x**i for i in range(maxrank + 1))
@@ -28,6 +28,12 @@ def randratm(x, size, maxrank=3):
     ])
 
 class Test(unittest.TestCase):
+    def test_import_matrix_from_file_1(t):
+        x, eps = SR.var("x eps")
+        m = import_matrix_from_file("test/data/henn_324.mtx")
+        t.assertEqual(set(m.variables()), set([x, eps]))
+        t.assertEqual(m, matrix([[eps/x, 0], [-1/x**2, eps/(x + 1)]]))
+
     def test_import_export_1(t):
         a, b = SR.var("v1 v2")
         M = matrix([[1, a, b], [a + b, 2, a/b]])

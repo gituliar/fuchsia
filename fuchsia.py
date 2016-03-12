@@ -9,8 +9,6 @@ import os.path as path
 from   random import Random
 
 from   sage.all import *
-from   sage.all import Expression, Rational
-from   sage.matrix.matrix import is_Matrix
 from   sage.misc.parser import Parser
 
 logging.basicConfig(
@@ -31,15 +29,8 @@ try:
 except IOError:
     __commit__ = "unknown"
 
-
-def partial_fraction(obj, *args):
-    if is_Matrix(obj):
-        obj = obj.apply_map(lambda ex: partial_fraction(ex, *args))
-    elif is_expression(obj):
-        for var in args:
-            obj = obj.partial_fraction(var) \
-                    if hasattr(obj, "partial_fraction") else obj
-    return obj
+def partial_fraction(M, var):
+    return M.apply_map(lambda ex: ex.partial_fraction(var))
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,
@@ -513,20 +504,6 @@ def fuchsify(M, x, seed=0):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
-def is_singularity_apparent(M0):
-    """Return True if a matrix residue M0 corresponds to an
-    apparent singularity, False otherwise.
-
-    The actual test checks if M0 is a diagonalizable matrix with
-    integer eigenvalues.
-    """
-    for eigenval, eigenvects, evmult in M0.eigenvectors_right():
-        if len(eigenvects) != evmult:
-            return False
-        if not eigenval.is_integer():
-            return False
-    return True
-
 def normalize(m, x, eps, seed=0):
     m = partial_fraction(m, x)
     T = identity_matrix(m.base_ring(), m.nrows())
@@ -812,6 +789,9 @@ def is_normalized(M, x, eps):
 # matrix.py
 
 def export_matrix(f, m):
+    """Write a matrix to a file-like object using MatrixMarket
+    array format.
+    """
     f.write("%%MatrixMarket matrix array Maple[symbolic] general\n")
     f.write("%d %d\n" % (m.nrows(), m.ncols()))
     for col in m.columns():
@@ -820,32 +800,30 @@ def export_matrix(f, m):
             f.write('\n')
 
 def export_matrix_to_file(filename, m):
+    """Write a matrix to a named file using MatrixMarket array format.
+    """
     with open(filename, 'w') as f:
         export_matrix(f, m)
 
-def import_matrix(f):
-    """Read a matrix, stored in the MatrixMarket array format, from the file.
+_parser = Parser(make_var=SR.var)
 
-    >>> with open('test/data/henn_324.mtx') as f:
-    ...     import_matrix(f)
-    [      eps/x           0]
-    [     -1/x^2 eps/(x + 1)]
+def import_matrix(f):
+    """Read and return a matrix, stored in the MatrixMarket
+    array format, from a file-like object.
     """
     while True:
         s = f.readline()
         if not s.startswith('%'):
             break
     nrows, ncols = map(int, s.split())
-
-    try:
-        data = [new_Expression(s) for s in f.readlines() if not s.startswith('%')]
-    except SyntaxError:
-        raise
-
+    data = [_parser.parse(s) for s in f.readlines() if not s.startswith('%')]
     m = matrix(ncols, nrows, data).T
     return m
 
 def import_matrix_from_file(filename):
+    """Read and return a matrix stored in MatrixMarket array
+    format from a named file.
+    """
     with open(filename, 'r') as f:
         return import_matrix(f)
 
@@ -857,25 +835,3 @@ def dot_product(v1, v2):
     m1, m2 = matrix(v1), matrix(v2)
     sp = m1 * m2.transpose()
     return sp[0,0]
-
-# expression.py
-
-def is_expression(obj):
-    return type(obj) is Expression
-
-def new_Expression(obj):
-    if type(obj) == str:
-        try:
-            ex = new_Expression_from_string(obj)
-        except SyntaxError:
-            log.error(obj)
-            raise
-    else:
-        raise NotImplementedError
-    return ex
-
-_parser = Parser(make_var=SR.var)
-
-def new_Expression_from_string(s):
-    ex = _parser.parse(s)
-    return ex
