@@ -1,3 +1,24 @@
+#!/usr/bin/env sage
+"""\033[35;1mFuchsia v%s\033[0m -- a tool for reducing differential equations for multiloop master integrals
+
+Authors:
+  Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
+  Vitaly Magerya
+
+\033[35;1mUsage:\033[0m
+  fuchsia (fuchsify | normalize | factorize) [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] [-m <file>] [-t <file>] <file>
+
+Options:
+  -x <var>           x variable name [default: x]
+  -e <var>           eps variable name [default: eps]
+  -m <file>          new matrix M after transformation
+  -t <file>          transformation matrix T
+  --log <level>      logger verbosity level [default: info]
+  --profile <file>   write profile statistics to <file_stats>
+
+Arguments:
+  <file>             matrix M
+"""
 """
     References:
         [1] Roman Lee, arXiv:1411.0911
@@ -9,12 +30,11 @@ import os.path as path
 from   random import Random
 
 from   sage.all import *
+from   sage.all import SR
 from   sage.misc.parser import Parser
 
 logging.basicConfig(
     format='\033[32m%(levelname)s [%(asctime)s]\033[0m\n%(message)s',
-#    format='\033[32m%(levelname)s [%(asctime)s]\033[0m %(pathname)s:%(funcName)s, line %(lineno)s %(message)s\n',
-#    format='%(levelname)s [%(asctime)s] %(message)s %(pathname)s:%(funcName)s, line %(lineno)s',
     datefmt='%Y-%m-%d %I:%M:%S',
 )
 logger = logging.getLogger('fuchsia')
@@ -835,3 +855,60 @@ def dot_product(v1, v2):
     m1, m2 = matrix(v1), matrix(v2)
     sp = m1 * m2.transpose()
     return sp[0,0]
+
+
+if __name__ == '__main__':
+    from   contextlib import contextmanager
+
+    from   docopt import docopt
+
+    @contextmanager
+    def profile(file_stats):
+        if file_stats is None:
+            yield
+            return
+
+        import cProfile, pstats
+        profile = cProfile.Profile()
+        profile.enable()
+        try:
+            yield
+        finally:
+            profile.disable()
+            with open(file_stats, 'w') as f:
+                stats = pstats.Stats(profile, stream=f).sort_stats("cumulative")
+                stats.print_stats(50)
+
+    def main(args):
+        print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
+        print """Authors:
+        Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
+        Vitaly Magerya
+        """
+        logger.setLevel({'debug': logging.DEBUG, 'info': logging.INFO}.get(args['--log']))
+
+        m = import_matrix_from_file(args['<file>'])
+        x = SR.var(args['-x'])
+        eps = SR.var(args['-e'])
+
+        with profile(args['--profile']):
+            if args['fuchsify']:
+                m, t1 = simplify_by_factorization(m, x)
+                m, t2 = fuchsify(m, x)
+                t = t1*t2
+            elif args['normalize']:
+                m, t = normalize(m, x, eps)
+            elif args['factorize']:
+                m, t = factor_epsilon(m, x, eps)
+
+        if args['-m']:
+            m = partial_fraction(m, x)
+            export_matrix_to_file(args['-m'], m)
+        if args['-t']:
+            t = partial_fraction(t, x)
+            export_matrix_to_file(args['-t'], t)
+
+    try:
+        main(docopt(__doc__ % (__version__)))
+    except Exception as error:
+       raise
