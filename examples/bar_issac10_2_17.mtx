@@ -1,0 +1,18 @@
+%%MatrixMarket matrix array Fuchsia[symbolic] general
+4 4
+-2/x
+x^2
+0
+x^2
+0
+1/x-x
+1/x^2
+1/x
+1/x^2
+x^2
+x
+0
+0
+-x^3
+0
+-1/x-x
