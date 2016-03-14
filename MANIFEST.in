@@ -1,0 +1,6 @@
+exclude .gitignore
+prune doc
+prune papers
+
+include COMMIT
+include doc/fuchsia.pdf

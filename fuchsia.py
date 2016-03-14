@@ -42,7 +42,7 @@ DEBUG = logger.getEffectiveLevel() <= logging.DEBUG
 INFO  = logger.getEffectiveLevel() <= logging.INFO
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
-__author_email__ = "oleksandr.gituliar@ifj.edu.pl"
+__author_email__ = "fuchsia@gituliar.org"
 __version__ = open(path.join(path.dirname(__file__),"VERSION")).readline().rstrip('\n')
 try:
     __commit__ = open(path.join(path.dirname(__file__),"COMMIT")).readline().rstrip('\n')
@@ -857,6 +857,12 @@ def dot_product(v1, v2):
     return sp[0,0]
 
 
+def entry_point():
+    try:
+        main(docopt(__doc__ % (__version__)))
+    except Exception as error:
+        raise
+
 if __name__ == '__main__':
     from   contextlib import contextmanager
 
@@ -908,7 +914,4 @@ if __name__ == '__main__':
             t = partial_fraction(t, x)
             export_matrix_to_file(args['-t'], t)
 
-    try:
-        main(docopt(__doc__ % (__version__)))
-    except Exception as error:
-       raise
+    entry_point()
