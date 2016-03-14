@@ -6,18 +6,17 @@ Authors:
   Vitaly Magerya
 
 \033[35;1mUsage:\033[0m
-  fuchsia (fuchsify | normalize | factorize) [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] [-m <file>] [-t <file>] <file>
+  fuchsia (fuchsify | normalize | factorize) [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] -a <file> [-t <file>] [-b <file>]
+  fuchsia transform [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] -a <file> -t <file> -b <file>
 
 Options:
   -x <var>           x variable name [default: x]
   -e <var>           eps variable name [default: eps]
-  -m <file>          new matrix M after transformation
+  -a <file>          initial matrix A, y' = A*y
+  -b <file>          equivalent matrix B, B = T(A) and y' = B*y
   -t <file>          transformation matrix T
   --log <level>      logger verbosity level [default: info]
   --profile <file>   write profile statistics to <file_stats>
-
-Arguments:
-  <file>             matrix M
 """
 """
     References:
@@ -893,23 +892,26 @@ if __name__ == '__main__':
         """
         logger.setLevel({'debug': logging.DEBUG, 'info': logging.INFO}.get(args['--log']))
 
-        m = import_matrix_from_file(args['<file>'])
         x = SR.var(args['-x'])
         eps = SR.var(args['-e'])
 
         with profile(args['--profile']):
+            a = import_matrix_from_file(args['-a'])
             if args['fuchsify']:
-                m, t1 = simplify_by_factorization(m, x)
-                m, t2 = fuchsify(m, x)
+                b, t1 = simplify_by_factorization(a, x)
+                b, t2 = fuchsify(b, x)
                 t = t1*t2
             elif args['normalize']:
-                m, t = normalize(m, x, eps)
+                b, t = normalize(a, x, eps)
             elif args['factorize']:
-                m, t = factor_epsilon(m, x, eps)
+                b, t = factor_epsilon(a, x, eps)
+            elif args['transform']:
+                t = import_matrix_from_file(args['-t'])
+                b = transform(a, x, t)
 
-        if args['-m']:
-            m = partial_fraction(m, x)
-            export_matrix_to_file(args['-m'], m)
+        if args['-b']:
+            b = partial_fraction(b, x)
+            export_matrix_to_file(args['-b'], b)
         if args['-t']:
             t = partial_fraction(t, x)
             export_matrix_to_file(args['-t'], t)
