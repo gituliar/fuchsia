@@ -1,8 +1,9 @@
 import unittest
 
 from   sage.all import SR
-from   fuchsia import (is_normalized, matrix, matrix_c0, normalize,
-        singularities, transform, import_matrix_from_file, fuchsify)
+from   fuchsia import (is_normalized, matrix, matrix_c0,
+        normalize, singularities, transform, import_matrix_from_file,
+        fuchsify, FuchsiaError)
 
 class Test(unittest.TestCase):
 
@@ -75,7 +76,7 @@ class Test(unittest.TestCase):
             [0, 0]
         ])
 
-        with t.assertRaises(ValueError):
+        with t.assertRaises(FuchsiaError):
             N, T = normalize(M, x, e)
 
     def test_normalize_5(t):
@@ -86,7 +87,7 @@ class Test(unittest.TestCase):
         f_pranks = singularities(f, x).values()
         t.assertEqual(f_pranks, [0]*len(f_pranks))
 
-        with t.assertRaises(ValueError):
+        with t.assertRaises(FuchsiaError):
             n, nt = normalize(f, x, e)
 
 if __name__ == "__main__":

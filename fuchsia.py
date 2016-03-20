@@ -48,6 +48,9 @@ try:
 except IOError:
     __commit__ = "unknown"
 
+class FuchsiaError(Exception):
+    pass
+
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
 
@@ -313,7 +316,7 @@ def solve_right_fixed(A, B):
         #   'matrix()' in Sage
         C = C.simplify_rational()
     if not (A*C - B).simplify_rational().is_zero():
-        raise ValueError, "matrix equation has no solutions"
+        raise ValueError("matrix equation has no solutions")
     return C
 
 def solve_left_fixed(A, B):
@@ -369,7 +372,7 @@ def alg1(L0, jordan_cellsizes):
 
 def alg1x(A0, A1, x):
     if not matrix_is_nilpotent(A0):
-        raise ValueError("matrix is irreducible (non-nilpotent residue)")
+        raise FuchsiaError("matrix is irreducible (non-nilpotent residue)")
     # We will rely on undocumented behavior of jordan_form() call:
     # we will take it upon faith that it sorts Jordan cells by
     # their size, and puts the largest ones closer to (0, 0).
@@ -400,7 +403,7 @@ def alg1x(A0, A1, x):
     #assert (L0 - _L0).is_zero()
     lam = SR.symbol()
     if not (L0 - lam*L1).determinant().is_zero():
-        raise ValueError("matrix is Moser-irreducible")
+        raise FuchsiaError("matrix is Moser-irreducible")
     S, D = alg1(L0, A0J_cs)
     I_E = identity_matrix(D.base_ring(), A0.nrows())
     for i in xrange(ncells):
@@ -466,7 +469,8 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
 def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
-    form. Return the transformed M and T.
+    form. Return the transformed M and T. Raise FuchsiaError if
+    M can not be transformed into Fuchsian form.
 
     Note that such transformations are not unique; you can obtain
     different ones by supplying different seeds.
@@ -501,7 +505,13 @@ def fuchsify(M, x, seed=0):
             A0 = matrix_c0(M, x, point, prank)
             if A0.is_zero(): break
             A1 = matrix_c1(M, x, point, prank)
-            U, V = alg1x(A0, A1, x)
+            try:
+                U, V = alg1x(A0, A1, x)
+            except FuchsiaError as e:
+                logger.debug("managed to fuchsify matrix to this state:\n" +
+                        "%s\nfurther reduction is pointless, because:\n%s",
+                        M, e)
+                raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
                 point2, P, M = min(iter_reductions(point, U), \
                         key=lambda (point2, P, M2): matrix_complexity(M2))
@@ -524,6 +534,12 @@ def fuchsify(M, x, seed=0):
     return M, combinedT
 
 def normalize(m, x, eps, seed=0):
+    """Given a Fuchsian system of differential equations of the
+    form dF/dx=m*F, find a transformation that will shift all
+    the eigenvalues of m into [-1/2, 1/2) range (in the limit
+    eps->0). Return the transformed matrix m and the transformation.
+    Raise FuchsiaError if such transformation is not found.
+    """
     m = partial_fraction(m, x)
     T = identity_matrix(m.base_ring(), m.nrows())
     select_balance_state = {"random": Random(seed)}
@@ -542,8 +558,7 @@ def normalize(m, x, eps, seed=0):
         balances = find_balances(m, x, eps)
         b = select_balance(balances, eps, select_balance_state)
         if b is None:
-            logger.info("Can not balance matrix")
-            raise ValueError
+            raise FuchsiaError("can not balance matrix")
         logger.info("Use balance:\n    %s" % b)
 
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
@@ -659,7 +674,8 @@ def factor_epsilon(M, x, epsilon, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
     try to find a transformation that will factor out an epsilon
-    from M. Return a transformed M (proportional to epsilon) and T.
+    from M. Return a transformed M (proportional to epsilon)
+    and T. Raise FuchsiaError if epsilon can not be factored.
     """
     n = M.nrows()
     rng = Random(seed)
@@ -694,7 +710,7 @@ def factor_epsilon(M, x, epsilon, seed=0):
         # which accumulate in SR.variables, but do I care?
         return M, sT
         # No, I don't.
-    raise ValueError("can not factor epsilon")
+    raise FuchsiaError("can not factor epsilon")
 
 def matrix_complexity(M):
     return len(str(M.list()))
@@ -859,8 +875,9 @@ def dot_product(v1, v2):
 def entry_point():
     try:
         main(docopt(__doc__ % (__version__)))
-    except Exception as error:
-        raise
+    except FuchsiaError as error:
+        logger.error(error)
+        exit(1)
 
 if __name__ == '__main__':
     from   contextlib import contextmanager
