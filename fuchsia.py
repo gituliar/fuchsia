@@ -508,8 +508,8 @@ def fuchsify(M, x, seed=0):
             try:
                 U, V = alg1x(A0, A1, x)
             except FuchsiaError as e:
-                logger.debug("managed to fuchsify matrix to this state:\n" +
-                        "%s\nfurther reduction is pointless, because:\n%s",
+                logger.debug("Managed to fuchsify matrix to this state:\n"
+                        "%s\nfurther reduction is pointless:\n%s",
                         M, e)
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
@@ -536,9 +536,10 @@ def fuchsify(M, x, seed=0):
 def normalize(m, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
     form dF/dx=m*F, find a transformation that will shift all
-    the eigenvalues of m into [-1/2, 1/2) range (in the limit
-    eps->0). Return the transformed matrix m and the transformation.
-    Raise FuchsiaError if such transformation is not found.
+    the eigenvalues of m's residues into [-1/2, 1/2) range (in
+    the limit eps->0). Return the transformed matrix m and the
+    transformation. Raise FuchsiaError if such transformation
+    is not found.
     """
     m = partial_fraction(m, x)
     T = identity_matrix(m.base_ring(), m.nrows())
@@ -876,7 +877,7 @@ def entry_point():
     try:
         main(docopt(__doc__ % (__version__)))
     except FuchsiaError as error:
-        logger.error(error)
+        logger.error("%s", error)
         exit(1)
 
 if __name__ == '__main__':
