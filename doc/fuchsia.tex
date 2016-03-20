@@ -1,16 +1,15 @@
 \documentclass[12pt,twoside,a4paper]{article}
 
 \usepackage{amssymb,amsmath,hyperref}
-\usepackage{authblk}
+\usepackage[affil-it]{authblk}
 
 \input include/layout.tex
-
 \input include/title.tex
-
 
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 
 \begin{abstract}
 \ldots
@@ -18,8 +17,10 @@
 
 \newpage
 \input include/summary.tex
+
 \newpage
 \tableofcontents
+
 \newpage
 
 \section{Introduction}
