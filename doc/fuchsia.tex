@@ -1,7 +1,12 @@
 \documentclass[12pt,twoside,a4paper]{article}
 
-\usepackage{amssymb,amsmath,hyperref}
+\usepackage{amssymb,amsmath,color,hyperref}
 \usepackage[affil-it]{authblk}
+
+\bibliographystyle{alpha}
+
+\definecolor{fuchsia}{RGB}{140,0,130}
+\def\fuchsia{\textcolor{fuchsia}{\texttt{fuchsia}}}
 
 \input include/layout.tex
 \input include/title.tex
@@ -21,12 +26,12 @@
 \newpage
 \tableofcontents
 
-\newpage
-
 \section{Introduction}
 
 \section{Summary}
 
 \section*{Acknowledgment}
+
+\bibliography{bibliography}
 
 \end{document}

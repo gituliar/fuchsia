@@ -2,4 +2,4 @@
 
 all:
 	latexmk -dvi- -pdf fuchsia.tex
-	latexmk -c fuchsia.tex
+	latexmk -bibtex -c fuchsia.tex
