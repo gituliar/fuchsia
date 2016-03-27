@@ -1,12 +1,17 @@
 \documentclass[12pt,twoside,a4paper]{article}
 
-\usepackage{amssymb,amsmath,color,hyperref}
+\usepackage{amssymb,amsmath,color,enumitem,hyperref}
 \usepackage[affil-it]{authblk}
 
 \bibliographystyle{alpha}
+\setcounter{tocdepth}{2}
+\setlist[description]{style=nextline}
 
 \definecolor{fuchsia}{RGB}{140,0,130}
 \def\fuchsia{\textcolor{fuchsia}{\texttt{fuchsia}}}
+\def\F#1{\mathbf{#1}} % use this to style function names
+\def\M#1{\mathbb{#1}} % use this to style matrix names
+\def\functionitem#1#2{\item[$\F{#1}(#2)$]}
 
 \input include/layout.tex
 \input include/title.tex
@@ -19,14 +24,121 @@
 \begin{abstract}
 \ldots
 \end{abstract}
-
 \newpage
+
 \input include/summary.tex
-
 \newpage
+
 \tableofcontents
 
 \section{Introduction}
+
+\section{Usage from SageMath}
+
+\begin{description}
+
+\functionitem{fuchsify}{\M M, x, seed=0}
+Reduce a system defined by matrix $\M M$ and independent variable
+$x$ to Fuchsian form. That is, make sure that the Poincare rank
+of all singularities of the transformed matrix $\M M'$ are
+$0$. Return a pair of values: the transformed matrix $\M M'$
+and the transformation $\M T$. If the system is irreducible,
+raise $FuchsiaError$.
+
+\functionitem{normalize}{\M M, x, epsilon, seed=0}
+Transform a Fuchsian system defined by matrix $\M M$, independent
+variable $x$ and infinitesimal parameter $epsilon$ to a normalized
+form. That is, make sure that eigenvalues of all matrix residues
+of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$
+in the limit $epsilon\to0$. Return a pair of values: the
+transformed matrix $\M M'$ and the transformation $\M T$. If
+such transformation can not be found, raise $FuchsiaError$.
+
+\functionitem{factor\_epsilon}{\M M, x, epsilon, seed=0}
+Transform a normalized system defined by matrix $\M M$, independent
+variable $x$ and infinitesimal parameter $epsilon$ so that the
+transformed matrix $\M M'$ is proportional to $epsilon$. Return a
+pair of values: the transformed matrix $\M M'$ and the transformation
+$\M T$. If such transformation can not be found, raise $FuchsiaError$.
+
+\functionitem{simplify\_by\_jordanification}{\M M, x}
+Try to simplify a system defined by matrix $\M M$ and independent
+variable $x$ by constant transformations that transform leading
+expansion coefficients of $\M M$ into their Jordan forms. Return a
+pair of values: the simplified matrix $\M M'$ and the transformation
+$\M T$. If none of the attempted transformations reduce the
+complexity of $\M M$ (as measured by $\F{matrix\_complexity}$),
+return the original matrix and the identity transformation.
+
+\functionitem{simplify\_by\_factorization}{\M M, x}
+Try to simplify a system defined by matrix $\M M$ and independent
+variable $x$ by a constant transformation that extracts common
+factors found in $\M M$ (if any). Return a pair of values:
+the simplified matrix $\M M'$ and the transformation $\M T$.
+
+\functionitem{matrix\_complexity}{\M M}
+This function is used as a measure of matrix complexity by
+$\F{fuchsify}$ and simplification function. Currently it is
+defined as the length of textual representation of matrix $\M M$.
+
+\functionitem{balance}{\M P, x_1, x_2, x}
+Return a \textit{balance} transformation between points $x=x_1$
+and $x=x_2$ using projector matrix $\M P$.
+
+\functionitem{transform}{\M M, x, \M T}
+Transform a system defined by matrix $\M M$ and independent
+variable $x$ using transformation matrix $\M T$. Return the
+transformed matrix $\M M'$.
+
+\functionitem{balance\_transform}{\M M, \M P, x_1, x_2, x}
+Same as $\F{transform}(\M M, x, \F{balance}(\M P, x_1, x_2, x))$,
+but implemented more efficiently: since the inverse of
+$\F{balance}(\M P, x_1, x_2, x)$ is $\F{balance}(\M P, x_2, x_1, x)$,
+this function can avoid a time-consuming matrix inversion
+operation that $\F{transform}$ must perform.
+
+\functionitem{singularities}{\M M, x}
+Find values of $x$ around which matrix $\M M$ has a singularity in
+$x$. Return a dictionary with $\{x_i: p_i\}$ entries, where $p_i$
+is the Poincare rank of $\M M$ at $x=x_i$. The set of singular points
+can include $+Infinity$, if $\M M$ has a singularity at $x\to\infty$.
+
+\functionitem{matrix\_c0}{\M M, x, x_0, p}
+Return the 0-th coefficient of the series expansion of matrix
+$\M M$ around $x=x_0$, assuming Poincare rank of $\M M$ at that
+point is $p$. If $x_0$ is $+Infinity$, return the coefficient
+at the highest power of $x$.
+
+\functionitem{matrix\_c1}{\M M, x, x_0, p}
+Return the 1-th coefficient of the series expansion of matrix
+$\M M$ around $x=x_0$, assuming Poincare rank of $\M M$ at that
+point is $p$. If $x_0$ is $+Infinity$, return the coefficient
+at the second-to-highest power of $x$.
+
+\functionitem{matrix\_residue}{\M M, x, x_0}
+Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that
+Poincare rank of $\M M$ at $x=x_0$ is $0$. Return matrix residue
+at infinity if $x=+Infinity$.
+
+\functionitem{export\_matrix}{file, \M M}
+Write matrix $\M M$ to a file-like object $file$ using MatrixMarket
+array format. For description of this format see \cite{MMarket}.
+
+\functionitem{export\_matrix\_to\_file}{filename, \M M}
+Write matrix $\M M$ to a file $filename$ using MatrixMarket
+array format.
+
+\functionitem{import\_matrix}{file}
+Read a symbolic matrix from a file-like object $file$, assuming
+it is formatted using MatrixMarket array format.
+
+\functionitem{import\_matrix\_from\_file}{filename}
+Read a symbolic matrix from a file $filename$, assuming it is
+formatted using MatrixMarket array format.
+
+\end{description}
+
+\section{Usage from the command line}
 
 \section{Summary}
 
