@@ -1,26 +1,36 @@
 #!/usr/bin/env sage
-"""\033[35;1mFuchsia v%s\033[0m -- a tool for reducing differential equations for multiloop master integrals
+"""\
+Usage:
+    fuchsia [-hv] [-P <path>] <command> <args>...
 
-Authors:
-  Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
-  Vitaly Magerya
+Commands:
+    fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
+        find a transformation that will transform a given matrix
+        into Fuchsian form
 
-\033[35;1mUsage:\033[0m
-  fuchsia (fuchsify | normalize | factorize) [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] -a <file> [-t <file>] [-b <file>]
-  fuchsia transform [-x <var>] [-e <var>] [--profile <file>] [--log debug | info] -a <file> -t <file> -b <file>
+    normalize [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
+        find a transformation that will transform a given Fuchsian
+        matrix into normalized form
+
+    factorize [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
+        find a transformation that will make a given normalized
+        matrix proportional to the infinitesimal parameter
+
+    transform [-x <name>] [-m <path>] <matrix> <transform>
+        transform a given matrix using a given transformation
 
 Options:
-  -x <var>           x variable name [default: x]
-  -e <var>           eps variable name [default: eps]
-  -a <file>          initial matrix A, y' = A*y
-  -b <file>          equivalent matrix B, B = T(A) and y' = B*y
-  -t <file>          transformation matrix T
-  --log <level>      logger verbosity level [default: info]
-  --profile <file>   write profile statistics to <file_stats>
-"""
-"""
-    References:
-        [1] Roman Lee, arXiv:1411.0911
+    -h          show this help message
+    -v          be verbose and print additional information
+    -P <path>   save profile report into this file
+    -x <name>   use this name for the independent variable (default: x)
+    -e <name>   use this name for the infinitesimal parameter (default: eps)
+    -m <path>   save the resulting matrix into this file
+    -t <path>   save the resulting transformation into this file
+
+Arguments:
+    <matrix>    read the input matrix from this file
+    <transform> read the transformation matrix from this file
 """
 from   collections import defaultdict
 from   itertools import permutations
@@ -37,8 +47,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %I:%M:%S',
 )
 logger = logging.getLogger('fuchsia')
-DEBUG = logger.getEffectiveLevel() <= logging.DEBUG
-INFO  = logger.getEffectiveLevel() <= logging.INFO
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "fuchsia@gituliar.org"
@@ -545,7 +553,7 @@ def normalize(m, x, eps, seed=0):
     T = identity_matrix(m.base_ring(), m.nrows())
     select_balance_state = {"random": Random(seed)}
     while not is_normalized(m, x, eps):
-        if INFO:
+        if logger.isEnabledFor(logging.INFO):
             points = singularities(m, x).keys()
             msg = "Eigenvalues:\n"
             for x0 in points:
@@ -575,7 +583,7 @@ def normalize(m, x, eps, seed=0):
 
         m = transform(m, x, T0)
         m = partial_fraction(m, x)
-        if INFO:
+        if logger.isEnabledFor(logging.INFO):
             logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
         T = partial_fraction(T*T0, x)
 
@@ -594,7 +602,7 @@ def find_balances(m, x, eps):
         a0_evr, b0_evr = right_evectors[i1], right_evectors[i2]
         a0_evl, b0_evl = left_evectors[i1], left_evectors[i2]
         logger.debug("Looking for the balance\n    x1 = %s\n    x2 = %s" % (x1, x2))
-        if DEBUG:
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Res(m, x = %s)\n%s" % (x1, a0))
             print("\nRes(m, x = %s)\n%s" % (x2, b0))
             logger.debug("Eigenvalues:")
@@ -615,7 +623,7 @@ def find_balances(m, x, eps):
         balances_2 = [[2, x1, x2] + balance for balance in balances_2]
         balances += balances_2
 
-    if INFO:
+    if logger.isEnabledFor(logging.INFO):
         logger.info("Found balances (#cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):")
         for balance in balances:
             print "    %s" % (balance,)
@@ -872,18 +880,9 @@ def dot_product(v1, v2):
     sp = m1 * m2.transpose()
     return sp[0,0]
 
-
-def entry_point():
-    try:
-        main(docopt(__doc__ % (__version__)))
-    except FuchsiaError as error:
-        logger.error("%s", error)
-        exit(1)
-
-if __name__ == '__main__':
+def main():
+    import getopt
     from   contextlib import contextmanager
-
-    from   docopt import docopt
 
     @contextmanager
     def profile(file_stats):
@@ -902,36 +901,59 @@ if __name__ == '__main__':
                 stats = pstats.Stats(profile, stream=f).sort_stats("cumulative")
                 stats.print_stats(50)
 
-    def main(args):
+    def usage():
+        print __doc__
+        exit(0)
+
+    try:
         print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
         print """Authors:
         Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
         Vitaly Magerya
         """
-        logger.setLevel({'debug': logging.DEBUG, 'info': logging.INFO}.get(args['--log']))
+        mpath = tpath = profpath = None
+        M = T = None
+        x = SR.var("x")
+        epsilon = SR.var("eps")
+        logger.setLevel(logging.INFO)
+        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvP:x:e:m:t:")
+        for key, value in kwargs:
+            if key == "-h": usage()
+            if key == "-v": logger.setLevel(logging.DEBUG)
+            if key == "-P": profpath = value
+            if key == "-x": x = SR.var(value)
+            if key == "-e": epsilon = SR.var(value)
+            if key == "-m": mpath = value
+            if key == "-t": tpath = value
+        with profile(profpath):
+            if len(args) == 2 and args[0] == 'fuchsify':
+                M = import_matrix_from_file(args[1])
+                M, t1 = simplify_by_factorization(M, x)
+                M, t2 = fuchsify(M, x)
+                T = t1*t2
+            elif len(args) == 2 and args[0] == 'normalize':
+                M = import_matrix_from_file(args[1])
+                M, T = normalize(M, x, eps)
+            elif len(args) == 2 and args[0] == 'factorize':
+                M = import_matrix_from_file(args[1])
+                M, T = factor_epsilon(M, x, eps)
+            elif len(args) == 3 and args[0] == 'transform':
+                M = import_matrix_from_file(args[1])
+                t = import_matrix_from_file(args[2])
+                M = transform(M, x, t)
+            elif len(args) == 0:
+                usage()
+            else:
+                raise getopt.GetoptError("unknown command: %s" % (args))
+        if mpath is not None and M is not None:
+            M = partial_fraction(M, x)
+            export_matrix_to_file(mpath, M)
+        if tpath is not None and T is not None:
+            T = partial_fraction(T, x)
+            export_matrix_to_file(tpath, T)
+    except (FuchsiaError, getopt.GetoptError) as error:
+        logger.error("%s", error)
+        exit(1)
 
-        x = SR.var(args['-x'])
-        eps = SR.var(args['-e'])
-
-        with profile(args['--profile']):
-            a = import_matrix_from_file(args['-a'])
-            if args['fuchsify']:
-                b, t1 = simplify_by_factorization(a, x)
-                b, t2 = fuchsify(b, x)
-                t = t1*t2
-            elif args['normalize']:
-                b, t = normalize(a, x, eps)
-            elif args['factorize']:
-                b, t = factor_epsilon(a, x, eps)
-            elif args['transform']:
-                t = import_matrix_from_file(args['-t'])
-                b = transform(a, x, t)
-
-        if args['-b']:
-            b = partial_fraction(b, x)
-            export_matrix_to_file(args['-b'], b)
-        if args['-t']:
-            t = partial_fraction(t, x)
-            export_matrix_to_file(args['-t'], t)
-
-    entry_point()
+if __name__ == '__main__':
+    main()
