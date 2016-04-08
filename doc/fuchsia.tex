@@ -1,17 +1,20 @@
-\documentclass[12pt,twoside,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 
-\usepackage{amssymb,amsmath,color,enumitem,hyperref}
+\usepackage{amssymb,amsmath,color,enumitem,hyperref,xspace}
 \usepackage[affil-it]{authblk}
 
-\bibliographystyle{alpha}
+\bibliographystyle{halpha}
+%\bibliographystyle{JHEP}
+
 \setcounter{tocdepth}{2}
 \setlist[description]{style=nextline}
 
 \definecolor{fuchsia}{RGB}{140,0,130}
-\def\fuchsia{\textcolor{fuchsia}{\texttt{fuchsia}}}
 \def\F#1{\mathbf{#1}} % use this to style function names
 \def\M#1{\mathbb{#1}} % use this to style matrix names
 \def\functionitem#1#2{\item[$\F{#1}(#2)$]}
+
+\input include/commands.tex
 
 \input include/layout.tex
 \input include/title.tex
@@ -22,7 +25,13 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-\ldots
+We present a program \fuchsia based on the Lee algorithm \cite{Lee15} which, given a system of first-order linear differential equations with rational function coefficients, constructs an equivalent system in the canonical form and corresponding transformation.
+After such a reduction is successfully done the system can be trivially solved, which makes a reduction step crucial to obtain the solution.
+
+In principle, \fuchsia can deal with any regular systems, however it's primary task is to reduce differential equations for master integrals which arise from Feynman diagrams.
+It ensures that solutions contain regular singularities only due to the analyticity of S-matrix.
+
+We discuss limitations and possible extensions of the proposed implementation.
 \end{abstract}
 \newpage
 
@@ -33,7 +42,145 @@
 
 \section{Introduction}
 
-\section{Usage from SageMath}
+{\it Feynman integrals calculus: importance, methods to calculate (Smirnov's book \cite{Smi06}), differential equations method (progress \cite{Henn14}) .}
+
+It has passed more than 50 years (?) since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
+Since then Feynman integrals calculus has grown to a separate branch of the mathematical physics with a big community of scientists making research in this exciting field.
+With no doubt we can say that none of the recent discoveries in the high-energy particle physics could happen without precise theoretical calculations, which are based in their core on the Feynman integrals calculation techniques. 
+It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and improvement is a very important task.
+
+Recent progress in the computer industry made possible to automate calculation of Feynman integrals; problems which seemed impossible 10 years ago now are successfully solved with state-of-the-art computer algorithms and techniques.
+Among the most popular of them is Feynman parameters~\cite{}, sector decomposition~\cite{}, Mellin-Barns~\cite{}, integration-by-parts~\cite{}, differential equations~\cite{}, and others; for a detailed review of these method see~\cite{Smi06}.
+
+{\it Analyticity of S-matrix and Fuchsian systems of DE. Reduction to Fuchsian form as an independent problem (Moser~\cite{Mos59},Barkatou~\cite{BP09}, \texttt{super\_reduce} in Maple), but mistreating $\infty$.}
+
+{\it Integration-by-parts reduction, canonical form (Henn) \cite{Henn13}, Lee algorithm.}
+
+The paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the three key algorithms of \cite{Lee15} and implemented in \fuchsia.
+In Section \ref{sec:3} we describe how to install and use \fuchsia from different environments, depending on your goal and programming experience.
+In Section \ref{sec:4} we discuss limitations and possible extensions of the implemented method.
+
+
+\section{Overview of the method}
+\label{sec:2}
+
+In this section, after a few preliminaries we briefly discuss R.Lee's method for reducing a system of ODEs to canonical form.
+
+
+\subsection{Notation and definitions}
+
+Let us consider a system of (ODEs)
+\begin{equation}
+\label{eq:df}
+  \frac{\D \bar{f}}{\D x} = \M A(x,\eps)\,\bar{f},
+\end{equation}
+where $\bar{f}(x,\eps)$ is a vector of $n$ unknown functions (e.g., master integrals).
+Elements of the $n \times n$ matrix  $\M A(x,\eps)$ are assumed to be rational functions in $x$ of the form
+\begin{equation}
+\label{eq:axeps}
+  A(x,\eps) = \sum_k \frac{1}{(x-x_k)^{1+p_k}} \sum_{i=0}^\infty A_{ik}(\eps) (x-x_k)^i
+\end{equation}
+with {\em singular points} at $x = x_k$, where $k$ runs over a final set and $x_k$ is a complex number or $\infty$.
+{(\em put comment on $\infty$)}
+
+\paragraph{Equivalent systems.}
+We can apply a {\em transformation} $\M T$ to the system \eqref{eq:df} by changing a basis $\bar{f}$ to
+\begin{equation}
+\label{eq:gtf}
+  \bar{g} = \M T(x,\eps)\, \bar{f}.
+\end{equation}
+That leads to the {\em equivalent system} of ODEs
+\begin{equation}
+  \frac{\D \bar{g}}{\D x} = \M B(x,\eps)\,\bar{g},
+\end{equation}
+where
+\begin{equation}
+\label{eq:bta}
+  \M B = \M T^{-1} \left( \M A \M T - \frac{\D \M T}{\D x} \right).
+\end{equation}
+We require that the transformation \eqref{eq:gtf} is also in the rational form, e.g.,  as $\M A$ in \eqref{eq:axeps}, which guarantees that the equivalent matrix $\M B$ is of the rational form too.
+
+\paragraph{Classification of singularities.}
+For any system \eqref{eq:df} we can define a rational number
+\begin{equation}
+  m_k(\M A) = p_k + \frac{r_k}{n} \ge 0
+\end{equation}
+as the {\em order} or {\em Poincar\'e rank} of $\M A$ at $x=x_k$, where $r_k = r(A_{0k})$ is the algebraic rank of $A_{0k}(\eps)$, $0 \le r_k \le n$.
+If $p_k + r_k/n < 0$ we set $m_k(\M A) = 0$.
+
+Under the transformation \eqref{eq:gtf} the order $m_k(\M A)$ may change, i.e., $m_k(\M A) \ne m_k(\M B)$.
+Therefore, we introduce the {\em minimum order} or {\em generalized Poincar\'e rank} of the matrix $\M A$ as
+\begin{equation}
+\label{eq:muk}
+  \mu_k(\M A) = \min m_k(\M B), \text{ for } \forall \; \M T.
+\end{equation}
+If we can decrease a Poincar\'e rank of the matrix at the point $x=x_k$, or in other words if $m_k(\M A) > \mu_k(\M A)$, we say that the matrix is {\em reducible} at this point.
+
+Considering this definition we say that the point $x=x_k$ (the change of variable $x \to 1/x$ allows to classify the point $x=\infty$ in the same way) of $\M A$ is
+\begin{itemize}
+  \item a {\em regular point}, for $\mu_k(\M A) = 0$ and $m_k(\M A) = 0$;
+  \item an {\em apparent singularity} for $\mu_k(\M A) = 0$ and $m_k(\M A) > 0$;
+  \item a {\em regular singularity}, for $0 < \mu_k(\M A) \le 1$;
+  \item an {\em irregular singularity}, for $\mu_k(\M A) > 1$.
+\end{itemize}
+We also say that matrix $\M A$ has a {\em Fuchsian form} when it does not contain irregular singularities at any point $x=x_k$, where $x_k$ is a complex number or $\infty$.
+
+
+\subsection{Reduction to canonical form}
+
+The goal of the method \cite{Lee15}, briefly described below, is to find a rational matrix $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ in the {\em canonical form}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M M(x)$.
+(Here and everywhere else in the text we assume that $\eps \to 0$, e.g., is a dimensional regularization parameter).
+Once such a form is found the initial system $\M A$ can be easily solved as a Laurent series in $\eps$ parameter, which is of course the ultimate goal.
+
+The whole method can be divided into three steps~\cite{Lee15}:
+\begin{enumerate}
+  \item Given a matrix $\M A(x,\eps)$, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps)$, given by eq.~\eqref{eq:bta}, has a Fuchsian form.
+  \item Given a matrix $\M A(x,\eps)$ in the Fuchsian form, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps)$ is normalized, i.e., the eigenvalues of all its residues have the form $n \eps$, where $n$ is integer.
+  \item Given a normalized matrix $\M A(x,\eps)$ in the Fuchsian form, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps) = \eps \, \M B(x)$.
+\end{enumerate}
+
+{\it Notation and definitions \cite{Mos59}: Poincare rank, equivalent and reducible systems, transformation, Fuchsian form (regular, irregular, and apparent singularities), balance.}
+
+
+\paragraph{The {\em fuchsify} algorithm.}
+
+At first let us make a small remark.
+The problem with eq.~\eqref{eq:muk} is that a criterion to directly calculate $\mu_k(A)$ does not exist.
+For that reason we can not say whether the point $x=x_k$ is regular or irregular singularity or whether matrix can be reduced to the Fuchsian form.
+(However, for the $n$-th order ODE such a criterion exists, which is a generalization of Fuchs' theorem, see~\cite{Mos59}.)
+
+Let us mention, that in regular singular points solutions of \eqref{eq:df} grow at most like a finite power of $\abs{x}$, for that reason we 
+
+{\it Describe key algorithms \cite{Lee15}: fuchsify, normalize, factorize.}
+
+\paragraph{The {\em normalize} algorithm.}
+
+\paragraph{The {\em factorize} algorithm.}
+
+
+\section{Using \fuchsia}
+\label{sec:3}
+
+\subsection{Installation}
+
+\subsection{Usage from the command line}
+
+An easy way to use \fuchsia is to run \code{fuchsia.py} shell script, which has the following invocation signature:
+
+\code{\$ fuchsia.py <action> <options>}
+
+where
+\begin{itemize}
+  \item \code{<action>} is one of the algorithms described in the previous section, i.e., \code{fuchsify}, \code{normalize}, \code{factorize}, or auxiliary action \code{transform}, which applies a user-defined transformation to the given matrix.
+  \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia.py --help} command.
+\end{itemize}
+
+In the following we provide a complete help information printed by \code{fuchsia.py --help}:
+
+\ldots
+
+
+\subsection{Usage from \sage}
 
 \begin{description}
 
@@ -122,7 +269,7 @@ at infinity if $x=+Infinity$.
 
 \functionitem{export\_matrix}{file, \M M}
 Write matrix $\M M$ to a file-like object $file$ using MatrixMarket
-array format. For description of this format see \cite{MMarket}.
+array format. For description of this format see \cite{BPR96}.
 
 \functionitem{export\_matrix\_to\_file}{filename, \M M}
 Write matrix $\M M$ to a file $filename$ using MatrixMarket
@@ -138,12 +285,13 @@ formatted using MatrixMarket array format.
 
 \end{description}
 
-\section{Usage from the command line}
-
 \section{Summary}
+\label{sec:4}
+
+{\it Prospects: non-rational transformations (e.g. sunrise graphs). }
 
 \section*{Acknowledgment}
 
-\bibliography{bibliography}
+\bibliography{fuchsia}
 
 \end{document}
