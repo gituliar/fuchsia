@@ -32,7 +32,7 @@ def randratm(x, size, maxrank=3):
 class Test(unittest.TestCase):
     def test_import_matrix_from_file_1(t):
         x, eps = SR.var("x eps")
-        m = import_matrix_from_file("test/data/henn_324.mtx")
+        m = import_matrix_from_file("examples/henn_324.mtx")
         t.assertEqual(set(m.variables()), set([x, eps]))
         t.assertEqual(m, matrix([[eps/x, 0], [-1/x**2, eps/(x + 1)]]))
 

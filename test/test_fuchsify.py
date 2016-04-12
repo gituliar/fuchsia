@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
 
     def test_henn_324(t):
         t.assertFuchsifyWorks(os.path.join(os.path.dirname(__file__),
-            "data", "henn_324.mtx"))
+            "..", "examples", "henn_324.mtx"))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

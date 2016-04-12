@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
     def test_normalize_5(t):
         # An unnormalizable example by A. A. Bolibrukh
         x, e = SR.var("x eps")
-        b = import_matrix_from_file("test/data/bolibrukh.mtx")
+        b = import_matrix_from_file("examples/bolibrukh.mtx")
         f, ft = fuchsify(b, x)
         f_pranks = singularities(f, x).values()
         t.assertEqual(f_pranks, [0]*len(f_pranks))
