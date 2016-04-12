@@ -6,6 +6,14 @@ TESTS := ${wildcard test/test_*.py}
 dist:
 	sage -python setup.py sdist
 
+register:
+	sage -python setup.py register
+
+upload-pypi:
+	sage -python setup.py sdist upload
+upload-http:
+	@echo "Not implemented"
+
 clean:
 	@rm -fr build dist fuchsia.egg-info
 

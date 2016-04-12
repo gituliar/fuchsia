@@ -8,7 +8,8 @@ with open('README.md') as f:
 setup(
     author = __author__,
     author_email = __author_email__,
-    description = "A tool for reducing differential equations for multiloop master integrals",
+    description = "A tool for reducing differential equations for Feynman master integrals",
+    download_url = "http://gituliar.org/fuchsia/fuchsia-"+__version__+".tar.gz",
     entry_points = {'console_scripts': ['fuchsia = fuchsia:main']},
     install_requires = ['sage>=7.0'],
     license = "ISC License",

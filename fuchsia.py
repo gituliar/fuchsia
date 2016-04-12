@@ -907,10 +907,7 @@ def main():
 
     try:
         print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
-        print """Authors:
-        Oleksandr Gituliar, The PAS Institute of Nuclear Physics, Cracow (Poland)
-        Vitaly Magerya
-        """
+        print "Authors: %s\n" % __author__
         mpath = tpath = profpath = None
         M = T = None
         x = SR.var("x")
