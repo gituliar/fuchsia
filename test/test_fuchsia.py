@@ -7,7 +7,7 @@ from   sage.all import SR
 import fuchsia
 from   fuchsia import (balance, balance_transform, identity_matrix,
             import_matrix, import_matrix_from_file, export_matrix,
-            factor_epsilon, fuchsify, limit_fixed, matrix,
+            factorize, fuchsify, limit_fixed, matrix,
             matrix_complexity, oo, Rational, reduce_at_one_point,
             simplify_by_jordanification, singularities, transform)
 
@@ -192,12 +192,12 @@ class Test(unittest.TestCase):
         pranks = singularities(MM, x).values()
         t.assertEqual(pranks, [0]*len(pranks))
 
-    def test_factor_epsilon_1(t):
+    def test_factorize_1(t):
         x = SR.var("x")
         e = SR.var("epsilon")
         M = matrix([[1/x, 0, 0], [0, 2/x, 0], [0, 0, 3/x]])*e
         M = transform(M, x, matrix([[1, 1, 0], [0, 1, 0],[1+2*e, 0, e]]))
-        F,T = factor_epsilon(M, x, e)
+        F,T = factorize(M, x, e)
         F = F.simplify_rational()
         for f in F.list():
             t.assertEqual(limit_fixed(f, e, 0), 0)

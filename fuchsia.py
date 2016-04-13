@@ -679,7 +679,7 @@ def gensym():
     SR.symbols[str(sym)] = sym
     return sym
 
-def factor_epsilon(M, x, epsilon, seed=0):
+def factorize(M, x, epsilon, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
     try to find a transformation that will factor out an epsilon
@@ -933,7 +933,7 @@ def main():
                 M, T = normalize(M, x, eps)
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
-                M, T = factor_epsilon(M, x, eps)
+                M, T = factorize(M, x, eps)
             elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 t = import_matrix_from_file(args[2])
