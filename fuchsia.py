@@ -1,7 +1,7 @@
 #!/usr/bin/env sage
 """\
 Usage:
-    fuchsia [-hv] [-P <path>] <command> <args>...
+    fuchsia [-hv] [-l <path>] [-P <path>] <command> <args>...
 
 Commands:
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
@@ -21,6 +21,7 @@ Commands:
 
 Options:
     -h          show this help message
+    -l <path>   save information to the log file
     -v          be verbose and print additional information
     -P <path>   save profile report into this file
     -x <name>   use this name for the independent variable (default: x)
@@ -560,15 +561,19 @@ def normalize(m, x, eps, seed=0):
                 m0 = matrix_residue(m, x, x0)
                 msg += "    x = %s:\n" % x0
                 msg += "        %s\n" % str(m0.eigenvalues()).replace("\n"," ")
-                msg += "        l: %s\n" % str(m0.eigenvectors_left()).replace("\n"," ")
-                msg += "        r: %s\n" % str(m0.eigenvectors_right()).replace("\n"," ")
-            logger.info(msg)
+                if logger.isEnabledFor(logging.DEBUG):
+                    msg += "        l: %s\n" % str(m0.eigenvectors_left()).replace("\n"," ")
+                    msg += "        r: %s\n" % str(m0.eigenvectors_right()).replace("\n"," ")
+            if logger.isEnabledFor(logging.INFO):
+                logger.info(msg)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(msg)
 
         balances = find_balances(m, x, eps)
         b = select_balance(balances, eps, select_balance_state)
         if b is None:
             raise FuchsiaError("can not balance matrix")
-        logger.info("Use balance:\n    %s" % b)
+        logger.info("Use balance:\n    %s\n" % b)
 
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if cond == 1:
@@ -583,8 +588,8 @@ def normalize(m, x, eps, seed=0):
 
         m = transform(m, x, T0)
         m = partial_fraction(m, x)
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
+        #if logger.isEnabledFor(logging.INFO):
+        #    logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
         T = partial_fraction(T*T0, x)
 
     logger.info("Transformation matrix:\n    %s" % '\n    '.join([str(ex) for ex in T.list()]))
@@ -603,14 +608,16 @@ def find_balances(m, x, eps):
         a0_evl, b0_evl = left_evectors[i1], left_evectors[i2]
         logger.debug("Looking for the balance\n    x1 = %s\n    x2 = %s" % (x1, x2))
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("Res(m, x = %s)\n%s" % (x1, a0))
-            print("\nRes(m, x = %s)\n%s" % (x2, b0))
-            logger.debug("Eigenvalues:")
+            msg = "Res(m, x = %s)\n%s\n" % (x1, a0)
+            msg += "Res(m, x = %s)\n%s\n" % (x2, b0)
+            logger.debug(msg)
+            msg = "Eigenvalues:"
             for xi, mi in [(x1, a0), (x2, b0)]:
-                print("    x = %s:" % xi)
-                print("        %s" % str(mi.eigenvalues()).replace("\n"," "))
-                print("        l: %s" % str(mi.eigenvectors_left()).replace("\n"," "))
-                print("        r: %s" % str(mi.eigenvectors_right()).replace("\n"," "))
+                msg += "    x = %s:\n" % xi
+                msg += "        %s\n" % str(mi.eigenvalues()).replace("\n"," ")
+                msg += "        l: %s\n" % str(mi.eigenvectors_left()).replace("\n"," ")
+                msg += "        r: %s\n" % str(mi.eigenvectors_right()).replace("\n"," ")
+            logger.debug(msg)
 
 
         logging.debug("Use condition #1")
@@ -623,10 +630,11 @@ def find_balances(m, x, eps):
         balances_2 = [[2, x1, x2] + balance for balance in balances_2]
         balances += balances_2
 
-    if logger.isEnabledFor(logging.INFO):
-        logger.info("Found balances (#cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):")
+    if logger.isEnabledFor(logging.DEBUG):
+        msg = "Found balances (#cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):\n"
         for balance in balances:
-            print "    %s" % (balance,)
+            msg += "    %s\n" % (balance,)
+        logger.debug(msg)
     return balances
 
 def find_balances_by_cond(a0_ev, b0_ev, cond):
@@ -913,9 +921,10 @@ def main():
         x = SR.var("x")
         epsilon = SR.var("eps")
         logger.setLevel(logging.INFO)
-        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvP:x:e:m:t:")
+        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:P:x:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
+            if key == "-l": logger.addHandler(logging.FileHandler(value, "w"))
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = SR.var(value)
@@ -930,10 +939,10 @@ def main():
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'normalize':
                 M = import_matrix_from_file(args[1])
-                M, T = normalize(M, x, eps)
+                M, T = normalize(M, x, epsilon)
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
-                M, T = factorize(M, x, eps)
+                M, T = factorize(M, x, epsilon)
             elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 t = import_matrix_from_file(args[2])
