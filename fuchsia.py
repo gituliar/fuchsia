@@ -43,6 +43,8 @@ from   random import Random
 from   sage.all import *
 from   sage.all import SR
 from   sage.misc.parser import Parser
+from   sage.libs.ecl import ecl_eval
+ecl_eval("(ext:set-limit 'ext:heap-size 0)")
 
 logging.basicConfig(
     format='\033[32m%(levelname)s [%(asctime)s]\033[0m\n%(message)s',
