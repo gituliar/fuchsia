@@ -21,8 +21,8 @@ Commands:
 
 Options:
     -h          show this help message
-    -l <path>   save information to the log file
-    -v          be verbose and print additional information
+    -l <path>   save log information to this file
+    -v          be verbose and print log information
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
     -x <expr>   replace a free variable by this expression (example: "x=1/(1-y)")
@@ -49,6 +49,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %I:%M:%S',
 )
 logger = logging.getLogger('fuchsia')
+logger_format = '%(levelname)s [%(asctime)s]\n%(message)s'
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "fuchsia@gituliar.org"
@@ -929,7 +930,10 @@ def main():
         kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:P:x:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
-            if key == "-l": logger.addHandler(logging.FileHandler(value, "w"))
+            if key == "-l":
+                fh = logging.FileHandler(value, "w")
+                fh.setFormatter(logging.Formatter(logger_format))
+                logger.addHandler(fh)
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = _parser.parse(value)
