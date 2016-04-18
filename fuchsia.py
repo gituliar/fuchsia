@@ -16,7 +16,7 @@ Commands:
         find a transformation that will make a given normalized
         matrix proportional to the infinitesimal parameter
 
-    transform [-x <name>] [-m <path>] <matrix> <transform>
+    transform [-x <expr>] [-m <path>] <matrix> [<transform>]
         transform a given matrix using a given transformation
 
 Options:
@@ -24,7 +24,8 @@ Options:
     -l <path>   save information to the log file
     -v          be verbose and print additional information
     -P <path>   save profile report into this file
-    -x <name>   use this name for the independent variable (default: x)
+    -x <name>   use this name for the free variable (default: x)
+    -x <expr>   replace a free variable by this expression (example: "x=1/(1-y)")
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -34,7 +35,7 @@ Arguments:
     <transform> read the transformation matrix from this file
 """
 from   collections import defaultdict
-from   itertools import permutations
+from   itertools import combinations
 import logging
 import os.path as path
 from   random import Random
@@ -62,6 +63,10 @@ class FuchsiaError(Exception):
 
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
+
+def change_variable(m, x, y, fy):
+    mm = m.subs({x: fy}) * derivative(fy, y)
+    return mm
 
 def transform(M, x, T):
     """Given a system of differential equations dF/dx = M*F,
@@ -927,7 +932,7 @@ def main():
             if key == "-l": logger.addHandler(logging.FileHandler(value, "w"))
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
-            if key == "-x": x = SR.var(value)
+            if key == "-x": x = _parser.parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
@@ -943,10 +948,16 @@ def main():
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
                 M, T = factorize(M, x, epsilon)
-            elif len(args) == 3 and args[0] == 'transform':
+            elif len(args) >= 2 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
-                t = import_matrix_from_file(args[2])
-                M = transform(M, x, t)
+                if len(args) == 3:
+                    t = import_matrix_from_file(args[2])
+                    M = transform(M, x, t)
+                if len(args) == 2:
+                    x, fy = expr.left(), expr.right()
+                    y = (y for y in fy.variables() if y != epsilon)[0]
+                    assert y.is_symbol()
+                    M = change_variable(M, x, y, fy)
             elif len(args) == 0:
                 usage()
             else:
