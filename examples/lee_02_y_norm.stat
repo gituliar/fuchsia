@@ -1,0 +1,58 @@
+         56374211 function calls (49506115 primitive calls) in 12009.978 seconds
+
+   Ordered by: cumulative time
+   List reduced from 939 to 50 due to restriction <50>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       33    0.707    0.021 12008.719  363.901 /home/gituliar/src/fuchsia/fuchsia.py:596(normalize)
+       33    0.177    0.005 11864.945  359.544 /home/gituliar/src/fuchsia/fuchsia.py:752(select_balance)
+     1384    0.025    0.000 11859.528    8.569 /home/gituliar/src/fuchsia/fuchsia.py:654(find_balances)
+   539653 11843.178    0.022 11857.940    0.022 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:381(_eval_line)
+334598/141652    1.070    0.000 11823.470    0.083 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:206(__call__)
+   264615    0.660    0.000 11818.449    0.045 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:461(set)
+   216214    0.607    0.000 11817.339    0.055 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:656(__init__)
+   216214    0.427    0.000 11816.732    0.055 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:530(_create)
+    44729    0.376    0.000 11766.610    0.263 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:631(__call__)
+    44730    0.300    0.000 11752.939    0.263 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:519(function_call)
+    69584    0.064    0.000 11740.065    0.169 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:307(new)
+      244    0.001    0.000 6898.065   28.271 /home/gituliar/src/fuchsia/fuchsia.py:582(eigenvectors_left)
+       80    0.160    0.002 6898.064   86.226 {method 'eigenvectors_left' of 'sage.matrix.matrix_symbolic_dense.Matrix_symbolic_dense' objects}
+      244    0.001    0.000 4818.140   19.746 /home/gituliar/src/fuchsia/fuchsia.py:589(eigenvectors_right)
+       79    0.163    0.002 4818.140   60.989 {method 'eigenvectors_right' of 'sage.matrix.matrix_symbolic_dense.Matrix_symbolic_dense' objects}
+       65    0.135    0.002   86.024    1.323 {method 'simplify_rational' of 'sage.matrix.matrix_symbolic_dense.Matrix_symbolic_dense' objects}
+      252    0.023    0.000   73.927    0.293 /home/gituliar/src/fuchsia/fuchsia.py:262(matrix_residue)
+       86    0.010    0.000   73.903    0.859 /home/gituliar/src/fuchsia/fuchsia.py:215(matrix_c0)
+       86    0.187    0.002   73.773    0.858 /home/gituliar/src/fuchsia/fuchsia.py:185(matrix_taylor0)
+    24854    0.044    0.000   72.744    0.003 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/calculus/functional.py:339(taylor)
+    24854    1.504    0.000   72.692    0.003 {method 'taylor' of 'sage.symbolic.expression.Expression' objects}
+      244    8.978    0.037   67.883    0.278 /home/gituliar/src/fuchsia/fuchsia.py:734(find_balances_by_cond)
+4868966/205214    8.180    0.000   41.999    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/symbolic/expression_conversions.py:154(__call__)
+     4357    0.233    0.000   41.333    0.009 {method 'simplify_rational' of 'sage.symbolic.expression.Expression' objects}
+    48221    0.495    0.000   40.170    0.001 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_abstract.py:1176(_sage_)
+    48401    2.100    0.000   39.722    0.001 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/calculus/calculus.py:1710(symbolic_expression_from_maxima_string)
+1948147/30250    7.236    0.000   39.355    0.001 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/symbolic/expression_conversions.py:607(arithmetic)
+       32    0.336    0.011   30.857    0.964 /home/gituliar/src/fuchsia/fuchsia.py:88(balance)
+       32   22.211    0.694   30.395    0.950 {method 'is_zero' of 'sage.structure.element.Element' objects}
+   216213    0.759    0.000   25.119    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:912(__del__)
+   216213    0.435    0.000   23.977    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:485(clear)
+       65    0.000    0.000   23.532    0.362 /home/gituliar/src/fuchsia/fuchsia.py:66(partial_fraction)
+       65    0.031    0.000   23.532    0.362 {method 'apply_map' of 'sage.matrix.matrix2.Matrix' objects}
+    18785    0.024    0.000   23.481    0.001 /home/gituliar/src/fuchsia/fuchsia.py:67(<lambda>)
+    18785    0.878    0.000   23.457    0.001 {method 'partial_fraction' of 'sage.symbolic.expression.Expression' objects}
+    48401    5.421    0.000   21.895    0.000 {method 'parse_sequence' of 'sage.misc.parser.Parser' objects}
+    10383    0.274    0.000   19.415    0.002 /home/gituliar/src/fuchsia/fuchsia.py:119(limit_fixed)
+    10383   18.609    0.002   19.139    0.002 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:874(sr_limit)
+    47996    0.073    0.000   18.212    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_abstract.py:1228(_symbolic_)
+    44730    0.314    0.000   14.687    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:466(_convert_args_kwds)
+    58825   12.835    0.000   13.779    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:243(max_to_string)
+    24856    0.403    0.000   11.395    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:275(_coerce_impl)
+   118385    0.202    0.000   10.996    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/maxima_lib.py:336(_coerce_from_special_method)
+   118385    0.375    0.000   10.763    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/interfaces/interface.py:258(_coerce_from_special_method)
+    68996    1.472    0.000    9.328    0.000 {method '_maxima_' of 'sage.symbolic.expression.Expression' objects}
+   939776    9.227    0.000    9.227    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/calculus/calculus.py:2099(<lambda>)
+  1927194    2.388    0.000    8.526    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/symbolic/expression_conversions.py:433(pyobject)
+  1970076    7.799    0.000    7.799    0.000 {method 'operands' of 'sage.symbolic.expression.Expression' objects}
+     4068    0.045    0.000    7.752    0.002 /home/gituliar/src/fuchsia/fuchsia.py:692(<lambda>)
+   454372    0.392    0.000    7.221    0.000 /home/gituliar/opt/sage/sage-7.0/local/lib/python2.7/site-packages/sage/calculus/calculus.py:2073(_find_Mvar)
+
+

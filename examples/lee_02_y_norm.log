@@ -1,0 +1,1372 @@
+INFO [2016-04-16 16:26:37,912]
+[normalize] START
+
+INFO [2016-04-16 16:26:39,184]
+[normalize] STEP #1
+
+INFO [2016-04-16 16:26:40,411]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:29:14,784]
+  Eigenvalues:
+    x = 0:
+        [eps, eps, eps, eps, 1, 1, eps + 1, eps + 1, eps + 1, 2*eps, 2*eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 3*eps - 1, 3*eps - 1, 3*eps - 1]
+    x = 1:
+        [-10*eps + 5, -6*eps + 3, -6*eps + 3, -2*eps + 1, -2*eps + 1, -2*eps + 1, -2*eps + 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:29:15,323]
+Use the balance:
+    [1, 0, 1, 2*eps - 1, -6*eps + 3, (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1/4*(2*eps^2 - eps - 1)/(6*eps^2 + eps - 1), 0, -1/432*(2688*eps^8 - 9248*eps^7 - 25040*eps^6 + 5280*eps^5 + 23648*eps^4 + 5210*eps^3 - 1749*eps^2 - 132*eps + 18)/(24*eps^4 + 44*eps^3 + 10*eps^2 - 3*eps)), (0, 1, 0, 0, 0, -1, 0, 0, 0, 1, -12*eps + 6, 0, 1, 0, 0, 0, 0), 1]
+
+INFO [2016-04-16 16:29:16,935]
+[normalize] STEP #2
+
+INFO [2016-04-16 16:29:16,937]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:31:58,738]
+  Eigenvalues:
+    x = 0:
+        [eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, 2*eps, 1, 1, eps + 1, eps + 1, eps + 1, 2*eps - 1, 2*eps + 1]
+    x = 1:
+        [-10*eps + 5, -6*eps + 2, -6*eps + 3, -2*eps + 1, -2*eps + 1, -2*eps + 1, -2*eps + 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:31:59,195]
+Use the balance:
+    [1, 0, 1, 3*eps - 1, -10*eps + 5, (0, 0, 1, 0, -1/2, 2, 0, 0, 0, 1, 0, 0, 1, 0, 1/8*(18*eps^2 - 9*eps + 1)/(6*eps^3 - 5*eps^2 + eps), 0, 1/864*(36864*eps^9 + 297984*eps^8 - 233600*eps^7 - 230880*eps^6 + 107600*eps^5 + 35936*eps^4 - 18864*eps^3 + 1318*eps^2 + 135*eps - 3)/(96*eps^6 - 136*eps^5 + 20*eps^4 + 30*eps^3 - 11*eps^2 + eps)), (0, 0, 1, -3, 5/2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), -1/4]
+
+INFO [2016-04-16 16:32:00,943]
+[normalize] STEP #3
+
+INFO [2016-04-16 16:32:00,945]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:34:48,493]
+  Eigenvalues:
+    x = 0:
+        [eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 1, 1, 2*eps - 1, 2*eps + 1]
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 3, -2*eps + 1, -2*eps + 1, -2*eps + 1, -2*eps + 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:34:48,885]
+Use the balance:
+    [1, 0, 1, 3*eps - 1, -2*eps + 1, (0, 1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1/4*(2*eps^2 - 7*eps + 2)/(6*eps^2 - 5*eps + 1), 0, -1/432*(1344*eps^7 - 10096*eps^6 + 21632*eps^5 - 3720*eps^4 - 14540*eps^3 + 5431*eps^2 - 39*eps - 93)/(12*eps^3 - 20*eps^2 + 9*eps - 1)), (0, 0, 1, -4*(236544*eps^11 - 730880*eps^10 + 228160*eps^9 + 911344*eps^8 - 626064*eps^7 - 179688*eps^6 + 178116*eps^5 - 7495*eps^4 - 11530*eps^3 + 1343*eps^2 + 174*eps - 24)/(301056*eps^11 - 928256*eps^10 + 285056*eps^9 + 1159840*eps^8 - 789296*eps^7 - 231136*eps^6 + 224320*eps^5 - 8930*eps^4 - 14515*eps^3 + 1672*eps^2 + 219*eps - 30), 10*(64512*eps^11 - 197376*eps^10 + 56896*eps^9 + 248496*eps^8 - 163232*eps^7 - 51448*eps^6 + 46204*eps^5 - 1435*eps^4 - 2985*eps^3 + 329*eps^2 + 45*eps - 6)/(301056*eps^11 - 928256*eps^10 + 285056*eps^9 + 1159840*eps^8 - 789296*eps^7 - 231136*eps^6 + 224320*eps^5 - 8930*eps^4 - 14515*eps^3 + 1672*eps^2 + 219*eps - 30), 0, 0, 0, 0, 1/2*(43008*eps^11 - 138752*eps^10 + 57472*eps^9 + 165856*eps^8 - 136368*eps^7 - 25344*eps^6 + 39504*eps^5 - 3190*eps^4 - 2575*eps^3 + 356*eps^2 + 39*eps - 6)/(602112*eps^12 - 2157568*eps^11 + 1498368*eps^10 + 2034624*eps^9 - 2738432*eps^8 + 327024*eps^7 + 679776*eps^6 - 242180*eps^5 - 20100*eps^4 + 17859*eps^3 - 1234*eps^2 - 279*eps + 30), -3*(43008*eps^11 - 138752*eps^10 + 57472*eps^9 + 165856*eps^8 - 136368*eps^7 - 25344*eps^6 + 39504*eps^5 - 3190*eps^4 - 2575*eps^3 + 356*eps^2 + 39*eps - 6)/(301056*eps^11 - 928256*eps^10 + 285056*eps^9 + 1159840*eps^8 - 789296*eps^7 - 231136*eps^6 + 224320*eps^5 - 8930*eps^4 - 14515*eps^3 + 1672*eps^2 + 219*eps - 30), (43008*eps^11 - 138752*eps^10 + 57472*eps^9 + 165856*eps^8 - 136368*eps^7 - 25344*eps^6 + 39504*eps^5 - 3190*eps^4 - 2575*eps^3 + 356*eps^2 + 39*eps - 6)/(301056*eps^11 - 928256*eps^10 + 285056*eps^9 + 1159840*eps^8 - 789296*eps^7 - 231136*eps^6 + 224320*eps^5 - 8930*eps^4 - 14515*eps^3 + 1672*eps^2 + 219*eps - 30), 1/2*(43008*eps^11 - 138752*eps^10 + 57472*eps^9 + 165856*eps^8 - 136368*eps^7 - 25344*eps^6 + 39504*eps^5 - 3190*eps^4 - 2575*eps^3 + 356*eps^2 + 39*eps - 6)/(301056*eps^11 - 928256*eps^10 + 285056*eps^9 + 1159840*eps^8 - 789296*eps^7 - 231136*eps^6 + 224320*eps^5 - 8930*eps^4 - 14515*eps^3 + 1672*eps^2 + 219*eps - 30), 0, 0, 0, 0), -1/2/(14*eps - 5)]
+
+INFO [2016-04-16 16:34:51,417]
+[normalize] STEP #4
+
+INFO [2016-04-16 16:34:51,418]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:37:24,950]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, eps, eps, eps, eps, 1, 1, 3*eps - 1, 2*eps - 1, 2*eps + 1]
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 3, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:37:25,202]
+Use the balance:
+    [1, 0, 1, 2*eps - 1, -6*eps + 3, (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1/4*(eps - 1)/(6*eps^2 + eps - 1), 0, 1/144*(1440*eps^6 + 1728*eps^5 - 1720*eps^4 - 1548*eps^3 - 8*eps^2 + 45*eps + 6)/(24*eps^4 + 44*eps^3 + 10*eps^2 - 3*eps)), (1, 0, 0, 0, 0, 0, 1/4*(2*eps - 1)/(eps - 1), -3/2*(4*eps^2 - 4*eps + 1)/(eps^2 - 2*eps + 1), 0, 0, 0, 0, 0, 0, 0, 0, 0), 1/4*(2*eps - 1)/(eps - 1)]
+
+INFO [2016-04-16 16:37:26,594]
+[normalize] STEP #5
+
+INFO [2016-04-16 16:37:26,596]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:40:11,338]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, eps, eps, eps, eps, 1, 1, 3*eps - 1, 2*eps + 1]
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:42:32,686]
+Use the balance:
+    [2, 0, 1, 2*eps + 1, -1, (1, 1/2*(4*eps^2 - 1)/(eps - 1), -1/2*(56*eps^5 - 188*eps^4 + 162*eps^3 + 7*eps^2 - 44*eps + 10)/(eps^3 - 2*eps^2 + eps), 1/2*(176*eps^5 - 592*eps^4 + 504*eps^3 + 24*eps^2 - 137*eps + 31)/(eps^3 - 2*eps^2 + eps), -1/4*(240*eps^5 - 800*eps^4 + 768*eps^3 + 4*eps^2 - 207*eps + 49)/(eps^3 - 2*eps^2 + eps), -1/4*(4*eps^2 - 1)/(eps - 1), 1/2*(2*eps - 1)/(eps - 1), -1/2*(12*eps^2 - 16*eps + 5)/(eps^2 - 2*eps + 1), 0, 1/2*(8*eps^2 + 2*eps - 1)/(eps^2 - 2*eps + 1), -1/2*(64*eps^3 - 12*eps^2 - 16*eps + 3)/(eps^2 - 2*eps + 1), -1/2*(8*eps^4 - 52*eps^3 + 14*eps^2 + 13*eps - 4)/(eps^2 - 2*eps + 1), -1/8*(16*eps^5 - 64*eps^4 + 20*eps^2 - eps - 1)/(eps^3 - 2*eps^2 + eps), (12*eps^3 - 4*eps^2 - 3*eps + 1)/(eps^2 - 2*eps + 1), -(12*eps^3 - 4*eps^2 - 3*eps + 1)/(eps^2 - 2*eps + 1), 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1/12*(720*eps^5 - 552*eps^4 - 376*eps^3 + 214*eps^2 - 9*eps - 3)/(6*eps^2 - 7*eps + 1)), -(12*eps^3 - 4*eps^2 - 3*eps + 1)/(eps^2 - 2*eps + 1)]
+
+INFO [2016-04-16 16:42:35,295]
+[normalize] STEP #6
+
+INFO [2016-04-16 16:42:35,297]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 16:45:21,908]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, eps, eps, eps, eps, 1, 1, 3*eps - 1]
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 16:47:44,635]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 16:47:44,636]
+  Eigenvalues:
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [3*eps - 1, 3*eps, 3*eps, eps + 1, eps + 1, eps + 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 1, 1, eps, eps, eps, eps]
+
+INFO [2016-04-16 16:47:45,422]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 16:49:20,766]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, eps, eps, eps, eps, 1, 1, 3*eps - 1]
+    x = -1:
+        [-2, -2, -2, -4*eps + 2, 2*eps - 4, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, 0]
+
+INFO [2016-04-16 16:49:21,022]
+Use the balance:
+    [1, 0, -1, 3*eps - 1, -4*eps + 2, (0, 1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 1/2/(2*eps - 1), 0, 0, 1/2*eps/(3*eps - 1), 0, -1/432*(672*eps^6 - 5144*eps^5 + 1332*eps^4 + 3714*eps^3 - 451*eps^2 - 72*eps + 3)/(6*eps^2 - 7*eps + 1)), (0, 1, -14*eps + 5, 44*eps - 16, -30*eps + 10, -1/2, 0, 0, 0, 0, 0, -2*eps + 1, -eps + 1, 0, 0, 0, 0), 1/2]
+
+INFO [2016-04-16 16:49:24,339]
+[normalize] STEP #7
+
+INFO [2016-04-16 16:49:24,345]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 16:52:16,938]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, 1, 1]
+    x = -1:
+        [-2, -2, -2, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, 0]
+
+INFO [2016-04-16 16:54:51,137]
+Use the balance:
+    [2, 0, -1, 1, -2, (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (1, 0, 0, 0, 0, 0, -2*(eps - 1)/(2*eps - 1), 0, 0, 0, 0, 0, 0, 0, -(4*eps^5 - 13*eps^4 + 15*eps^3 - 7*eps^2 + eps)/(48*eps^6 - 76*eps^5 + 20*eps^4 + 15*eps^3 - 8*eps^2 + eps), 0, -1/144*(92160*eps^11 - 195072*eps^10 - 113792*eps^9 + 523296*eps^8 - 283232*eps^7 - 158152*eps^6 + 161884*eps^5 - 19936*eps^4 - 9129*eps^3 + 1979*eps^2 + 9*eps - 15)/(768*eps^9 - 512*eps^8 - 1712*eps^7 + 1568*eps^6 + 280*eps^5 - 448*eps^4 + 37*eps^3 + 22*eps^2 - 3*eps)), 1]
+
+INFO [2016-04-16 16:54:52,245]
+[normalize] STEP #8
+
+INFO [2016-04-16 16:54:52,250]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 16:57:37,440]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, 1, 0]
+    x = -1:
+        [-2, -2, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, 0]
+
+INFO [2016-04-16 17:00:14,179]
+Use the balance:
+    [2, 0, -1, 1, -2, (0, 0, 1, -3, 5/2, 1/8, 0, 0, 0, 0, 0, 0, -1/4, 0, 0, 0, 0), (0, 0, 0, 0, 0, 1, 0, 0, 0, 1/2, 0, -1/4*(eps - 1)/(2*eps^2 - 3*eps + 1), 0, 0, -1/8*(eps - 1)/(4*eps^3 - 5*eps^2 + eps), 0, 1/864*(36864*eps^10 - 56832*eps^9 - 75968*eps^8 + 117872*eps^7 + 36104*eps^6 - 49572*eps^5 - 16394*eps^4 + 6532*eps^3 + 1655*eps^2 - 228*eps - 33)/(192*eps^7 - 320*eps^6 + 36*eps^5 + 116*eps^4 - 19*eps^3 - 6*eps^2 + eps)), 1/8]
+
+INFO [2016-04-16 17:00:16,256]
+[normalize] STEP #9
+
+INFO [2016-04-16 17:00:16,261]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 17:02:37,026]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-2, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0]
+
+INFO [2016-04-16 17:04:45,988]
+Use the balance:
+    [2, 0, -1, eps + 1, -2, (0, 0, 1, -28/9, 22/9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, 1/6*(3*eps - 2)/(eps - 1), 1/6*eps/(eps - 1), 0, 0, 0, 0, 0, 0, 1/6*(5*eps - 1)/(eps - 1), -1/3*eps/(eps - 1), 0, 1/6*(40*eps^3 - 36*eps^2 + 10*eps - 1)/(4*eps^3 - 5*eps^2 + eps), 1/12*(44*eps^3 - 36*eps^2 + 7*eps)/(24*eps^3 - 34*eps^2 + 11*eps - 1), -1/432*(92160*eps^10 - 830976*eps^9 + 862048*eps^8 + 251952*eps^7 - 511432*eps^6 + 128300*eps^5 + 19176*eps^4 - 9626*eps^3 + 579*eps^2 + 96*eps - 9)/(96*eps^6 - 208*eps^5 + 122*eps^4 - 3*eps^3 - 8*eps^2 + eps)), -1/27*(4*eps - 1)/(eps - 1)]
+
+INFO [2016-04-16 17:04:51,341]
+[normalize] STEP #10
+
+INFO [2016-04-16 17:04:51,347]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 17:07:11,200]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-1, -1, -1, -1, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 0]
+
+INFO [2016-04-16 17:09:20,766]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 17:09:20,766]
+  Eigenvalues:
+    x = -1:
+        [-1, -1, -1, -1, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 17:09:21,959]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 17:09:53,169]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, eps, eps, eps, eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 0, 1]
+
+INFO [2016-04-16 17:10:34,494]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 17:10:34,495]
+  Eigenvalues:
+    x = +Infinity:
+        [eps + 1, eps + 1, eps + 1, 2*eps, 2*eps, eps, eps, eps, eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 3*eps - 1, 3*eps - 1, 3*eps - 1, 0, 1]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 17:10:35,135]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:11:21,947]
+  Eigenvalues:
+    x = 1:
+        [-10*eps + 4, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-1, -1, -1, -1, -4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 0]
+
+INFO [2016-04-16 17:12:34,544]
+Use the balance:
+    [2, 1, -1, -10*eps + 4, -1, (0, 0, 1, -4*(17*eps - 6)/(23*eps - 8), 2*(29*eps - 10)/(23*eps - 8), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, (9*eps^2 - 9*eps + 2)/(22*eps^2 - 25*eps + 6), 1/2*(2*eps^2 - eps)/(22*eps^2 - 25*eps + 6), 0, 0, 0, 0, 0, 0, 0, (18*eps^2 - 13*eps + 2)/(22*eps^2 - 25*eps + 6), -(10*eps^2 - 7*eps + 1)/(88*eps^3 - 122*eps^2 + 49*eps - 6), -1/2*(168*eps^5 - 308*eps^4 + 222*eps^3 - 79*eps^2 + 14*eps - 1)/(528*eps^6 - 1172*eps^5 + 992*eps^4 - 403*eps^3 + 79*eps^2 - 6*eps), -1/2*(96*eps^5 - 176*eps^4 + 132*eps^3 - 52*eps^2 + 11*eps - 1)/(1056*eps^5 - 2168*eps^4 + 1652*eps^3 - 586*eps^2 + 97*eps - 6), 1/12*(49536*eps^12 - 136896*eps^11 + 81024*eps^10 + 50208*eps^9 - 45160*eps^8 - 6428*eps^7 + 8060*eps^6 + 688*eps^5 - 784*eps^4 - 8*eps^3 + 33*eps^2 - 3*eps)/(16896*eps^10 - 30464*eps^9 + 5088*eps^8 + 15856*eps^7 - 6496*eps^6 - 2072*eps^5 + 1262*eps^4 - 21*eps^3 - 55*eps^2 + 6*eps)), -4*(12*eps^3 - 7*eps^2 + eps)/(506*eps^3 - 751*eps^2 + 338*eps - 48)]
+
+INFO [2016-04-16 17:12:43,341]
+[normalize] STEP #11
+
+INFO [2016-04-16 17:12:43,351]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:14:55,270]
+  Eigenvalues:
+    x = 1:
+        [-10*eps + 3, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 4, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:17:05,235]
+Use the balance:
+    [2, 1, -1, -10*eps + 3, 2*eps - 4, (0, 0, 1, -4*(23*eps - 3)/(29*eps - 4), 2*(35*eps - 6)/(29*eps - 4), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, 2*(3*eps - 1)/(19*eps - 6), -1/2*eps/(19*eps - 6), 0, 0, 0, 0, 0, 0, -(3*eps^2 - eps)/(76*eps^2 - 43*eps + 6), (24*eps^2 - 15*eps + 2)/(76*eps^2 - 43*eps + 6), -(10*eps^2 - 7*eps + 1)/(304*eps^3 - 248*eps^2 + 67*eps - 6), -1/2*(12*eps^3 - 5*eps + 1)/(76*eps^3 - 43*eps^2 + 6*eps), -1/6*(12*eps^4 - 172*eps^3 + 131*eps^2 - 34*eps + 3)/(1824*eps^4 - 1792*eps^3 + 650*eps^2 - 103*eps + 6), 1/72*(110592*eps^11 - 912384*eps^10 + 1229184*eps^9 + 279200*eps^8 - 945200*eps^7 + 90856*eps^6 + 203460*eps^5 - 52216*eps^4 - 7048*eps^3 + 3391*eps^2 - 264*eps - 3)/(14592*eps^7 - 17984*eps^6 - 336*eps^5 + 5012*eps^4 - 1204*eps^3 - 147*eps^2 + 73*eps - 6)), -12*(3*eps^2 - eps)/(551*eps^2 - 250*eps + 24)]
+
+INFO [2016-04-16 17:17:13,084]
+[normalize] STEP #12
+
+INFO [2016-04-16 17:17:13,093]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:19:25,495]
+  Eigenvalues:
+    x = 1:
+        [-10*eps + 2, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 3, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:21:36,668]
+Use the balance:
+    [2, 1, -1, -10*eps + 2, 2*eps - 3, (0, 0, 1, -4*(43*eps - 6)/(55*eps - 8), 2*(67*eps - 12)/(55*eps - 8), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, 4*(3*eps - 1)/(35*eps - 12), 1/2*eps/(35*eps - 12), 0, 0, 0, 0, 0, 0, -2*(3*eps^2 - eps)/(35*eps^2 - 47*eps + 12), (39*eps^2 - 27*eps + 4)/(35*eps^2 - 47*eps + 12), -2*(10*eps^2 - 7*eps + 1)/(140*eps^3 - 223*eps^2 + 95*eps - 12), -(12*eps^3 - 5*eps + 1)/(35*eps^3 - 47*eps^2 + 12*eps), -1/3*(408*eps^4 - 430*eps^3 + 173*eps^2 - 34*eps + 3)/(840*eps^4 - 1478*eps^3 + 793*eps^2 - 167*eps + 12), 1/36*(110592*eps^12 - 967680*eps^11 + 453312*eps^10 + 778304*eps^9 - 263520*eps^8 - 161376*eps^7 + 59020*eps^6 - 3980*eps^5 + 1104*eps^4 + 582*eps^3 - 331*eps^2 + 18*eps + 3)/(6720*eps^8 - 13504*eps^7 + 5100*eps^6 + 3628*eps^5 - 2057*eps^4 + 18*eps^3 + 107*eps^2 - 12*eps)), -24*(3*eps^2 - eps)/(1925*eps^2 - 940*eps + 96)]
+
+INFO [2016-04-16 17:21:44,517]
+[normalize] STEP #13
+
+INFO [2016-04-16 17:21:44,527]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:23:58,047]
+  Eigenvalues:
+    x = 1:
+        [-10*eps + 1, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 2, 2*eps - 2, 2*eps - 2, 2*eps - 2, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:26:19,999]
+Use the balance:
+    [2, 1, -1, -10*eps + 1, 2*eps - 2, (0, 0, 1, -4*(94*eps^2 - 45*eps + 6)/(118*eps^2 - 59*eps + 8), 2*(142*eps^2 - 79*eps + 12)/(118*eps^2 - 59*eps + 8), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, 2*(7*eps - 2)/(47*eps - 12), -3/2*eps/(47*eps - 12), 0, 0, 0, 0, 0, 0, -4*eps^3/(188*eps^3 - 283*eps^2 + 107*eps - 12), (60*eps^3 - 71*eps^2 + 31*eps - 4)/(188*eps^3 - 283*eps^2 + 107*eps - 12), -2*(88*eps^5 - 180*eps^4 + 152*eps^3 - 64*eps^2 + 13*eps - 1)/(4512*eps^6 - 11680*eps^5 + 11618*eps^4 - 5805*eps^3 + 1558*eps^2 - 215*eps + 12), -(96*eps^7 + 64*eps^6 - 224*eps^5 + 124*eps^4 + 10*eps^3 - 31*eps^2 + 10*eps - 1)/(2256*eps^7 - 4148*eps^6 + 1852*eps^5 + 465*eps^4 - 556*eps^3 + 143*eps^2 - 12*eps), 0, 1/108*(5308416*eps^16 - 35831808*eps^15 - 2377728*eps^14 + 44579328*eps^13 - 76407552*eps^12 + 60452480*eps^11 + 60963392*eps^10 - 61191904*eps^9 - 8711952*eps^8 + 17053896*eps^7 - 2402892*eps^6 - 1077524*eps^5 + 278704*eps^4 + 5215*eps^3 - 5100*eps^2 + 33*eps + 36)/(866304*eps^12 - 870912*eps^11 - 1753216*eps^10 + 2443680*eps^9 - 249904*eps^8 - 668912*eps^7 + 225248*eps^6 + 24346*eps^5 - 18015*eps^4 + 1084*eps^3 + 333*eps^2 - 36*eps)), -8*(18*eps^3 - 9*eps^2 + eps)/(5546*eps^3 - 4189*eps^2 + 1084*eps - 96)]
+
+INFO [2016-04-16 17:26:32,425]
+[normalize] STEP #14
+
+INFO [2016-04-16 17:26:32,434]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:29:04,153]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps + 2, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 2, 2*eps - 2, 2*eps - 2, 2*eps - 1, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:31:28,050]
+Use the balance:
+    [2, 1, -1, -6*eps + 2, 2*eps - 2, (1, 0, 0, 0, 0, 0, 1/3*(2*eps - 1)/(eps - 1), -2*(4*eps^2 - 4*eps + 1)/(eps^2 - 2*eps + 1), 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 1, 1/4*(eps - 1)/(2*eps - 1), 0, 0, 0, 0, 0, 0, 1/4*(2*eps^2 - 3*eps + 1)/(12*eps^3 - 4*eps^2 - 3*eps + 1), 0, 1/288*(34560*eps^9 - 14400*eps^8 - 83712*eps^7 + 53664*eps^6 + 29056*eps^5 - 19828*eps^4 + 296*eps^3 + 328*eps^2 + 39*eps - 3)/(288*eps^7 + 144*eps^6 - 512*eps^5 - 40*eps^4 + 122*eps^3 + eps^2 - 3*eps)), -1/6*(2*eps - 1)/(eps - 1)]
+
+INFO [2016-04-16 17:31:30,953]
+[normalize] STEP #15
+
+INFO [2016-04-16 17:31:30,964]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:34:02,588]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps + 1, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 2, 2*eps - 2, 2*eps - 1, 2*eps - 1, -4*eps - 3, -4*eps - 1, -4*eps, -2*eps + 1, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:36:17,357]
+Use the balance:
+    [2, 1, -1, -6*eps + 1, 2*eps - 1, (1, 0, 0, 0, 0, 0, (6*eps^2 - 5*eps + 1)/(13*eps^2 - 16*eps + 3), -(72*eps^3 - 92*eps^2 + 38*eps - 5)/(13*eps^3 - 29*eps^2 + 19*eps - 3), 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1/6*(91*eps^4 - 229*eps^3 + 191*eps^2 - 59*eps + 6)/(182*eps^5 - 185*eps^4 - 32*eps^3 + 41*eps^2 - 6*eps), 0, 1/36*(18869760*eps^14 - 22954752*eps^13 - 45948384*eps^12 + 71811888*eps^11 + 6460944*eps^10 - 40782944*eps^9 + 7954462*eps^8 + 6892391*eps^7 - 2090630*eps^6 - 369400*eps^5 + 156394*eps^4 + 4375*eps^3 - 4182*eps^2 + 42*eps + 36)/(628992*eps^12 - 115200*eps^11 - 1538832*eps^10 + 597920*eps^9 + 699368*eps^8 - 204152*eps^7 - 96733*eps^6 + 25012*eps^5 + 4880*eps^4 - 1198*eps^3 - 75*eps^2 + 18*eps)), (6*eps^2 - 5*eps + 1)/(13*eps^2 - 16*eps + 3)]
+
+INFO [2016-04-16 17:36:19,551]
+[normalize] STEP #16
+
+INFO [2016-04-16 17:36:19,561]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:38:44,642]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps + 2, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 2, 2*eps - 2, 2*eps - 1, -2*eps + 1, 2*eps, -4*eps - 3, -4*eps - 1, -4*eps, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:40:59,938]
+Use the balance:
+    [2, 1, -1, -6*eps + 2, 2*eps - 2, (0, 1, 0, 0, 0, -1/2, 0, 0, 0, 1, -12*eps + 6, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1/4/(2*eps - 1), 0, 0, 1/4/(6*eps^2 - 5*eps + 1), 1/4*(4*eps - 1)/(6*eps^2 - 5*eps + 1), 0, -1/864*(4608*eps^8 - 116544*eps^7 + 65024*eps^6 + 70328*eps^5 - 21324*eps^4 - 1466*eps^3 + 487*eps^2 + 24*eps - 3)/(72*eps^5 - 108*eps^4 + 34*eps^3 + 3*eps^2 - eps)), -1/2]
+
+INFO [2016-04-16 17:41:02,696]
+[normalize] STEP #17
+
+INFO [2016-04-16 17:41:02,708]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:43:30,211]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps + 1, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps - 1, 2*eps - 1, -2*eps + 1, 2*eps, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:45:50,834]
+Use the balance:
+    [2, 1, -1, -6*eps + 1, 2*eps - 1, (0, 1, 0, 0, 0, -1/4*(5*eps - 1)/(3*eps - 1), 0, 0, 0, (4*eps - 1)/(3*eps - 1), -(44*eps^2 - 32*eps + 5)/(3*eps - 1), 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1/6*(1456*eps^5 - 2936*eps^4 + 2043*eps^3 - 658*eps^2 + 101*eps - 6)/(546*eps^6 - 1283*eps^5 + 1099*eps^4 - 439*eps^3 + 83*eps^2 - 6*eps), 0, -1/216*(26836992*eps^15 - 642293760*eps^14 + 825810944*eps^13 + 448586752*eps^12 - 793907328*eps^11 - 66950816*eps^10 + 245073296*eps^9 - 17800848*eps^8 - 31671104*eps^7 + 5033642*eps^6 + 1667949*eps^5 - 364123*eps^4 - 30863*eps^3 + 9225*eps^2 + 114*eps - 72)/(628992*eps^12 - 1373184*eps^11 + 578544*eps^10 + 499520*eps^9 - 348872*eps^8 - 30528*eps^7 + 51135*eps^6 - 3324*eps^5 - 2640*eps^4 + 322*eps^3 + 41*eps^2 - 6*eps)), (4*eps - 1)/(3*eps - 1)]
+
+INFO [2016-04-16 17:45:53,328]
+[normalize] STEP #18
+
+INFO [2016-04-16 17:45:53,338]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:48:16,966]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps + 1, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps - 1, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, -1, 0, 0]
+
+INFO [2016-04-16 17:50:32,891]
+Use the balance:
+    [2, 1, -1, -2*eps + 1, -1, (1, 0, 0, 0, 0, 0, 0, 0, (131328*eps^11 + 55296*eps^10 - 543168*eps^9 - 441280*eps^8 + 179632*eps^7 + 145712*eps^6 - 6836*eps^5 - 9748*eps^4 - 1856*eps^3 - 27*eps^2 + 78*eps + 9)/(65664*eps^10 + 60480*eps^9 - 241344*eps^8 - 341312*eps^7 - 80840*eps^6 + 32436*eps^5 + 12800*eps^4 + 1526*eps^3 - 165*eps^2 - 96*eps - 9), 0, 0, 0, 0, 0, 0, 0, 0), (1, 0, 0, 0, 0, 0, (5*eps^2 - 7*eps + 2)/(6*eps^2 - 5*eps + 1), (eps^2 - 2*eps + 1)/(4*eps^2 - 4*eps + 1), 0, 0, 0, 0, 0, 0, -1/12*(eps^2 - 2*eps + 1)/(6*eps^3 - 5*eps^2 + eps), 0, -1/36*(69120*eps^11 - 73728*eps^10 - 117600*eps^9 + 105408*eps^8 + 78184*eps^7 - 40428*eps^6 - 26860*eps^5 + 3701*eps^4 + 2409*eps^3 - 146*eps^2 - 63*eps + 3)/(13824*eps^9 - 2304*eps^8 - 13920*eps^7 - 1520*eps^6 + 3472*eps^5 + 728*eps^4 - 230*eps^3 - 55*eps^2 + 4*eps + 1)), 1]
+
+INFO [2016-04-16 17:50:35,277]
+[normalize] STEP #19
+
+INFO [2016-04-16 17:50:35,289]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 17:53:17,284]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps - 1, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, 0, 0, 0]
+
+INFO [2016-04-16 17:55:53,023]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 17:55:53,023]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps - 1, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 17:55:54,793]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 17:56:26,466]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, eps, eps, eps, eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 0, 1]
+
+INFO [2016-04-16 17:57:06,596]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 17:57:06,597]
+  Eigenvalues:
+    x = +Infinity:
+        [eps + 1, eps + 1, eps + 1, 2*eps, 2*eps, eps, eps, eps, eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 3*eps - 1, 3*eps - 1, 3*eps - 1, 0, 1]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 17:57:07,379]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 17:57:07,379]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps - 1, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, 0, 0, 0]
+    x = +Infinity:
+        [3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, eps + 1, eps + 1, eps + 1, eps, eps, eps, eps, 2*eps - 1, 2*eps - 1, 2*eps + 1, 0, 1]
+
+INFO [2016-04-16 17:57:07,738]
+Use the balance:
+    [1, -1, +Infinity, 2*eps - 1, eps + 1, (0, 0, 1, (4*eps - 1)/(13*eps - 3), -1/2*(3*eps^2 - eps)/(91*eps^2 - 47*eps + 6), 0, 0, 0, 0, 0, 0, -1/2*(64*eps^3 - 52*eps^2 + 13*eps - 1)/(91*eps^3 - 138*eps^2 + 53*eps - 6), (147*eps^3 - 136*eps^2 + 41*eps - 4)/(91*eps^3 - 138*eps^2 + 53*eps - 6), -(56*eps^3 - 57*eps^2 + 19*eps - 2)/(273*eps^4 - 505*eps^3 + 297*eps^2 - 71*eps + 6), -1/3*(192*eps^4 - 132*eps^3 + eps^2 + 13*eps - 2)/(91*eps^4 - 138*eps^3 + 53*eps^2 - 6*eps), -1/2*(180*eps^4 - 216*eps^3 + 91*eps^2 - 16*eps + 1)/(364*eps^4 - 643*eps^3 + 350*eps^2 - 77*eps + 6), 1/36*(10616832*eps^14 - 92676096*eps^13 + 39135744*eps^12 + 93648000*eps^11 - 35201600*eps^10 - 26986336*eps^9 + 10727344*eps^8 + 2403304*eps^7 - 1156564*eps^6 - 46958*eps^5 + 46441*eps^4 - 1642*eps^3 - 440*eps^2 + 3)/(314496*eps^10 - 529344*eps^9 + 24600*eps^8 + 262060*eps^7 - 43406*eps^6 - 36967*eps^5 + 7084*eps^4 + 1880*eps^3 - 380*eps^2 - 29*eps + 6)), (0, 0, 1, -4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), -2*(12*eps^2 - 7*eps + 1)/(91*eps^2 - 47*eps + 6)]
+
+INFO [2016-04-16 17:57:19,732]
+[normalize] STEP #20
+
+INFO [2016-04-16 17:57:19,746]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 17:59:04,332]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps - 1, -4*eps, 2*eps - 2, -1, -1, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, eps + 1, eps + 1, 2*eps - 1, 2*eps - 1, 2*eps + 1, 0, 1]
+
+INFO [2016-04-16 17:59:04,709]
+Use the balance:
+    [1, -1, +Infinity, -4*eps - 1, 2*eps + 1, (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1/6*(288*eps^5 - 120*eps^4 - 292*eps^3 + 118*eps^2 + 3*eps - 3)/(36*eps^3 - 48*eps^2 + 13*eps - 1), 1/24*(576*eps^7 + 7536*eps^6 - 8288*eps^5 - 2296*eps^4 + 2972*eps^3 - 551*eps^2 - 9*eps + 6)/(36*eps^3 - 48*eps^2 + 13*eps - 1)), (0, 0, 1, -4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, -6*(3*eps^3 - 4*eps^2 + eps)/(48*eps^3 - 21*eps^2 - 5*eps + 2), 0, 0), -6*(3*eps^3 - 4*eps^2 + eps)/(48*eps^3 - 21*eps^2 - 5*eps + 2)]
+
+INFO [2016-04-16 17:59:08,179]
+[normalize] STEP #21
+
+INFO [2016-04-16 17:59:08,189]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:01:29,521]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps, -4*eps, 2*eps - 2, -1, -1, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, 2*eps - 1, 2*eps - 1, 0, 1]
+
+INFO [2016-04-16 18:01:29,855]
+Use the balance:
+    [1, -1, +Infinity, -1, 1, (1, 0, 0, 0, 0, 0, (5*eps^2 - 7*eps + 2)/(6*eps^2 - 5*eps + 1), (eps^2 - 2*eps + 1)/(4*eps^2 - 4*eps + 1), -1/(2*eps - 1), 0, 0, 0, 0, 0, 0, -1/72*(768*eps^8 + 3008*eps^7 - 17184*eps^6 + 26512*eps^5 - 18068*eps^4 + 5712*eps^3 - 769*eps^2 + 18*eps + 3)/(576*eps^7 - 1488*eps^6 + 1456*eps^5 - 696*eps^4 + 172*eps^3 - 21*eps^2 + eps), 1/288*(442368*eps^15 - 1142784*eps^14 + 734208*eps^13 - 1460480*eps^12 + 3302912*eps^11 - 984576*eps^10 - 1659648*eps^9 + 477632*eps^8 + 174032*eps^7 + 154704*eps^6 - 15180*eps^5 - 26135*eps^4 + 2015*eps^3 + 1025*eps^2 - 87*eps - 6)/(165888*eps^12 - 138240*eps^11 - 134784*eps^10 + 90816*eps^9 + 39904*eps^8 - 20560*eps^7 - 5112*eps^6 + 1908*eps^5 + 258*eps^4 - 75*eps^3 - 4*eps^2 + eps)), (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 1]
+
+INFO [2016-04-16 18:01:32,396]
+[normalize] STEP #22
+
+INFO [2016-04-16 18:01:32,407]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:04:02,354]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps, -4*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, 2*eps - 1, 2*eps - 1, 0, 0]
+
+INFO [2016-04-16 18:06:24,735]
+Use the balance:
+    [2, -1, +Infinity, -4*eps + 1, 3*eps - 1, (0, 0, 1, 0, 2*(884*eps^3 - 841*eps^2 + 264*eps - 27)/(124*eps^3 - 115*eps^2 + 34*eps - 3), 0, 0, 0, 0, -2*(832*eps^5 - 1648*eps^4 + 1116*eps^3 - 349*eps^2 + 52*eps - 3)/(248*eps^6 - 354*eps^5 + 183*eps^4 - 40*eps^3 + 3*eps^2), 8*(832*eps^5 - 1648*eps^4 + 1116*eps^3 - 349*eps^2 + 52*eps - 3)/(124*eps^5 - 115*eps^4 + 34*eps^3 - 3*eps^2), -8*(52*eps^3 - 77*eps^2 + 28*eps - 3)/(124*eps^3 - 115*eps^2 + 34*eps - 3), -2*(52*eps^3 - 77*eps^2 + 28*eps - 3)/(124*eps^3 - 115*eps^2 + 34*eps - 3), 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, -4, 2/3*(824832*eps^11 - 2217984*eps^10 + 1475680*eps^9 + 1023504*eps^8 - 1969024*eps^7 + 1134536*eps^6 - 301662*eps^5 + 26941*eps^4 + 4242*eps^3 - 1137*eps^2 + 72*eps)/(103104*eps^9 - 371760*eps^8 + 540992*eps^7 - 414744*eps^6 + 184540*eps^5 - 49259*eps^4 + 7770*eps^3 - 667*eps^2 + 24*eps), -1/6*(237551616*eps^17 + 2865106944*eps^16 - 6697368576*eps^15 + 1324975872*eps^14 + 5109001984*eps^13 - 2511708288*eps^12 - 1110363072*eps^11 + 838281632*eps^10 + 33601920*eps^9 - 103535496*eps^8 + 10304192*eps^7 + 5100435*eps^6 - 885801*eps^5 - 85085*eps^4 + 21681*eps^3 + 186*eps^2 - 144*eps)/(14846976*eps^13 - 34974720*eps^12 + 19234368*eps^11 + 9461184*eps^10 - 10274096*eps^9 + 687504*eps^8 + 1335292*eps^7 - 284812*eps^6 - 49349*eps^5 + 18251*eps^4 - 315*eps^3 - 307*eps^2 + 24*eps)), -8*(52*eps^3 - 77*eps^2 + 28*eps - 3)/(124*eps^3 - 115*eps^2 + 34*eps - 3)]
+
+INFO [2016-04-16 18:06:28,954]
+[normalize] STEP #23
+
+INFO [2016-04-16 18:06:28,966]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:09:12,754]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps, -4*eps, -4*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 3*eps - 1, 2*eps, 2*eps, 2*eps, eps + 1, eps + 1, 2*eps - 1, 2*eps - 1, 3*eps, 0, 0]
+
+INFO [2016-04-16 18:11:53,018]
+Use the balance:
+    [2, -1, +Infinity, -4*eps + 1, 3*eps - 1, (0, 0, 0, 0, 0, 1, 0, 0, 0, -2*(16*eps^2 - 8*eps + 1)/eps^2, 8*(32*eps^3 - 32*eps^2 + 10*eps - 1)/eps^2, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1/4*(74464*eps^6 - 167776*eps^5 + 139974*eps^4 - 58303*eps^3 + 13090*eps^2 - 1521*eps + 72)/(9308*eps^7 - 20972*eps^6 + 16915*eps^5 - 6268*eps^4 + 1089*eps^3 - 72*eps^2), 0, 0, 1/3*(595712*eps^7 - 1565600*eps^6 + 1623120*eps^5 - 886346*eps^4 + 279629*eps^3 - 51438*eps^2 + 5139*eps - 216)/(27924*eps^8 - 72224*eps^7 + 71717*eps^6 - 35719*eps^5 + 9535*eps^4 - 1305*eps^3 + 72*eps^2), -1/18*(228753408*eps^12 - 677441536*eps^11 + 590155776*eps^10 + 139467264*eps^9 - 605993344*eps^8 + 481989072*eps^7 - 196528512*eps^6 + 43909520*eps^5 - 4028340*eps^4 - 425607*eps^3 + 158364*eps^2 - 16713*eps + 648)/(1340352*eps^11 - 5142192*eps^10 + 8148176*eps^9 - 7014648*eps^8 + 3643252*eps^7 - 1193987*eps^6 + 248787*eps^5 - 31981*eps^4 + 2313*eps^3 - 72*eps^2), 1/72*(65880981504*eps^18 + 776641314816*eps^17 - 2070042279936*eps^16 + 920592711680*eps^15 + 1219226148864*eps^14 - 1079699272192*eps^13 - 40166996608*eps^12 + 291706309952*eps^11 - 72959575840*eps^10 - 22155559984*eps^9 + 11990103320*eps^8 - 536155060*eps^7 - 583531710*eps^6 + 103238441*eps^5 + 5069025*eps^4 - 2662287*eps^3 + 142677*eps^2 + 14634*eps - 1296)/(193010688*eps^15 - 499212288*eps^14 + 354970944*eps^13 + 65292288*eps^12 - 161946800*eps^11 + 39759840*eps^10 + 15296284*eps^9 - 7708432*eps^8 + 212899*eps^7 + 385310*eps^6 - 58848*eps^5 - 3046*eps^4 + 1233*eps^3 - 72*eps^2)), -2*(16*eps^2 - 8*eps + 1)/eps^2]
+
+INFO [2016-04-16 18:11:56,565]
+[normalize] STEP #24
+
+INFO [2016-04-16 18:11:56,577]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:14:38,092]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, -4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 2*eps - 1, 2*eps - 1, 0, 0]
+
+INFO [2016-04-16 18:17:08,851]
+Use the balance:
+    [2, -1, +Infinity, -4*eps + 1, 2*eps - 1, (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1/3*(4*eps^2 + 4*eps + 1)/(4*eps^3 - eps), -1/18*(1152*eps^7 + 672*eps^6 - 1360*eps^5 - 816*eps^4 + 192*eps^3 + 118*eps^2 - 9*eps - 3)/(144*eps^6 - 192*eps^5 + 16*eps^4 + 44*eps^3 - 13*eps^2 + eps), 1/72*(2304*eps^9 + 32448*eps^8 - 2432*eps^7 - 34800*eps^6 - 5584*eps^5 + 7388*eps^4 + 732*eps^3 - 563*eps^2 + 15*eps + 6)/(144*eps^6 - 192*eps^5 + 16*eps^4 + 44*eps^3 - 13*eps^2 + eps)), 1]
+
+INFO [2016-04-16 18:17:11,299]
+[normalize] STEP #25
+
+INFO [2016-04-16 18:17:11,310]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:19:47,516]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -2*eps + 1, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 2*eps - 1, 0, 0]
+
+INFO [2016-04-16 18:22:17,783]
+Use the balance:
+    [2, -1, +Infinity, -2*eps + 1, 2*eps - 1, (1, 0, 0, 0, 0, 0, (6*eps^2 - 5*eps + 1)/(9*eps^2 - 11*eps + 2), -2*(28*eps^3 - 36*eps^2 + 15*eps - 2)/(9*eps^3 - 20*eps^2 + 13*eps - 2), 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, -1/3*(eps - 1)/(2*eps^2 + eps), 1/18*(288*eps^5 - 120*eps^4 - 292*eps^3 + 118*eps^2 + 3*eps - 3)/(72*eps^4 + 12*eps^3 - 10*eps^2 + eps), -1/72*(576*eps^7 + 7536*eps^6 - 8288*eps^5 - 2296*eps^4 + 2972*eps^3 - 551*eps^2 - 9*eps + 6)/(72*eps^4 + 12*eps^3 - 10*eps^2 + eps)), (6*eps^2 - 5*eps + 1)/(9*eps^2 - 11*eps + 2)]
+
+INFO [2016-04-16 18:22:21,061]
+[normalize] STEP #26
+
+INFO [2016-04-16 18:22:21,072]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:24:58,398]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:27:38,926]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 18:27:38,927]
+  Eigenvalues:
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:27:40,190]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 18:28:38,329]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:30:06,347]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 18:30:06,348]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:30:07,096]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 18:30:07,096]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:30:08,282]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 18:30:08,283]
+  Eigenvalues:
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:30:09,625]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 18:31:15,955]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:32:56,837]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 18:32:56,838]
+  Eigenvalues:
+    x = -1:
+        [-4*eps + 1, 2*eps, 2*eps, 2*eps, -4*eps - 3, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:32:57,258]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 18:32:57,258]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:32:58,083]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 18:32:58,083]
+  Eigenvalues:
+    x = +Infinity:
+        [eps, eps, eps, eps, eps, 3*eps - 1, 2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, eps + 1, eps + 1, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:32:59,204]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 18:32:59,205]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:32:59,991]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 18:32:59,992]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:33:01,260]
+Use the balance:
+    [2, -1, +Infinity, -4*eps + 1, 3*eps - 1, (0, 0, 1, -4*(52*eps^2 - 25*eps + 3)/(67*eps^2 - 33*eps + 4), 2*(91*eps^2 - 47*eps + 6)/(67*eps^2 - 33*eps + 4), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 1, 4*(28*eps^2 - 15*eps + 2)/(358*eps^2 - 187*eps + 24), -3/2*(2*eps^2 - eps)/(358*eps^2 - 187*eps + 24), 0, 0, 0, 0, 0, 0, -1/4*(2680*eps^4 - 2866*eps^3 + 1127*eps^2 - 193*eps + 12)/(4654*eps^4 - 8159*eps^3 + 4378*eps^2 - 945*eps + 72), (582*eps^3 - 537*eps^2 + 163*eps - 16)/(358*eps^3 - 545*eps^2 + 211*eps - 24), -4*(56*eps^3 - 57*eps^2 + 19*eps - 2)/(1074*eps^4 - 1993*eps^3 + 1178*eps^2 - 283*eps + 24), -(4184*eps^5 - 3918*eps^4 + 1061*eps^3 + 43*eps^2 - 56*eps + 6)/(4654*eps^5 - 8159*eps^4 + 4378*eps^3 - 945*eps^2 + 72*eps), 1/18*(2958336*eps^11 - 4951296*eps^10 - 1955712*eps^9 + 11250192*eps^8 - 12605744*eps^7 + 7339064*eps^6 - 2505696*eps^5 + 502643*eps^4 - 52718*eps^3 + 1251*eps^2 + 258*eps - 18)/(670176*eps^9 - 2236008*eps^8 + 2956084*eps^7 - 2029282*eps^6 + 806985*eps^5 - 193501*eps^4 + 27643*eps^3 - 2169*eps^2 + 72*eps), 1/72*(5772902400*eps^17 - 71603896320*eps^16 + 60134289408*eps^15 + 51519744000*eps^14 - 51920240256*eps^13 - 4028350016*eps^12 + 13749306208*eps^11 - 2783542288*eps^10 - 958985064*eps^9 + 429779764*eps^8 - 20929774*eps^7 - 16723215*eps^6 + 3445627*eps^5 - 55183*eps^4 - 54007*eps^3 + 4470*eps^2 + 282*eps - 36)/(96505344*eps^13 - 201353472*eps^12 + 76808736*eps^11 + 71050512*eps^10 - 45448144*eps^9 - 2844152*eps^8 + 6226066*eps^7 - 741183*eps^6 - 264142*eps^5 + 60584*eps^4 + 868*eps^3 - 1089*eps^2 + 72*eps)), 2*(72*eps^4 - 54*eps^3 + 13*eps^2 - eps)/(23986*eps^4 - 24343*eps^3 + 9211*eps^2 - 1540*eps + 96)]
+
+INFO [2016-04-16 18:33:17,557]
+[normalize] STEP #27
+
+INFO [2016-04-16 18:33:17,562]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:35:52,423]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:38:29,962]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 18:38:29,963]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:38:30,841]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 18:39:28,322]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:40:55,838]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 18:40:55,838]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:40:56,551]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 18:40:56,552]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:40:57,714]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 18:40:57,714]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:40:58,520]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 18:42:03,832]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:43:43,355]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 18:43:43,356]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, -1, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:43:43,692]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 18:43:43,692]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:43:44,445]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 18:43:44,446]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:43:45,261]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 18:43:45,261]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:43:46,089]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 18:43:46,089]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps + 1, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:43:47,384]
+Use the balance:
+    [2, 1, -1, -2*eps + 1, -1, (0, 0, 1, -4*(33591996186624*eps^24 - 31001036193792*eps^23 - 272820807401472*eps^22 + 593101221789696*eps^21 - 78018357952512*eps^20 - 955048389132288*eps^19 + 1156773963141120*eps^18 - 404924909433856*eps^17 - 234869205217280*eps^16 + 287539337740544*eps^15 - 96516273990144*eps^14 - 15393259306240*eps^13 + 26036703812544*eps^12 - 9799522121536*eps^11 + 1043865612992*eps^10 + 495364282820*eps^9 - 224072053932*eps^8 + 32728145023*eps^7 + 1910092113*eps^6 - 1468181302*eps^5 + 221315958*eps^4 - 10351741*eps^3 - 911259*eps^2 + 132672*eps - 4752)/(42964705345536*eps^24 - 40226638528512*eps^23 - 348585068593152*eps^22 + 763371415928832*eps^21 - 108505747292160*eps^20 - 1222830035042304*eps^19 + 1495520352915456*eps^18 - 532894742674432*eps^17 - 298019795493888*eps^16 + 372536328784128*eps^15 - 126934497294336*eps^14 - 19097160047104*eps^13 + 33749194882752*eps^12 - 12845121193216*eps^11 + 1408094520928*eps^10 + 638213400156*eps^9 - 293759721912*eps^8 + 43515348607*eps^7 + 2393668689*eps^6 - 1927171930*eps^5 + 293182298*eps^4 - 13898373*eps^3 - 1195875*eps^2 + 176148*eps - 6336), 2*(14333402677248*eps^23 - 10221390397440*eps^22 - 118574758232064*eps^21 + 228206338179072*eps^20 + 14750248329216*eps^19 - 404678317185024*eps^18 + 408581231588352*eps^17 - 86541681177088*eps^16 - 118751490785024*eps^15 + 97760098289152*eps^14 - 20514691519104*eps^13 - 10949709617472*eps^12 + 8812312278464*eps^11 - 2317368362584*eps^10 - 47390957612*eps^9 + 202178446070*eps^8 - 52839601419*eps^7 + 2728021017*eps^6 + 1404207442*eps^5 - 329166376*eps^4 + 24403225*eps^3 + 793569*eps^2 - 221124*eps + 9504)/(10741176336384*eps^23 - 7371365548032*eps^22 - 88989108535296*eps^21 + 168595576848384*eps^20 + 15022457389056*eps^19 - 301951894413312*eps^18 + 298392114625536*eps^17 - 58625657012224*eps^16 - 89161363126528*eps^15 + 70843741414400*eps^14 - 14022688969984*eps^13 - 8279962254272*eps^12 + 6367308157120*eps^11 - 1619453259024*eps^10 - 52839684524*eps^9 + 146343428908*eps^8 - 36854073251*eps^7 + 1665318839*eps^6 + 1014746882*eps^5 - 228106262*eps^4 + 16269009*eps^3 + 592659*eps^2 - 150804*eps + 6336), (14523826176*eps^22 - 1592524800*eps^21 - 122125418496*eps^20 + 157666148352*eps^19 + 118625218560*eps^18 - 349608815616*eps^17 + 194872283136*eps^16 + 54493081344*eps^15 - 101371281408*eps^14 + 34180471040*eps^13 + 7011993664*eps^12 - 9328116096*eps^11 + 2820926464*eps^10 + 16732316*eps^9 - 241187364*eps^8 + 59050681*eps^7 - 735727*eps^6 - 1952262*eps^5 + 308990*eps^4 - 7091*eps^3 - 1995*eps^2 + 132*eps)/(21482352672768*eps^23 - 4001554759680*eps^22 - 174608406282240*eps^21 + 251571855949824*eps^20 + 113021193879552*eps^19 - 505905052336128*eps^18 + 392831071328256*eps^17 - 22812357321728*eps^16 - 142509426562560*eps^15 + 88339419392768*eps^14 - 10549699961600*eps^13 - 13086935500160*eps^12 + 7927643068352*eps^11 - 1678571606816*eps^10 - 164797716840*eps^9 + 180728825500*eps^8 - 39322749910*eps^7 + 861961019*eps^6 + 1226135944*eps^5 - 244823462*eps^4 + 15820818*eps^3 + 737127*eps^2 - 157140*eps + 6336), 0, 0, 0, 0, 0, 0, 2*(14523826176*eps^22 - 1592524800*eps^21 - 122125418496*eps^20 + 157666148352*eps^19 + 118625218560*eps^18 - 349608815616*eps^17 + 194872283136*eps^16 + 54493081344*eps^15 - 101371281408*eps^14 + 34180471040*eps^13 + 7011993664*eps^12 - 9328116096*eps^11 + 2820926464*eps^10 + 16732316*eps^9 - 241187364*eps^8 + 59050681*eps^7 - 735727*eps^6 - 1952262*eps^5 + 308990*eps^4 - 7091*eps^3 - 1995*eps^2 + 132*eps)/(10741176336384*eps^22 + 3369810788352*eps^21 - 85619297746944*eps^20 + 82976279101440*eps^19 + 97998736490496*eps^18 - 203953157922816*eps^17 + 94438956702720*eps^16 + 35813299690496*eps^15 - 53348063436032*eps^14 + 17495677978368*eps^13 + 3472989008384*eps^12 - 4806973245888*eps^11 + 1560334911232*eps^10 - 59118347792*eps^9 - 111958032316*eps^8 + 34385396592*eps^7 - 2468676659*eps^6 - 803357820*eps^5 + 211389062*eps^4 - 16717200*eps^3 - 448191*eps^2 + 144468*eps - 6336), 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -8, 4/(4*eps - 1), 4, 2*(3*eps - 1)/(4*eps - 1), -2/9*(2304*eps^8 - 20544*eps^7 + 12808*eps^6 + 11950*eps^5 - 6309*eps^4 - 487*eps^3 + 416*eps^2 - 6*eps - 6)/(96*eps^4 - 112*eps^3 + 10*eps^2 + 7*eps - 1)), -16*(72*eps^5 - 126*eps^4 + 67*eps^3 - 14*eps^2 + eps)/(53248*eps^5 - 70640*eps^4 + 35866*eps^3 - 8779*eps^2 + 1041*eps - 48)]
+
+INFO [2016-04-16 18:43:52,323]
+[normalize] STEP #28
+
+INFO [2016-04-16 18:43:52,327]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:46:31,491]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:49:14,409]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 18:49:14,409]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:49:15,594]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 18:50:15,194]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:51:51,976]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 18:51:51,976]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:51:52,347]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 18:51:52,348]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:51:53,663]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 18:51:53,664]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:51:54,468]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 18:53:07,989]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:55:02,278]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 18:55:02,278]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 3, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:55:02,479]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 18:55:02,479]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:55:03,684]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 18:55:03,685]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:55:04,562]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 18:55:04,562]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 18:55:05,383]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 18:55:05,384]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 18:55:06,418]
+Use the balance:
+    [1, -1, +Infinity, -4*eps - 3, eps + 1, (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1), (1, -4/3*(1161216*eps^14 + 2792448*eps^13 - 5695488*eps^12 - 7673856*eps^11 + 8662528*eps^10 + 4037760*eps^9 - 2974592*eps^8 - 472768*eps^7 + 272920*eps^6 - 55300*eps^5 + 5664*eps^4 + 8204*eps^3 - 519*eps^2 - 168*eps - 9)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 2/3*(2210679226368*eps^23 + 18239377637376*eps^22 - 24739193290752*eps^21 - 38016608698368*eps^20 + 65931920326656*eps^19 - 4208935280640*eps^18 - 37637821274112*eps^17 + 17214426210304*eps^16 + 6153874801152*eps^15 - 6544302160896*eps^14 + 864697998848*eps^13 + 774660513536*eps^12 - 328281105024*eps^11 + 13035009056*eps^10 + 20582800648*eps^9 - 5024958192*eps^8 + 62117674*eps^7 + 153877636*eps^6 - 26068233*eps^5 + 1451967*eps^4 - 6595*eps^3 + 7437*eps^2 - 1518*eps + 72)/(4841275392*eps^22 + 16158818304*eps^21 - 96022167552*eps^20 + 74411900928*eps^19 + 164440657920*eps^18 - 293768768512*eps^17 + 87593615360*eps^16 + 128667045120*eps^15 - 108340704256*eps^14 + 8781549312*eps^13 + 21601860416*eps^12 - 9164538048*eps^11 + 243215072*eps^10 + 735812572*eps^9 - 188664260*eps^8 + 4351407*eps^7 + 5767765*eps^6 - 1108700*eps^5 + 84086*eps^4 - 2377*eps^3 + 57*eps^2 - 6*eps), -8/3*(435714785280*eps^22 + 3676184248320*eps^21 - 3889046421504*eps^20 - 8425001631744*eps^19 + 10698888314880*eps^18 + 1931528534016*eps^17 - 6843041519616*eps^16 + 1599004977664*eps^15 + 1610290254336*eps^14 - 863304174592*eps^13 - 53056198912*eps^12 + 137928159360*eps^11 - 28715315264*eps^10 - 4921414600*eps^9 + 2789934888*eps^8 - 262634774*eps^7 - 58329758*eps^6 + 15448881*eps^5 - 1064581*eps^4 - 7077*eps^3 - 2103*eps^2 + 954*eps - 54)/(1210318848*eps^21 + 4342284288*eps^20 - 22919970816*eps^19 + 12872982528*eps^18 + 44328410112*eps^17 - 62360089600*eps^16 + 6308381440*eps^15 + 33743856640*eps^14 - 18649211904*eps^13 - 2466915648*eps^12 + 4783736192*eps^11 - 1095200464*eps^10 - 212996348*eps^9 + 130704056*eps^8 - 14490051*eps^7 - 2534661*eps^6 + 808276*eps^5 - 75106*eps^4 + 2245*eps^3 - 33*eps^2 + 6*eps), 4/3*(2513386340352*eps^23 + 24291991093248*eps^22 - 31993844465664*eps^21 - 50884198465536*eps^20 + 87524963647488*eps^19 - 5713473085440*eps^18 - 50199223160832*eps^17 + 23280450408448*eps^16 + 8097742670848*eps^15 - 8851883765248*eps^14 + 1240818049792*eps^13 + 1031878580480*eps^12 - 453911690240*eps^11 + 22671102048*eps^10 + 27633062000*eps^9 - 7147117856*eps^8 + 163022372*eps^7 + 210133906*eps^6 - 38077177*eps^5 + 2310215*eps^4 - 16929*eps^3 + 9795*eps^2 - 2178*eps + 108)/(4841275392*eps^22 + 16158818304*eps^21 - 96022167552*eps^20 + 74411900928*eps^19 + 164440657920*eps^18 - 293768768512*eps^17 + 87593615360*eps^16 + 128667045120*eps^15 - 108340704256*eps^14 + 8781549312*eps^13 + 21601860416*eps^12 - 9164538048*eps^11 + 243215072*eps^10 + 735812572*eps^9 - 188664260*eps^8 + 4351407*eps^7 + 5767765*eps^6 - 1108700*eps^5 + 84086*eps^4 - 2377*eps^3 + 57*eps^2 - 6*eps), 2/3*(16809984*eps^15 + 36642816*eps^14 - 26691072*eps^13 - 70216192*eps^12 + 18117120*eps^11 + 37071488*eps^10 - 5800832*eps^9 - 8167072*eps^8 + 820624*eps^7 + 802488*eps^6 - 37106*eps^5 - 32868*eps^4 - 291*eps^3 + 486*eps^2 + 27*eps)/(4202496*eps^15 + 21381120*eps^14 - 49583616*eps^13 - 40380160*eps^12 + 117124608*eps^11 - 18309888*eps^10 - 63563264*eps^9 + 25145632*eps^8 + 9210832*eps^7 - 5762304*eps^6 + 321382*eps^5 + 262445*eps^4 - 51765*eps^3 + 2449*eps^2 + 27*eps + 6), 4*(165888*eps^13 + 1175040*eps^12 - 200448*eps^11 - 2570496*eps^10 + 636544*eps^9 + 1366080*eps^8 - 439040*eps^7 - 238240*eps^6 + 92896*eps^5 + 9374*eps^4 - 5289*eps^3 + 83*eps^2 + 45*eps + 3)/(1050624*eps^13 + 6658560*eps^12 - 4335360*eps^11 - 17178880*eps^10 + 8891392*eps^9 + 10831488*eps^8 - 4574304*eps^7 - 2139344*eps^6 + 772104*eps^5 + 59390*eps^4 - 38443*eps^3 + 2710*eps^2 + 57*eps + 6), -8*(774144*eps^14 + 5133312*eps^13 - 3422208*eps^12 - 11618048*eps^11 + 8389376*eps^10 + 5123840*eps^9 - 4925504*eps^8 - 233088*eps^7 + 936672*eps^6 - 143476*eps^5 - 44948*eps^4 + 11047*eps^3 + 62*eps^2 - 75*eps - 6)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 0, 4/3*(4423680*eps^14 + 17547264*eps^13 + 4890624*eps^12 - 31153664*eps^11 - 13999360*eps^10 + 15671296*eps^9 + 6192256*eps^8 - 3420352*eps^7 - 936896*eps^6 + 346048*eps^5 + 44936*eps^4 - 13574*eps^3 - 639*eps^2 + 132*eps + 9)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), -16/3*(8847360*eps^15 + 30670848*eps^14 - 7766016*eps^13 - 67197952*eps^12 + 3154944*eps^11 + 45341952*eps^10 - 3286784*eps^9 - 13032960*eps^8 + 1546560*eps^7 + 1628992*eps^6 - 256176*eps^5 - 72084*eps^4 + 12296*eps^3 + 903*eps^2 - 114*eps - 9)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 16*(2985984*eps^15 + 6137856*eps^14 - 5958144*eps^13 - 12365568*eps^12 + 5495808*eps^11 + 6916480*eps^10 - 2177024*eps^9 - 1656064*eps^8 + 377056*eps^7 + 186992*eps^6 - 24806*eps^5 - 9713*eps^4 + 237*eps^3 + 177*eps^2 + 9*eps)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 4*(2985984*eps^15 + 6137856*eps^14 - 5958144*eps^13 - 12365568*eps^12 + 5495808*eps^11 + 6916480*eps^10 - 2177024*eps^9 - 1656064*eps^8 + 377056*eps^7 + 186992*eps^6 - 24806*eps^5 - 9713*eps^4 + 237*eps^3 + 177*eps^2 + 9*eps)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 0, 12*(331776*eps^15 + 5004288*eps^14 + 4008960*eps^13 - 9848064*eps^12 - 6483712*eps^11 + 5628928*eps^10 + 3098304*eps^9 - 1400640*eps^8 - 614208*eps^7 + 165012*eps^6 + 51448*eps^5 - 8671*eps^4 - 1626*eps^3 + 147*eps^2 + 18*eps)/(1050624*eps^14 + 5607936*eps^13 - 10993920*eps^12 - 12843520*eps^11 + 26070272*eps^10 + 1940096*eps^9 - 15405792*eps^8 + 2434960*eps^7 + 2911448*eps^6 - 712714*eps^5 - 97833*eps^4 + 41153*eps^3 - 2653*eps^2 - 51*eps - 6), 0, -288*(20736*eps^10 + 34560*eps^9 - 6912*eps^8 - 19968*eps^7 - 544*eps^6 + 3552*eps^5 + 272*eps^4 - 192*eps^3 - 7*eps^2 + 3*eps)/(1050624*eps^13 + 6658560*eps^12 - 4335360*eps^11 - 17178880*eps^10 + 8891392*eps^9 + 10831488*eps^8 - 4574304*eps^7 - 2139344*eps^6 + 772104*eps^5 + 59390*eps^4 - 38443*eps^3 + 2710*eps^2 + 57*eps + 6)), -288*(20736*eps^10 + 34560*eps^9 - 6912*eps^8 - 19968*eps^7 - 544*eps^6 + 3552*eps^5 + 272*eps^4 - 192*eps^3 - 7*eps^2 + 3*eps)/(1050624*eps^13 + 6658560*eps^12 - 4335360*eps^11 - 17178880*eps^10 + 8891392*eps^9 + 10831488*eps^8 - 4574304*eps^7 - 2139344*eps^6 + 772104*eps^5 + 59390*eps^4 - 38443*eps^3 + 2710*eps^2 + 57*eps + 6)]
+
+INFO [2016-04-16 18:55:10,922]
+[normalize] STEP #29
+
+INFO [2016-04-16 18:55:10,929]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 18:57:50,331]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:00:24,669]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 19:00:24,669]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:00:25,232]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 19:01:21,927]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:02:49,711]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 19:02:49,712]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:02:50,024]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 19:02:50,024]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:02:50,907]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 19:02:50,907]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:02:51,342]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 19:04:00,412]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:05:46,899]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 19:05:46,900]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 2, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:05:47,145]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 19:05:47,145]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:05:48,073]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 19:05:48,073]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:05:48,676]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 19:05:48,676]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:05:49,365]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 19:05:49,365]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:05:50,378]
+Use the balance:
+    [1, -1, +Infinity, 2*eps - 2, eps + 1, (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0), (1, -4*(2304*eps^8 + 192*eps^7 - 2960*eps^6 - 992*eps^5 + 1416*eps^4 + 188*eps^3 - 217*eps^2 + 12*eps + 3)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 2*(426442752*eps^16 - 1164165120*eps^15 + 744964608*eps^14 + 1062040320*eps^13 - 2312792320*eps^12 + 1846468736*eps^11 - 638576640*eps^10 - 85617920*eps^9 + 193487152*eps^8 - 94019928*eps^7 + 24358558*eps^6 - 3271763*eps^5 + 41430*eps^4 + 63053*eps^3 - 10786*eps^2 + 804*eps - 24)/(8404992*eps^15 - 39186432*eps^14 + 66665472*eps^13 - 34312448*eps^12 - 44134400*eps^11 + 88162496*eps^10 - 70015152*eps^9 + 31806784*eps^8 - 8495200*eps^7 + 1081392*eps^6 + 64015*eps^5 - 49138*eps^4 + 8252*eps^3 - 654*eps^2 + 21*eps), -8*(84049920*eps^15 - 207986688*eps^14 + 94040832*eps^13 + 231575040*eps^12 - 392848768*eps^11 + 259269248*eps^10 - 57139264*eps^9 - 31875744*eps^8 + 29582376*eps^7 - 10652040*eps^6 + 1970113*eps^5 - 121796*eps^4 - 24281*eps^3 + 6048*eps^2 - 534*eps + 18)/(2101248*eps^14 - 9271296*eps^13 + 14348544*eps^12 - 4990976*eps^11 - 12281344*eps^10 + 18970288*eps^9 - 12761216*eps^8 + 4761392*eps^7 - 933452*eps^6 + 36985*eps^5 + 25250*eps^4 - 5972*eps^3 + 570*eps^2 - 21*eps), 4*(484835328*eps^16 - 1341997056*eps^15 + 860533248*eps^14 + 1343389440*eps^13 - 2981287936*eps^12 + 2475541888*eps^11 - 918100288*eps^10 - 79937344*eps^9 + 257415712*eps^8 - 131753896*eps^7 + 35529218*eps^6 - 5044091*eps^5 + 124214*eps^4 + 85557*eps^3 - 15546*eps^2 + 1188*eps - 36)/(8404992*eps^15 - 39186432*eps^14 + 66665472*eps^13 - 34312448*eps^12 - 44134400*eps^11 + 88162496*eps^10 - 70015152*eps^9 + 31806784*eps^8 - 8495200*eps^7 + 1081392*eps^6 + 64015*eps^5 - 49138*eps^4 + 8252*eps^3 - 654*eps^2 + 21*eps), 2*(12288*eps^9 - 8704*eps^8 - 12568*eps^7 + 7788*eps^6 + 3058*eps^5 - 2039*eps^4 - 99*eps^3 + 159*eps^2 - 18*eps)/(29184*eps^9 - 77696*eps^8 + 36160*eps^7 + 71936*eps^6 - 93848*eps^5 + 40412*eps^4 - 5702*eps^3 - 701*eps^2 + 276*eps - 21), 4*(1152*eps^7 - 1632*eps^6 - 400*eps^5 + 1520*eps^4 - 752*eps^3 + 94*eps^2 + 15*eps - 3)/(7296*eps^7 - 10304*eps^6 - 5664*eps^5 + 13480*eps^4 - 5196*eps^3 + 238*eps^2 + 171*eps - 21), -8*(5376*eps^8 - 10048*eps^7 + 1536*eps^6 + 7984*eps^5 - 6688*eps^4 + 1980*eps^3 - 116*eps^2 - 45*eps + 6)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 0, 4*(6144*eps^8 - 3584*eps^7 - 6432*eps^6 + 3224*eps^5 + 1220*eps^4 - 690*eps^3 + 13*eps^2 + 27*eps - 3)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), -16*(12288*eps^9 - 13312*eps^8 - 9280*eps^7 + 12880*eps^6 - 784*eps^5 - 2600*eps^4 + 716*eps^3 + 41*eps^2 - 33*eps + 3)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 96*(1152*eps^9 - 1056*eps^8 - 1072*eps^7 + 1008*eps^6 + 200*eps^5 - 270*eps^4 + 11*eps^3 + 21*eps^2 - 3*eps)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 24*(1152*eps^9 - 1056*eps^8 - 1072*eps^7 + 1008*eps^6 + 200*eps^5 - 270*eps^4 + 11*eps^3 + 21*eps^2 - 3*eps)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 0, 12*(2304*eps^9 - 2112*eps^8 - 2432*eps^7 + 2640*eps^6 + 16*eps^5 - 564*eps^4 + 124*eps^3 + 9*eps^2 - 3*eps)/(7296*eps^8 - 17600*eps^7 + 4640*eps^6 + 19144*eps^5 - 18676*eps^4 + 5434*eps^3 - 67*eps^2 - 192*eps + 21), 72*(288*eps^6 - 240*eps^5 - 16*eps^4 + 56*eps^3 - 14*eps^2 + eps)/(7296*eps^7 - 10304*eps^6 - 5664*eps^5 + 13480*eps^4 - 5196*eps^3 + 238*eps^2 + 171*eps - 21), 0), 72*(288*eps^6 - 240*eps^5 - 16*eps^4 + 56*eps^3 - 14*eps^2 + eps)/(7296*eps^7 - 10304*eps^6 - 5664*eps^5 + 13480*eps^4 - 5196*eps^3 + 238*eps^2 + 171*eps - 21)]
+
+INFO [2016-04-16 19:05:54,024]
+[normalize] STEP #30
+
+INFO [2016-04-16 19:05:54,028]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 19:08:35,034]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:11:09,876]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 19:11:09,876]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:11:09,971]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 19:12:07,907]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:13:33,604]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 19:13:33,604]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:13:33,928]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 19:13:33,928]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:13:34,698]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 19:13:34,699]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:13:34,780]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 19:14:44,283]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:16:34,059]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 19:16:34,059]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 2, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:16:34,252]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 19:16:34,253]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:16:34,915]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 19:16:34,916]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:16:34,995]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 19:16:34,995]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:16:35,716]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 19:16:35,716]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps + 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:16:36,557]
+Use the balance:
+    [2, 1, -1, -2*eps + 1, -4*eps - 2, (1, 2/3*(483840*eps^11 + 1368576*eps^10 + 1466496*eps^9 + 373952*eps^8 - 1171872*eps^7 - 998672*eps^6 - 60776*eps^5 + 143508*eps^4 + 31376*eps^3 - 2445*eps^2 - 960*eps - 63)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75), 1/3*(122815512576*eps^21 + 4814181236736*eps^20 - 1228792135680*eps^19 - 12363215781888*eps^18 + 6592193753088*eps^17 + 7474402160640*eps^16 - 5679148823552*eps^15 - 1336969258240*eps^14 + 1901925427072*eps^13 - 128155381568*eps^12 - 281254063712*eps^11 + 67138284752*eps^10 + 15462385032*eps^9 - 7227980060*eps^8 + 155788322*eps^7 + 271907840*eps^6 - 32489413*eps^5 - 2841941*eps^4 + 563261*eps^3 + 34497*eps^2 - 10266*eps + 504)/(3296526336*eps^19 - 7030996992*eps^18 - 5206228992*eps^17 + 21605419008*eps^16 - 9019415808*eps^15 - 13683486720*eps^14 + 11700934080*eps^13 + 668690624*eps^12 - 3175592368*eps^11 + 712847536*eps^10 + 227901540*eps^9 - 102260356*eps^8 + 2309812*eps^7 + 3815265*eps^6 - 440443*eps^5 - 25226*eps^4 + 1918*eps^3 + 861*eps^2 - 75*eps), -4/3*(96825507840*eps^21 + 3766554722304*eps^20 - 915807928320*eps^19 - 9665175748608*eps^18 + 5037273329664*eps^17 + 5869533299712*eps^16 - 4358991248384*eps^15 - 1074414377216*eps^14 + 1464152843392*eps^13 - 88800433600*eps^12 - 217421060896*eps^11 + 50495601488*eps^10 + 12106093496*eps^9 - 5492991688*eps^8 + 101719142*eps^7 + 207863752*eps^6 - 24333173*eps^5 - 2200067*eps^4 + 424269*eps^3 + 26673*eps^2 - 7758*eps + 378)/(3296526336*eps^19 - 7030996992*eps^18 - 5206228992*eps^17 + 21605419008*eps^16 - 9019415808*eps^15 - 13683486720*eps^14 + 11700934080*eps^13 + 668690624*eps^12 - 3175592368*eps^11 + 712847536*eps^10 + 227901540*eps^9 - 102260356*eps^8 + 2309812*eps^7 + 3815265*eps^6 - 440443*eps^5 - 25226*eps^4 + 1918*eps^3 + 861*eps^2 - 75*eps), 2/3*(139632574464*eps^21 + 6358484385792*eps^20 - 1761624391680*eps^19 - 16363535007744*eps^18 + 9182639382528*eps^17 + 9767862644736*eps^16 - 7856066476544*eps^15 - 1632238152192*eps^14 + 2618773721600*eps^13 - 225745807360*eps^12 - 383691676800*eps^11 + 99417956608*eps^10 + 20226745040*eps^9 - 10464166944*eps^8 + 335591362*eps^7 + 388276810*eps^6 - 50189565*eps^5 - 3862009*eps^4 + 858741*eps^3 + 45939*eps^2 - 15138*eps + 756)/(3296526336*eps^19 - 7030996992*eps^18 - 5206228992*eps^17 + 21605419008*eps^16 - 9019415808*eps^15 - 13683486720*eps^14 + 11700934080*eps^13 + 668690624*eps^12 - 3175592368*eps^11 + 712847536*eps^10 + 227901540*eps^9 - 102260356*eps^8 + 2309812*eps^7 + 3815265*eps^6 - 440443*eps^5 - 25226*eps^4 + 1918*eps^3 + 861*eps^2 - 75*eps), 1/3*(3833856*eps^14 + 26990592*eps^13 + 35357696*eps^12 - 17056896*eps^11 - 46841536*eps^10 - 18009728*eps^9 + 6766448*eps^8 + 6192136*eps^7 + 829020*eps^6 - 405620*eps^5 - 120687*eps^4 + 789*eps^3 + 2934*eps^2 + 216*eps)/(11446272*eps^13 - 1520640*eps^12 - 36777600*eps^11 + 8432448*eps^10 + 34496448*eps^9 - 5627584*eps^8 - 11925304*eps^7 + 248212*eps^6 + 1254344*eps^5 + 22690*eps^4 - 47509*eps^3 - 2341*eps^2 + 489*eps + 75), 2*(248832*eps^10 + 307584*eps^9 - 385344*eps^8 - 405216*eps^7 + 129296*eps^6 + 120648*eps^5 - 12700*eps^4 - 10434*eps^3 + 59*eps^2 + 198*eps + 21)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75), -4*(1078272*eps^11 + 801792*eps^10 - 2336256*eps^9 - 936768*eps^8 + 1443904*eps^7 + 241520*eps^6 - 315920*eps^5 - 16060*eps^4 + 22264*eps^3 + 593*eps^2 - 309*eps - 42)/(715392*eps^11 - 95040*eps^10 - 2253888*eps^9 + 521088*eps^8 + 2015160*eps^7 - 319156*eps^6 - 619384*eps^5 - 4434*eps^4 + 39685*eps^3 + 1141*eps^2 - 489*eps - 75), 4*(20736*eps^10 + 43776*eps^9 - 3840*eps^8 - 52544*eps^7 - 24608*eps^6 + 8912*eps^5 + 7352*eps^4 + 264*eps^3 - 249*eps^2 - 9*eps)/(715392*eps^9 + 1335744*eps^8 - 297792*eps^7 - 1410240*eps^6 - 507528*eps^5 + 76028*eps^4 + 40200*eps^3 - 62*eps^2 - 639*eps - 75), 2/3*(147456*eps^12 + 2795520*eps^11 + 5651968*eps^10 - 63488*eps^9 - 6494400*eps^8 - 3444608*eps^7 + 542656*eps^6 + 583248*eps^5 + 9172*eps^4 - 32264*eps^3 - 2040*eps^2 + 537*eps + 63)/(715392*eps^11 - 95040*eps^10 - 2253888*eps^9 + 521088*eps^8 + 2015160*eps^7 - 319156*eps^6 - 619384*eps^5 - 4434*eps^4 + 39685*eps^3 + 1141*eps^2 - 489*eps - 75), -8/3*(294912*eps^13 + 5305344*eps^12 + 8268800*eps^11 - 5792000*eps^10 - 12730240*eps^9 - 126016*eps^8 + 4562752*eps^7 + 530144*eps^6 - 586456*eps^5 - 65288*eps^4 + 29516*eps^3 + 2853*eps^2 - 438*eps - 63)/(715392*eps^11 - 95040*eps^10 - 2253888*eps^9 + 521088*eps^8 + 2015160*eps^7 - 319156*eps^6 - 619384*eps^5 - 4434*eps^4 + 39685*eps^3 + 1141*eps^2 - 489*eps - 75), 8*(165888*eps^13 + 1112832*eps^12 + 1157760*eps^11 - 1234752*eps^10 - 1803680*eps^9 - 114864*eps^8 + 540488*eps^7 + 167684*eps^6 - 36726*eps^5 - 21908*eps^4 - 1353*eps^3 + 528*eps^2 + 63*eps)/(715392*eps^11 - 95040*eps^10 - 2253888*eps^9 + 521088*eps^8 + 2015160*eps^7 - 319156*eps^6 - 619384*eps^5 - 4434*eps^4 + 39685*eps^3 + 1141*eps^2 - 489*eps - 75), 2*(2654208*eps^15 + 17805312*eps^14 + 17114112*eps^13 - 23585280*eps^12 - 29664128*eps^11 + 3038976*eps^10 + 11874016*eps^9 + 1856000*eps^8 - 1691000*eps^7 - 484288*eps^6 + 71430*eps^5 + 35090*eps^4 + 1065*eps^3 - 690*eps^2 - 63*eps)/(11446272*eps^13 - 1520640*eps^12 - 36777600*eps^11 + 8432448*eps^10 + 34496448*eps^9 - 5627584*eps^8 - 11925304*eps^7 + 248212*eps^6 + 1254344*eps^5 + 22690*eps^4 - 47509*eps^3 - 2341*eps^2 + 489*eps + 75), -144*(5184*eps^10 + 10368*eps^9 + 1872*eps^8 - 4032*eps^7 - 1316*eps^6 + 392*eps^5 + 143*eps^4 - 8*eps^3 - 3*eps^2)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75), 12*(145152*eps^12 + 297216*eps^11 - 81216*eps^10 - 414336*eps^9 - 112432*eps^8 + 123008*eps^7 + 49764*eps^6 - 9608*eps^5 - 5240*eps^4 - 9*eps^3 + 132*eps^2 + 9*eps)/(715392*eps^11 - 95040*eps^10 - 2253888*eps^9 + 521088*eps^8 + 2015160*eps^7 - 319156*eps^6 - 619384*eps^5 - 4434*eps^4 + 39685*eps^3 + 1141*eps^2 - 489*eps - 75), 144*(1728*eps^9 + 4032*eps^8 + 1968*eps^7 - 688*eps^6 - 668*eps^5 - 92*eps^4 + 17*eps^3 + 3*eps^2)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75), -144*(1728*eps^8 + 4032*eps^7 + 1968*eps^6 - 688*eps^5 - 668*eps^4 - 92*eps^3 + 17*eps^2 + 3*eps)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75)), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1), -144*(1728*eps^8 + 4032*eps^7 + 1968*eps^6 - 688*eps^5 - 668*eps^4 - 92*eps^3 + 17*eps^2 + 3*eps)/(715392*eps^10 + 620352*eps^9 - 1633536*eps^8 - 1112448*eps^7 + 902712*eps^6 + 583556*eps^5 - 35828*eps^4 - 40262*eps^3 - 577*eps^2 + 564*eps + 75)]
+
+INFO [2016-04-16 19:16:40,799]
+[normalize] STEP #31
+
+INFO [2016-04-16 19:16:40,803]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 19:19:20,626]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:21:57,993]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 19:21:57,993]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:21:58,090]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 19:22:56,872]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:24:16,747]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 19:24:16,747]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:24:17,019]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 19:24:17,020]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:24:17,084]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 19:24:17,084]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:24:17,147]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 19:25:24,822]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:27:05,777]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 19:27:05,777]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, -4*eps - 1, -2*eps, 2*eps - 1, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:27:05,972]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 19:27:05,973]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:27:06,738]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 19:27:06,738]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:27:06,817]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 19:27:06,817]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:27:07,496]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 19:27:07,497]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps + 1, eps + 1, 0, 0]
+
+INFO [2016-04-16 19:27:07,581]
+Use the balance:
+    [2, 0, -1, eps + 1, -4*eps - 1, (1, 2/3*(483840*eps^12 + 760320*eps^11 - 690048*eps^10 - 2274496*eps^9 - 1387424*eps^8 + 1563184*eps^7 + 1770696*eps^6 + 207164*eps^5 - 237976*eps^4 - 63389*eps^3 + 2403*eps^2 + 1689*eps + 117)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), 1/3*(122815512576*eps^21 + 6479452569600*eps^20 - 308344651776*eps^19 - 17489442963456*eps^18 + 5924752121856*eps^17 + 13031310385152*eps^16 - 6902833593344*eps^15 - 3533161457920*eps^14 + 2845314741376*eps^13 + 189188454208*eps^12 - 514406102816*eps^11 + 66541316912*eps^10 + 39358216296*eps^9 - 10661877812*eps^8 - 805420282*eps^7 + 541147466*eps^6 - 28841971*eps^5 - 10424375*eps^4 + 1304459*eps^3 + 61857*eps^2 - 18942*eps + 936)/(3471704064*eps^19 - 6332940288*eps^18 - 8497889280*eps^17 + 23129468928*eps^16 - 2835955200*eps^15 - 21766803968*eps^14 + 13124838528*eps^13 + 3380364288*eps^12 - 4578453312*eps^11 + 590804432*eps^10 + 449838616*eps^9 - 132384744*eps^8 - 9062266*eps^7 + 6932251*eps^6 - 352507*eps^5 - 118522*eps^4 + 7504*eps^3 + 1623*eps^2 - 147*eps), -4/3*(96825507840*eps^21 + 5068348194816*eps^20 - 175761653760*eps^19 - 13659802583040*eps^18 + 4458348871680*eps^17 + 10199070163968*eps^16 - 5260363347968*eps^15 - 2792833024256*eps^14 + 2179093529728*eps^13 + 163463127104*eps^12 - 395456082208*eps^11 + 48780362768*eps^10 + 30444792680*eps^9 - 8029071688*eps^8 - 642728350*eps^7 + 410403496*eps^6 - 21023477*eps^5 - 7947461*eps^4 + 977895*eps^3 + 47823*eps^2 - 14292*eps + 702)/(3471704064*eps^19 - 6332940288*eps^18 - 8497889280*eps^17 + 23129468928*eps^16 - 2835955200*eps^15 - 21766803968*eps^14 + 13124838528*eps^13 + 3380364288*eps^12 - 4578453312*eps^11 + 590804432*eps^10 + 449838616*eps^9 - 132384744*eps^8 - 9062266*eps^7 + 6932251*eps^6 - 352507*eps^5 - 118522*eps^4 + 7504*eps^3 + 1623*eps^2 - 147*eps), 2/3*(139632574464*eps^21 + 8586745085952*eps^20 - 659342426112*eps^19 - 23253077311488*eps^18 + 8641018490880*eps^17 + 17174516183040*eps^16 - 9780638829056*eps^15 - 4502246900736*eps^14 + 3982523429888*eps^13 + 163226937344*eps^12 - 712080911616*eps^11 + 106532597632*eps^10 + 53188618496*eps^9 - 15889306944*eps^8 - 931005446*eps^7 + 789263416*eps^6 - 49688067*eps^5 - 14798467*eps^4 + 2006151*eps^3 + 81255*eps^2 - 27990*eps + 1404)/(3471704064*eps^19 - 6332940288*eps^18 - 8497889280*eps^17 + 23129468928*eps^16 - 2835955200*eps^15 - 21766803968*eps^14 + 13124838528*eps^13 + 3380364288*eps^12 - 4578453312*eps^11 + 590804432*eps^10 + 449838616*eps^9 - 132384744*eps^8 - 9062266*eps^7 + 6932251*eps^6 - 352507*eps^5 - 118522*eps^4 + 7504*eps^3 + 1623*eps^2 - 147*eps), 1/3*(3833856*eps^14 + 31635456*eps^13 + 55126016*eps^12 - 2712192*eps^11 - 69143296*eps^10 - 43344896*eps^9 + 6019280*eps^8 + 12629368*eps^7 + 2546712*eps^6 - 697844*eps^5 - 260895*eps^4 - 3306*eps^3 + 5436*eps^2 + 405*eps)/(12054528*eps^13 + 2119680*eps^12 - 41758464*eps^11 - 957824*eps^10 + 45517056*eps^9 - 1159680*eps^8 - 16808672*eps^7 - 939016*eps^6 + 1876336*eps^5 + 140524*eps^4 - 78467*eps^3 - 7171*eps^2 + 1023*eps + 147), 2*(269568*eps^10 + 407808*eps^9 - 374976*eps^8 - 581088*eps^7 + 110464*eps^6 + 179488*eps^5 - 6876*eps^4 - 16342*eps^3 - 535*eps^2 + 354*eps + 39)/(753408*eps^10 + 885888*eps^9 - 1676928*eps^8 - 1728512*eps^7 + 956128*eps^6 + 880424*eps^5 - 2328*eps^4 - 65748*eps^3 - 3649*eps^2 + 1170*eps + 147), -4*(1119744*eps^11 + 1112832*eps^10 - 2434176*eps^9 - 1595904*eps^8 + 1710624*eps^7 + 485888*eps^6 - 413160*eps^5 - 46768*eps^4 + 32232*eps^3 + 2225*eps^2 - 549*eps - 78)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), 8*(17280*eps^10 + 43776*eps^9 + 3648*eps^8 - 55440*eps^7 - 27656*eps^6 + 10080*eps^5 + 7628*eps^4 + 225*eps^3 - 267*eps^2 - 9*eps)/(753408*eps^9 + 1639296*eps^8 - 37632*eps^7 - 1766144*eps^6 - 810016*eps^5 + 70408*eps^4 + 68080*eps^3 + 2332*eps^2 - 1317*eps - 147), 2/3*(147456*eps^12 + 3127296*eps^11 + 7532032*eps^10 + 1738240*eps^9 - 8239488*eps^8 - 5805440*eps^7 + 150304*eps^6 + 830736*eps^5 + 57256*eps^4 - 45848*eps^3 - 3912*eps^2 + 951*eps + 117)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), -8/3*(294912*eps^13 + 5637120*eps^12 + 10978304*eps^11 - 4031744*eps^10 - 17140480*eps^9 - 2648128*eps^8 + 5992768*eps^7 + 1274960*eps^6 - 747136*eps^5 - 131120*eps^4 + 39968*eps^3 + 5184*eps^2 - 771*eps - 117)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), 8*(165888*eps^13 + 1237248*eps^12 + 1821312*eps^11 - 809664*eps^10 - 2765600*eps^9 - 860880*eps^8 + 761000*eps^7 + 415004*eps^6 - 28350*eps^5 - 45248*eps^4 - 5007*eps^3 + 780*eps^2 + 117*eps)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), 2*(2654208*eps^15 + 19795968*eps^14 + 27233280*eps^13 - 19438080*eps^12 - 47335808*eps^11 - 5799552*eps^10 + 19121248*eps^9 + 5782496*eps^8 - 2658488*eps^7 - 1127464*eps^6 + 86934*eps^5 + 72524*eps^4 + 3783*eps^3 - 1212*eps^2 - 117*eps)/(12054528*eps^13 + 2119680*eps^12 - 41758464*eps^11 - 957824*eps^10 + 45517056*eps^9 - 1159680*eps^8 - 16808672*eps^7 - 939016*eps^6 + 1876336*eps^5 + 140524*eps^4 - 78467*eps^3 - 7171*eps^2 + 1023*eps + 147), -288*(5184*eps^10 + 10368*eps^9 + 1872*eps^8 - 4032*eps^7 - 1316*eps^6 + 392*eps^5 + 143*eps^4 - 8*eps^3 - 3*eps^2)/(753408*eps^10 + 885888*eps^9 - 1676928*eps^8 - 1728512*eps^7 + 956128*eps^6 + 880424*eps^5 - 2328*eps^4 - 65748*eps^3 - 3649*eps^2 + 1170*eps + 147), 12*(82944*eps^12 + 235008*eps^11 + 20736*eps^10 - 343488*eps^9 - 145024*eps^8 + 102512*eps^7 + 52752*eps^6 - 7796*eps^5 - 5300*eps^4 - 45*eps^3 + 132*eps^2 + 9*eps)/(753408*eps^11 + 132480*eps^10 - 2562816*eps^9 - 51584*eps^8 + 2684640*eps^7 - 75704*eps^6 - 882752*eps^5 - 63420*eps^4 + 62099*eps^3 + 4819*eps^2 - 1023*eps - 147), 288*(1728*eps^9 + 4032*eps^8 + 1968*eps^7 - 688*eps^6 - 668*eps^5 - 92*eps^4 + 17*eps^3 + 3*eps^2)/(753408*eps^10 + 885888*eps^9 - 1676928*eps^8 - 1728512*eps^7 + 956128*eps^6 + 880424*eps^5 - 2328*eps^4 - 65748*eps^3 - 3649*eps^2 + 1170*eps + 147), -144*(1728*eps^8 + 4032*eps^7 + 1968*eps^6 - 688*eps^5 - 668*eps^4 - 92*eps^3 + 17*eps^2 + 3*eps)/(753408*eps^10 + 885888*eps^9 - 1676928*eps^8 - 1728512*eps^7 + 956128*eps^6 + 880424*eps^5 - 2328*eps^4 - 65748*eps^3 - 3649*eps^2 + 1170*eps + 147)), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1), -144*(1728*eps^8 + 4032*eps^7 + 1968*eps^6 - 688*eps^5 - 668*eps^4 - 92*eps^3 + 17*eps^2 + 3*eps)/(753408*eps^10 + 885888*eps^9 - 1676928*eps^8 - 1728512*eps^7 + 956128*eps^6 + 880424*eps^5 - 2328*eps^4 - 65748*eps^3 - 3649*eps^2 + 1170*eps + 147)]
+
+INFO [2016-04-16 19:27:11,096]
+[normalize] STEP #32
+
+INFO [2016-04-16 19:27:11,101]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 19:29:40,288]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 1, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:32:16,928]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 19:32:16,928]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 1, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:32:17,009]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 19:33:11,916]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 1, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:34:25,350]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 19:34:25,350]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 1, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:34:25,538]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 19:34:25,538]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:34:25,604]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 19:34:25,605]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:34:25,670]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 19:35:30,325]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps + 1, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps - 1, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:36:59,857]
+Use the balance:
+    [2, 0, -1, eps + 1, 2*eps - 1, (0, 1, 1/6*(7345920*eps^9 - 16645408*eps^8 + 14749840*eps^7 - 5999032*eps^6 + 617908*eps^5 + 430028*eps^4 - 198446*eps^3 + 37689*eps^2 - 3519*eps + 132)/(4608*eps^8 - 13824*eps^7 + 16384*eps^6 - 10000*eps^5 + 3438*eps^4 - 673*eps^3 + 70*eps^2 - 3*eps), -2/3*(5730816*eps^9 - 12888544*eps^8 + 11315936*eps^7 - 4537944*eps^6 + 436540*eps^5 + 337516*eps^4 - 152037*eps^3 + 28590*eps^2 - 2652*eps + 99)/(4608*eps^8 - 13824*eps^7 + 16384*eps^6 - 10000*eps^5 + 3438*eps^4 - 673*eps^3 + 70*eps^2 - 3*eps), 1/3*(10536960*eps^9 - 24559264*eps^8 + 22730304*eps^7 - 10104256*eps^6 + 1651880*eps^5 + 391326*eps^4 - 246698*eps^3 + 50795*eps^2 - 4959*eps + 192)/(4608*eps^8 - 13824*eps^7 + 16384*eps^6 - 10000*eps^5 + 3438*eps^4 - 673*eps^3 + 70*eps^2 - 3*eps), -(3*eps^2 - 5*eps + 1)/(16*eps^2 - 16*eps + 3), 0, 0, 0, -3*(4*eps - 1)/(4*eps - 3), 4*(22*eps^2 - 17*eps + 3)/(4*eps - 3), -12*(4*eps^2 - 4*eps + 1)/(4*eps - 3), -(12*eps^3 - 24*eps^2 + 13*eps - 2)/(16*eps^2 - 16*eps + 3), 0, 0, -2*(12*eps^2 - 8*eps + 1)/(4*eps - 3), 0), (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2*eps), -2*(12*eps^2 - 8*eps + 1)/(4*eps - 3)]
+
+INFO [2016-04-16 19:37:03,395]
+[normalize] STEP #33
+
+INFO [2016-04-16 19:37:03,407]
+Looking for the balance between x = -1 and x = +Infinity
+INFO [2016-04-16 19:39:33,631]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:41:54,073]
+Looking for the balance between x = +Infinity and x = -1
+INFO [2016-04-16 19:41:54,073]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:41:54,135]
+Looking for the balance between x = 0 and x = -1
+INFO [2016-04-16 19:42:59,512]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:44:36,363]
+Looking for the balance between x = -1 and x = 0
+INFO [2016-04-16 19:44:36,364]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:44:36,429]
+Looking for the balance between x = 0 and x = +Infinity
+INFO [2016-04-16 19:44:36,430]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:44:36,494]
+Looking for the balance between x = +Infinity and x = 0
+INFO [2016-04-16 19:44:36,495]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:44:36,560]
+Looking for the balance between x = 0 and x = 1
+INFO [2016-04-16 19:45:51,597]
+  Eigenvalues:
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:46:47,499]
+Looking for the balance between x = 1 and x = 0
+INFO [2016-04-16 19:46:47,500]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = 0:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:46:47,567]
+Looking for the balance between x = 1 and x = -1
+INFO [2016-04-16 19:46:47,567]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:46:47,635]
+Looking for the balance between x = -1 and x = 1
+INFO [2016-04-16 19:46:47,636]
+  Eigenvalues:
+    x = -1:
+        [-4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, -4*eps, 2*eps, 2*eps, 2*eps, 2*eps, -2*eps, 0, 0, 0, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:46:47,705]
+Looking for the balance between x = 1 and x = +Infinity
+INFO [2016-04-16 19:46:47,705]
+  Eigenvalues:
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+
+INFO [2016-04-16 19:46:47,774]
+Looking for the balance between x = +Infinity and x = 1
+INFO [2016-04-16 19:46:47,774]
+  Eigenvalues:
+    x = +Infinity:
+        [2*eps, 2*eps, 2*eps, 2*eps, 2*eps, 3*eps, 3*eps, 3*eps, eps, eps, eps, eps, eps, eps, eps, 0, 0]
+    x = 1:
+        [-10*eps, -6*eps, -6*eps, -2*eps, -2*eps, -2*eps, -2*eps, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+INFO [2016-04-16 19:46:47,842]
+Select x0 = None
+INFO [2016-04-16 19:46:47,843]
+[normalize] DONE
+
+real    200m13.220s
+user    200m12.485s
+sys     0m1.353s
