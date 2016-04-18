@@ -3,7 +3,7 @@ import unittest
 
 from   sage.all import SR
 from   fuchsia import (import_matrix_from_file, is_normalized, factorize,
-           fuchsify, normalize, partial_fraction, transform, singularities)
+           fuchsify, normalize, transform, simplify_by_factorization, singularities)
 
 class Test(unittest.TestCase):
     def assertReductionWorks(t, filename):
@@ -14,32 +14,33 @@ class Test(unittest.TestCase):
         t.assertNotEqual(M_pranks, [0]*len(M_pranks))
 
         #1 Fuchsify
-        Mf, Tf = fuchsify(M, x)
-        Mf = Mf.simplify_rational()
-        t.assertEqual(Mf, transform(M, x, Tf).simplify_rational())
+        m, t1 = simplify_by_factorization(M, x)
+        Mf, t2 = fuchsify(m, x)
+        Tf = t1*t2
+        t.assertTrue((Mf-transform(M, x, Tf)).simplify_rational().is_zero())
         Mf_pranks = singularities(Mf, x).values()
         t.assertEqual(Mf_pranks, [0]*len(Mf_pranks))
 
         #2 Normalize
         t.assertFalse(is_normalized(Mf, x, eps))
-        Mn, Tn = normalize(Mf, x, eps)
-        Mn = Mn.simplify_rational()
-        t.assertEqual(Mn, transform(Mf, x, Tn).simplify_rational())
+        m, t1 = simplify_by_factorization(Mf, x)
+        for Mn, t2 in normalize(m, x, eps): pass
+        Tn = t1*t2
+        t.assertTrue((Mn-transform(Mf, x, Tn)).simplify_rational().is_zero())
         t.assertTrue(is_normalized(Mn, x, eps))
 
         #3 Factorize
-        Mn = partial_fraction(Mn,x)
         t.assertIn(eps, Mn.variables())
-        Mc, Tc = factorize(Mn, x, eps, seed=3)
-        Mc = Mc.simplify_rational()
-        t.assertEqual(Mc, transform(Mn, x, Tc).simplify_rational())
+        m, t1 = simplify_by_factorization(Mn, x)
+        Mc, t2 = factorize(m, x, eps, seed=3)
+        Tc = t1*t2
+        t.assertTrue((Mc-transform(Mn, x, Tc)).simplify_rational().is_zero())
         t.assertNotIn(eps, (Mc/eps).simplify_rational().variables())
 
     def test_git_409(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "git_409.mtx"))
 
-    @unittest.skip("Part #3 of the test is hanging")
     def test_git_410(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "git_410.mtx"))

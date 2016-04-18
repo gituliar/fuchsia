@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        N, T = normalize(M, x, SR.var("epsilon"))
+        for N, T in normalize(M, x, SR.var("epsilon")): pass
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        N, T = normalize(M, x, SR.var("epsilon"))
+        for N, T in normalize(M, x, SR.var("epsilon")): pass
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
             [0, (1+e)/3/x]
         ])
 
-        N, T = normalize(M, x, e)
+        for N, T in normalize(M, x, e): pass
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         t.assertTrue(is_normalized(N, x, e))
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         ])
 
         with t.assertRaises(FuchsiaError):
-            N, T = normalize(M, x, e)
+            for N, T in normalize(M, x, e): pass
 
     def test_normalize_5(t):
         # An unnormalizable example by A. A. Bolibrukh
@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
         t.assertEqual(f_pranks, [0]*len(f_pranks))
 
         with t.assertRaises(FuchsiaError):
-            n, nt = normalize(f, x, e)
+            for n, nt in normalize(f, x, e): pass
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

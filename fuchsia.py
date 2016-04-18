@@ -269,11 +269,19 @@ def matrix_residue(M, x, x0):
     [-1 -2]
     [-3 -4]
     """
+    if M._cache is None:
+        M._cache = {}
+    key = "matrix_residue_%s_%s" % (x, x0)
+    if M._cache.has_key(key):
+        return M._cache[key]
+
     m0 = matrix_c0(M, x, x0, 0)
     if x0 == oo:
-        return -m0
+        res = -m0
     else:
-        return m0
+        res = m0
+    M._cache[key] = res
+    return res
 
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
@@ -550,6 +558,20 @@ def fuchsify(M, x, seed=0):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
+def eigenvectors_left(m):
+    if m._cache is None:
+        m._cache = {}
+    if not m._cache.has_key("eigenvectors_left"):
+        m._cache["eigenvectors_left"] = m.eigenvectors_left()
+    return m._cache["eigenvectors_left"]
+
+def eigenvectors_right(m):
+    if m._cache is None:
+        m._cache = {}
+    if not m._cache.has_key("eigenvectors_right"):
+        m._cache["eigenvectors_right"] = m.eigenvectors_right()
+    return m._cache["eigenvectors_right"]
+
 def normalize(m, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
     form dF/dx=m*F, find a transformation that will shift all
@@ -558,92 +580,88 @@ def normalize(m, x, eps, seed=0):
     transformation. Raise FuchsiaError if such transformation
     is not found.
     """
-    m = partial_fraction(m, x)
+    logger.info("[normalize] START\n")
     T = identity_matrix(m.base_ring(), m.nrows())
-    select_balance_state = {"random": Random(seed)}
-    while not is_normalized(m, x, eps):
-        if logger.isEnabledFor(logging.INFO):
-            points = singularities(m, x).keys()
-            msg = "Eigenvalues:\n"
-            for x0 in points:
-                m0 = matrix_residue(m, x, x0)
-                msg += "    x = %s:\n" % x0
-                msg += "        %s\n" % str(m0.eigenvalues()).replace("\n"," ")
-                if logger.isEnabledFor(logging.DEBUG):
-                    msg += "        l: %s\n" % str(m0.eigenvectors_left()).replace("\n"," ")
-                    msg += "        r: %s\n" % str(m0.eigenvectors_right()).replace("\n"," ")
-            if logger.isEnabledFor(logging.INFO):
-                logger.info(msg)
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(msg)
-
-        balances = find_balances(m, x, eps)
-        b = select_balance(balances, eps, select_balance_state)
+    state = {"random": Random(seed)}
+    i = 0
+    while True:
+        i += 1
+        m = partial_fraction(m, x)
+        logger.info("[normalize] STEP #%s\n" % i)
+        balances = find_balances(m, x, eps, state)
+        b = select_balance(balances, eps, state)
         if b is None:
+            if state["is_normalized"]:
+                break
             raise FuchsiaError("can not balance matrix")
-        logger.info("Use balance:\n    %s\n" % b)
+        logger.info("Use the balance:\n    %s\n" % b)
 
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if cond == 1:
-            P = partial_fraction(cross_product(a0_evec, b0_evec) / scale, eps)
+            P = cross_product(a0_evec, b0_evec) / scale
+            m = balance_transform(m, P, x1, x2, x)
             T0 = balance(P, x1, x2, x)
         else:
-            P = partial_fraction(cross_product(b0_evec, a0_evec) / scale, eps)
+            P = cross_product(b0_evec, a0_evec) / scale
+            m = balance_transform(m, P, x2, x1, x)
             T0 = balance(P, x2, x1, x)
-        T0 = partial_fraction(T0, x)
-        logger.debug("P  =\n%s" % (P,))
-        logger.debug("T0 =\n%s" % (T0,))
 
-        m = transform(m, x, T0)
-        m = partial_fraction(m, x)
-        #if logger.isEnabledFor(logging.INFO):
-        #    logger.info("New matrix:\n    %s" % '\n    '.join([str(ex) for ex in m.list()]))
-        T = partial_fraction(T*T0, x)
+        T = (T*T0).simplify_rational()
+        yield m, T
+    logger.info("[normalize] DONE\n")
 
-    logger.info("Transformation matrix:\n    %s" % '\n    '.join([str(ex) for ex in T.list()]))
-    return m, T
-
-def find_balances(m, x, eps):
-    points = singularities(m, x).keys()
-    residues = [matrix_residue(m, x, pt) for pt in points]
-    left_evectors = [r.eigenvectors_left() for r in residues]
-    right_evectors = [r.eigenvectors_right() for r in residues]
-    balances = []
-    for i1, i2 in permutations(range(len(points)), 2):
-        x1, x2 = points[i1], points[i2]
-        a0, b0 = residues[i1], residues[i2]
-        a0_evr, b0_evr = right_evectors[i1], right_evectors[i2]
-        a0_evl, b0_evl = left_evectors[i1], left_evectors[i2]
-        logger.debug("Looking for the balance\n    x1 = %s\n    x2 = %s" % (x1, x2))
-        if logger.isEnabledFor(logging.DEBUG):
-            msg = "Res(m, x = %s)\n%s\n" % (x1, a0)
-            msg += "Res(m, x = %s)\n%s\n" % (x2, b0)
-            logger.debug(msg)
-            msg = "Eigenvalues:"
-            for xi, mi in [(x1, a0), (x2, b0)]:
-                msg += "    x = %s:\n" % xi
-                msg += "        %s\n" % str(mi.eigenvalues()).replace("\n"," ")
-                msg += "        l: %s\n" % str(mi.eigenvectors_left()).replace("\n"," ")
-                msg += "        r: %s\n" % str(mi.eigenvectors_right()).replace("\n"," ")
-            logger.debug(msg)
-
-
-        logging.debug("Use condition #1")
-        balances_1 = find_balances_by_cond(a0_evr, b0_evl, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5)
-        balances_1 = [[1, x1, x2] + balance for balance in balances_1]
-        balances += balances_1
+def find_balances(m, x, eps, state={}):
+    if not state.has_key("pairs"):
+        pairs = list(combinations(singularities(m, x).keys(), 2))
+        state["pairs"] = []
+        for x1,x2 in pairs:
+            state["pairs"] += [(x1,x2),(x2,x1)]
+            # the order of pairs matters, hence we do not use `permutations` routine
+    pairs = state["pairs"]
+    pairs.sort(key = lambda pair: pair in state.get("processed_pairs", []))
+    state["is_normalized"] = True
+    state.setdefault("processed_pairs", [])
     
-        logging.debug("Use condition #2")
-        balances_2 = find_balances_by_cond(a0_evl, b0_evr, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5)
-        balances_2 = [[2, x1, x2] + balance for balance in balances_2]
-        balances += balances_2
+    for x1, x2 in pairs:
+        logger.info("Looking for the balance between x = %s and x = %s" % (x1,x2))
+        a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
 
-    if logger.isEnabledFor(logging.DEBUG):
-        msg = "Found balances (#cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale):\n"
-        for balance in balances:
-            msg += "    %s\n" % (balance,)
-        logger.debug(msg)
-    return balances
+        a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
+        for ev, evec, emult in a0_evr:
+            if limit_fixed(ev, eps, 0) != 0:
+                state["is_normalized"] = False
+                break
+
+        if logger.isEnabledFor(logging.INFO):
+            msg = "  Eigenvalues:\n"
+            msg += "    x = %s:\n" % x1
+            a0_evals = [];
+            for ev, evec, emult in a0_evr:
+                a0_evals += [ev]*emult
+            msg += "        %s\n" % str(a0_evals)
+            msg += "    x = %s:\n" % x2
+            b0_evals = [];
+            for ev, evec, emult in b0_evl:
+                b0_evals += [ev]*emult
+            msg += "        %s\n" % str(b0_evals)
+            logger.info(msg)
+
+        balances_1 = find_balances_by_cond(a0_evr, b0_evl, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5)
+        for balance in balances_1:
+            balance = [1, x1, x2] + balance
+            yield balance
+
+        a0_evl, b0_evr = eigenvectors_left(a0), eigenvectors_right(b0)
+        balances_2 = find_balances_by_cond(a0_evl, b0_evr, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) >= 0.5)
+        for balance in balances_2:
+            balance = [2, x1, x2] + balance
+            yield balance
+
+        if len(state["processed_pairs"]) == len(pairs):
+            state["processed_pairs"] = []
+        if (x1,x2) not in state["processed_pairs"]:
+            state["processed_pairs"].append((x1,x2))
+
 
 def find_balances_by_cond(a0_ev, b0_ev, cond):
     res = []
@@ -663,19 +681,34 @@ def find_balances_by_cond(a0_ev, b0_ev, cond):
                     res.append(balance)
     return res
 
-def select_balance(balances, eps, state):
+def select_balance(balances, eps, state={}):
+    min_degree, min_balance = None, None
+    bs = []
     for b in balances:
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if (cond == 1) and limit_fixed(a0_eval, eps, 0) < -0.5 and \
                 limit_fixed(b0_eval, eps, 0) >= 0.5:
-            return b
+            degree = max(scale.numerator().degree(eps), scale.denominator().degree(eps))
+            if degree < 4:
+                return b
+            if (min_degree is None) or (min_degree > degree):
+                 min_degree = degree
+                 min_balance = b
         elif (cond == 2) and limit_fixed(a0_eval, eps, 0) >= 0.5 and \
                 limit_fixed(b0_eval, eps, 0) < -0.5:
-            return b
+            degree = max(scale.numerator().degree(eps), scale.denominator().degree(eps))
+            if degree < 4:
+                return b
+            if (min_degree is None) or (min_degree > degree):
+                 min_degree = degree
+                 min_balance = b
+        bs.append(b)
+    if min_balance is not None:
+        return min_balance
 
     x0 = state.get("x0")
     if x0 is None:
-        for b in balances:
+        for b in bs:
             cond, x1, x2, ev1, ev2 = b[:5]
             if cond == 1:
                 x0 = x2
@@ -686,7 +719,7 @@ def select_balance(balances, eps, state):
         logger.info("Select x0 = %s" % x0)
         state["x0"] = x0
 
-    balances_x0 = [b for b in balances if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
+    balances_x0 = [b for b in bs if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
     b = state["random"].choice(balances_x0) if balances_x0 else None
     return b
 
@@ -854,7 +887,10 @@ def export_matrix(f, m):
     """
     f.write("%%MatrixMarket matrix array Maple[symbolic] general\n")
     f.write("%d %d\n" % (m.nrows(), m.ncols()))
+    i = 0
     for col in m.columns():
+        i += 1
+        f.write('%% #%d\n' % i)
         for mij in col:
             f.write(str(mij).replace(' ', ''))
             f.write('\n')
@@ -950,10 +986,16 @@ def main():
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'normalize':
                 M = import_matrix_from_file(args[1])
-                M, T = normalize(M, x, epsilon)
+                M, t1 = simplify_by_factorization(M, x)
+                i = 0
+                for M, t2 in normalize(M, x, epsilon):
+                    i += 1
+                T = t1*t2
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
-                M, T = factorize(M, x, epsilon)
+                M, t1 = simplify_by_factorization(M, x)
+                M, t2 = factorize(M, x, epsilon)
+                T = t1*t2
             elif len(args) >= 2 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 if len(args) == 3:
@@ -968,9 +1010,12 @@ def main():
                 usage()
             else:
                 raise getopt.GetoptError("unknown command: %s" % (args))
-        if mpath is not None and M is not None:
+        if M is not None:
             M = partial_fraction(M, x)
-            export_matrix_to_file(mpath, M)
+            if mpath is not None: 
+                export_matrix_to_file(mpath, M)
+            else:
+                print M
         if tpath is not None and T is not None:
             T = partial_fraction(T, x)
             export_matrix_to_file(tpath, T)

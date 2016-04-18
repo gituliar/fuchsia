@@ -17,9 +17,5 @@ class Test(unittest.TestCase):
         F_pranks = singularities(F, x).values()
         t.assertEqual(F_pranks, [0]*len(F_pranks))
 
-    def test_git_410(t):
-        t.assertFuchsifyWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "git_410.mtx"))
-
 if __name__ == "__main__":
     unittest.main(verbosity=2)
