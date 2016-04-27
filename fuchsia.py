@@ -64,6 +64,15 @@ except IOError:
 class FuchsiaError(Exception):
     pass
 
+def cross_product(v1, v2):
+    m1, m2 = matrix(v1), matrix(v2)
+    return m1.transpose() * m2
+
+def dot_product(v1, v2):
+    m1, m2 = matrix(v1), matrix(v2)
+    sp = m1 * m2.transpose()
+    return sp[0,0]
+
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
 
@@ -84,7 +93,7 @@ def transform(M, x, T):
 def balance(P, x1, x2, x):
     assert P.is_square()
     assert (P*P - P).is_zero()
-    assert x1 != x2
+    assert not bool(x1 == x2)
     coP = identity_matrix(P.nrows()) - P
     if x1 == oo:
         b = coP - (x - x2)*P
@@ -98,7 +107,7 @@ def balance_transform(M, P, x1, x2, x):
     """Same thing as transform(M, x, balance(P, x1, x2, x)), but faster."""
     assert P.is_square()
     #assert (P*P - P).is_zero()
-    assert x1 != x2
+    assert not bool(x1 == x2)
     coP = identity_matrix(P.nrows()) - P
     if x1 == oo:
         k = -(x - x2)
@@ -350,123 +359,6 @@ def solve_left_fixed(A, B):
     """
     return solve_right_fixed(A.transpose(), B.transpose()).transpose()
 
-def alg1(L0, jordan_cellsizes):
-    assert L0.is_square()
-    ring = L0.base_ring()
-    N = L0.nrows()
-    I_N = identity_matrix(N)
-    S = set()
-    D = zero_matrix(ring, N)
-    K = sum(1 if s > 1 else 0 for s in jordan_cellsizes)
-    while True:
-        Lx = copy(L0)
-        for i in S:
-            Lx[:, i] = 0
-            Lx[i, :] = 0
-        fi = None
-        c = None
-        for i in xrange(0, N):
-            if i not in S:
-                try:
-                    c = solve_right_fixed(Lx[:,0:i], Lx[:,i])
-                except ValueError:
-                    # No solution found; vectors are independent.
-                    continue
-                fi = i
-                break
-        assert fi is not None
-        assert c is not None
-        D0 = matrix(ring, N)
-        invD0 = matrix(ring, N)
-        for j in xrange(fi):
-            D0[j, fi] = -c[j, 0]
-            invD0[j, fi] = -c[j, 0] \
-                    if jordan_cellsizes[j] == jordan_cellsizes[fi] else 0
-        L0 = (I_N - invD0)*L0*(I_N + D0)
-        D = D + D0 + D*D0
-        if fi < K:
-            break
-        S.add(fi)
-    # Check Alg.1 promise
-    for j in xrange(N):
-        for k in xrange(N):
-            if (j not in S) and ((k in S) or k == fi):
-                assert L0[j,k] == 0
-    S.add(fi)
-    return S, D
-
-def alg1x(A0, A1, x):
-    if not matrix_is_nilpotent(A0):
-        raise FuchsiaError("matrix is irreducible (non-nilpotent residue)")
-    # We will rely on undocumented behavior of jordan_form() call:
-    # we will take it upon faith that it sorts Jordan cells by
-    # their size, and puts the largest ones closer to (0, 0).
-    A0J, U = A0.jordan_form(transformation=True)
-    invU = U.inverse()
-    A0J_cs = jordan_cell_sizes(A0J)
-    assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
-    ncells = len(A0J_cs)
-    A0J_css = [sum(A0J_cs[:i]) for i in xrange(ncells + 1)]
-    nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
-    u0 = [U[:,A0J_css[i]] for i in xrange(ncells)]
-    v0t = [invU[A0J_css[i+1]-1,:] for i in xrange(ncells)]
-    L0 = matrix([
-        [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
-        for k in xrange(ncells)
-    ])
-    L0 = L0.simplify_rational()
-    L1 = matrix([
-        [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
-        for k in xrange(ncells)
-    ])
-    assert (L1 - diagonal_matrix(
-            [0]*(ncells-nsimplecells) + [1]*nsimplecells)).is_zero()
-    #zero_rows = [i for i in xrange(A0.nrows()) if A0J[i,:].is_zero()]
-    #zero_cols = [j for j in xrange(A0.nrows()) if A0J[:,j].is_zero()]
-    #assert len(zero_rows) == len(zero_cols) == ncells
-    #_L0 = (invU*A1*U)[zero_rows, zero_cols]
-    #assert (L0 - _L0).is_zero()
-    lam = SR.symbol()
-    if not (L0 - lam*L1).determinant().is_zero():
-        raise FuchsiaError("matrix is Moser-irreducible")
-    S, D = alg1(L0, A0J_cs)
-    I_E = identity_matrix(D.base_ring(), A0.nrows())
-    for i in xrange(ncells):
-        for j in xrange(ncells):
-            if not D[i,j].is_zero():
-                ni = A0J_css[i]
-                nj = A0J_css[j]
-                for k in xrange(min(A0J_cs[i], A0J_cs[j])):
-                    I_E[ni+k,nj+k] += D[i,j]
-    U_t = U*I_E
-    invU_t = U_t.inverse()
-    return \
-        U_t[:, [A0J_css[i] for i in S]], \
-        invU_t[[A0J_css[i] for i in S], :]
-
-def reduce_at_one_point(M, x, v, p, v2=oo):
-    """Given a system of differential equations of the form dF/dx=M*F,
-    with M having a singularity around x=v with Poincare rank p,
-    try to find a transformation T, which will reduce p by 1 (but
-    possibly introduce another singularity at x=v2). Return the
-    transformed M and T.
-    """
-    assert M.is_square()
-    assert p > 0
-    n = M.nrows()
-    combinedT = identity_matrix(M.base_ring(), n)
-    while True:
-        A0 = matrix_c0(M, x, v, p)
-        if A0.is_zero(): break
-        A1 = matrix_c1(M, x, v, p)
-        U, V = alg1x(A0, A1, x)
-        P = U*V
-        M = balance_transform(M, P, v, v2, x)
-        M = M.simplify_rational()
-        combinedT = combinedT * balance(P, v, v2, x)
-    combinedT = combinedT.simplify_rational()
-    return M, combinedT
-
 def any_integer(rng, ring, excluded):
     r = 2
     while True:
@@ -475,21 +367,10 @@ def any_integer(rng, ring, excluded):
             return p
         r *= 2
 
-def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
-    """Find matrix V, such that it's rows span a left invariant
-    subspace of A and form a dual basis with columns of U (that
-    is, V*U=I).
-    """
-    evlist = []
-    for eigenval, eigenvects, evmult in A.eigenvectors_left():
-        evlist.extend(eigenvects)
-    rng.shuffle(evlist)
-    W = matrix(evlist)
-    try:
-        M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
-        return M*W
-    except ValueError:
-        return None
+
+###############################################################################
+# Step I: Fuchsify
+###############################################################################
 
 def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -505,7 +386,7 @@ def fuchsify(M, x, seed=0):
     poincare_map = singularities(M, x)
     def iter_reductions(p1, U):
         for p2, prank2 in poincare_map.iteritems():
-            if p2 == p1: continue
+            if bool(p2 == p1): continue
             while prank2 >= 0:
                 B0 = matrix_c0(M, x, p2, prank2)
                 if not B0.is_zero(): break
@@ -558,19 +439,142 @@ def fuchsify(M, x, seed=0):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
-def eigenvectors_left(m):
-    if m._cache is None:
-        m._cache = {}
-    if not m._cache.has_key("eigenvectors_left"):
-        m._cache["eigenvectors_left"] = m.eigenvectors_left()
-    return m._cache["eigenvectors_left"]
+def reduce_at_one_point(M, x, v, p, v2=oo):
+    """Given a system of differential equations of the form dF/dx=M*F,
+    with M having a singularity around x=v with Poincare rank p,
+    try to find a transformation T, which will reduce p by 1 (but
+    possibly introduce another singularity at x=v2). Return the
+    transformed M and T.
+    """
+    assert M.is_square()
+    assert p > 0
+    n = M.nrows()
+    combinedT = identity_matrix(M.base_ring(), n)
+    while True:
+        A0 = matrix_c0(M, x, v, p)
+        if A0.is_zero(): break
+        A1 = matrix_c1(M, x, v, p)
+        U, V = alg1x(A0, A1, x)
+        P = U*V
+        M = balance_transform(M, P, v, v2, x)
+        M = M.simplify_rational()
+        combinedT = combinedT * balance(P, v, v2, x)
+    combinedT = combinedT.simplify_rational()
+    return M, combinedT
 
-def eigenvectors_right(m):
-    if m._cache is None:
-        m._cache = {}
-    if not m._cache.has_key("eigenvectors_right"):
-        m._cache["eigenvectors_right"] = m.eigenvectors_right()
-    return m._cache["eigenvectors_right"]
+def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
+    """Find matrix V, such that it's rows span a left invariant
+    subspace of A and form a dual basis with columns of U (that
+    is, V*U=I).
+    """
+    evlist = []
+    for eigenval, eigenvects, evmult in A.eigenvectors_left():
+        evlist.extend(eigenvects)
+    rng.shuffle(evlist)
+    W = matrix(evlist)
+    try:
+        M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
+        return M*W
+    except ValueError:
+        return None
+
+def alg1x(A0, A1, x):
+    #if not matrix_is_nilpotent(A0):
+    #    raise FuchsiaError("matrix is irreducible (non-nilpotent residue)")
+    # We will rely on undocumented behavior of jordan_form() call:
+    # we will take it upon faith that it sorts Jordan cells by
+    # their size, and puts the largest ones closer to (0, 0).
+    A0J, U = A0.jordan_form(transformation=True)
+    invU = U.inverse()
+    A0J_cs = jordan_cell_sizes(A0J)
+    assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
+    ncells = len(A0J_cs)
+    A0J_css = [sum(A0J_cs[:i]) for i in xrange(ncells + 1)]
+    nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
+    u0 = [U[:,A0J_css[i]] for i in xrange(ncells)]
+    v0t = [invU[A0J_css[i+1]-1,:] for i in xrange(ncells)]
+    L0 = matrix([
+        [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
+        for k in xrange(ncells)
+    ])
+    L0 = L0.simplify_rational()
+    L1 = matrix([
+        [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
+        for k in xrange(ncells)
+    ])
+    assert (L1 - diagonal_matrix(
+            [0]*(ncells-nsimplecells) + [1]*nsimplecells)).is_zero()
+    #zero_rows = [i for i in xrange(A0.nrows()) if A0J[i,:].is_zero()]
+    #zero_cols = [j for j in xrange(A0.nrows()) if A0J[:,j].is_zero()]
+    #assert len(zero_rows) == len(zero_cols) == ncells
+    #_L0 = (invU*A1*U)[zero_rows, zero_cols]
+    #assert (L0 - _L0).is_zero()
+    lam = SR.symbol()
+    if not (L0 - lam*L1).determinant().is_zero():
+        raise FuchsiaError("matrix is Moser-irreducible")
+    S, D = alg1(L0, A0J_cs)
+    I_E = identity_matrix(D.base_ring(), A0.nrows())
+    for i in xrange(ncells):
+        for j in xrange(ncells):
+            if not D[i,j].is_zero():
+                ni = A0J_css[i]
+                nj = A0J_css[j]
+                for k in xrange(min(A0J_cs[i], A0J_cs[j])):
+                    I_E[ni+k,nj+k] += D[i,j]
+    U_t = U*I_E
+    invU_t = U_t.inverse()
+    return \
+        U_t[:, [A0J_css[i] for i in S]], \
+        invU_t[[A0J_css[i] for i in S], :]
+
+def alg1(L0, jordan_cellsizes):
+    assert L0.is_square()
+    ring = L0.base_ring()
+    N = L0.nrows()
+    I_N = identity_matrix(N)
+    S = set()
+    D = zero_matrix(ring, N)
+    K = sum(1 if s > 1 else 0 for s in jordan_cellsizes)
+    while True:
+        Lx = copy(L0)
+        for i in S:
+            Lx[:, i] = 0
+            Lx[i, :] = 0
+        fi = None
+        c = None
+        for i in xrange(0, N):
+            if i not in S:
+                try:
+                    c = solve_right_fixed(Lx[:,0:i], Lx[:,i])
+                except ValueError:
+                    # No solution found; vectors are independent.
+                    continue
+                fi = i
+                break
+        assert fi is not None
+        assert c is not None
+        D0 = matrix(ring, N)
+        invD0 = matrix(ring, N)
+        for j in xrange(fi):
+            D0[j, fi] = -c[j, 0]
+            invD0[j, fi] = -c[j, 0] \
+                    if jordan_cellsizes[j] == jordan_cellsizes[fi] else 0
+        L0 = (I_N - invD0)*L0*(I_N + D0)
+        D = D + D0 + D*D0
+        if fi < K:
+            break
+        S.add(fi)
+    # Check Alg.1 promise
+    for j in xrange(N):
+        for k in xrange(N):
+            if (j not in S) and ((k in S) or k == fi):
+                assert L0[j,k] == 0
+    S.add(fi)
+    return S, D
+
+###############################################################################
+# Step II: Normalize
+###############################################################################
 
 def normalize(m, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
@@ -621,7 +625,7 @@ def find_balances(m, x, eps, state={}):
     pairs.sort(key = lambda pair: pair in state.get("processed_pairs", []))
     state["is_normalized"] = True
     state.setdefault("processed_pairs", [])
-    
+
     for x1, x2 in pairs:
         logger.info("Looking for the balance between x = %s and x = %s" % (x1,x2))
         a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
@@ -722,6 +726,26 @@ def select_balance(balances, eps, state={}):
     balances_x0 = [b for b in bs if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
     b = state["random"].choice(balances_x0) if balances_x0 else None
     return b
+
+def eigenvectors_left(m):
+    if m._cache is None:
+        m._cache = {}
+    if not m._cache.has_key("eigenvectors_left"):
+        res = simplify(m.eigenvectors_left())
+        m._cache["eigenvectors_left"] = res
+    return m._cache["eigenvectors_left"]
+
+def eigenvectors_right(m):
+    if m._cache is None:
+        m._cache = {}
+    if not m._cache.has_key("eigenvectors_right"):
+        res = m.eigenvectors_right()
+        m._cache["eigenvectors_right"] = res
+    return m._cache["eigenvectors_right"]
+
+###############################################################################
+# Step III: Factorize
+###############################################################################
 
 def gensym():
     sym = SR.symbol()
@@ -879,27 +903,9 @@ def is_normalized(M, x, eps):
                 return False
     return True
 
-# matrix.py
-
-def export_matrix(f, m):
-    """Write a matrix to a file-like object using MatrixMarket
-    array format.
-    """
-    f.write("%%MatrixMarket matrix array Maple[symbolic] general\n")
-    f.write("%d %d\n" % (m.nrows(), m.ncols()))
-    i = 0
-    for col in m.columns():
-        i += 1
-        f.write('%% #%d\n' % i)
-        for mij in col:
-            f.write(str(mij).replace(' ', ''))
-            f.write('\n')
-
-def export_matrix_to_file(filename, m):
-    """Write a matrix to a named file using MatrixMarket array format.
-    """
-    with open(filename, 'w') as f:
-        export_matrix(f, m)
+###############################################################################
+# Import/Export routines
+###############################################################################
 
 _parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
 
@@ -941,14 +947,27 @@ def import_matrix_from_file(filename):
     with open(filename, 'r') as f:
         return import_matrix(f)
 
-def cross_product(v1, v2):
-    m1, m2 = matrix(v1), matrix(v2)
-    return m1.transpose() * m2
+def export_matrix(f, m):
+    """Write a matrix to a file-like object using MatrixMarket
+    array format.
+    """
+    f.write("%%MatrixMarket matrix array Fuchsia[symbolic] general\n")
+    f.write("%d %d\n" % (m.nrows(), m.ncols()))
+    i = 0
+    for col in m.columns():
+        i += 1
+        f.write('%% #%d\n' % i)
+        for mij in col:
+            f.write(str(mij).replace(' ', ''))
+            f.write('\n')
 
-def dot_product(v1, v2):
-    m1, m2 = matrix(v1), matrix(v2)
-    sp = m1 * m2.transpose()
-    return sp[0,0]
+def export_matrix_to_file(filename, m):
+    """Write a matrix to a named file using MatrixMarket array format.
+    """
+    with open(filename, 'w') as f:
+        export_matrix(f, m)
+
+###############################################################################
 
 def main():
     import getopt
