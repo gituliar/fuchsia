@@ -21,5 +21,8 @@ clean:
 test:
 	sage -python setup.py test
 
+test_fuchsia_py:
+	sage -python -mdoctest fuchsia.py
+
 $(TESTS): test/%.py:
 	env SAGE_PATH="$(CURDIR)" sage -python test/$*.py
