@@ -16,8 +16,11 @@ Commands:
         find a transformation that will make a given normalized
         matrix proportional to the infinitesimal parameter
 
-    transform [-x <expr>] [-m <path>] <matrix> [<transform>]
+    transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
+
+    transform [-m <path>] -y <expr> <matrix>
+        change a free variable according to the given expression
 
 Options:
     -h          show this help message
@@ -25,7 +28,7 @@ Options:
     -v          be verbose and print log information
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
-    -x <expr>   replace a free variable by this expression (example: "x=1/(1-y)")
+    -y <expr>   expression for the new free variable (example: "x=(1-y^2)/(1+y^2)")
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -998,11 +1001,10 @@ def main():
         print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
         print "Authors: %s\n" % __author__
         mpath = tpath = profpath = None
-        M = T = None
-        x = SR.var("x")
-        epsilon = SR.var("eps")
+        M = T = x_fy = None
+        x, epsilon = SR.var("x eps")
         logger.setLevel(logging.INFO)
-        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:P:x:e:m:t:")
+        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:P:x:y:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
             if key == "-l":
@@ -1012,6 +1014,7 @@ def main():
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = _parser.parse(value)
+            if key == "-y": x_fy = _parser.parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
@@ -1035,14 +1038,18 @@ def main():
                 T = t1*t2
             elif len(args) >= 2 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
-                if len(args) == 3:
+                if x_fy is None:
                     t = import_matrix_from_file(args[2])
                     M = transform(M, x, t)
-                if len(args) == 2:
-                    x, fy = expr.left(), expr.right()
-                    y = (y for y in fy.variables() if y != epsilon)[0]
+                else:
+                    x, fy = x_fy.left(), x_fy.right()
+                    y = None
+                    [y for y in fy.variables() if y != epsilon]
+                    if y is None:
+                        raise FuchsiaError("No new variable found in the expression given by option -y '%s'" % x_fy)
                     assert y.is_symbol()
                     M = change_variable(M, x, y, fy)
+                    x = y
             elif len(args) == 0:
                 usage()
             else:
