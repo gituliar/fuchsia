@@ -907,12 +907,30 @@ def import_matrix(f):
     """Read and return a matrix, stored in the MatrixMarket
     array format, from a file-like object.
     """
+    lineno = 0
     while True:
         s = f.readline()
+        lineno += 1
         if not s.startswith('%'):
             break
-    nrows, ncols = map(int, s.split())
-    data = [_parser.parse(s) for s in f.readlines() if not s.startswith('%')]
+    try:
+        nrows, ncols = map(int, s.split())
+    except ValueError:
+        msg = ("Can not determine size of the matrix in '%s'\n"
+               "Make sure the file is in the MatrixMarket array format")
+        raise FuchsiaError(msg % f.name)
+    data = []
+    for s in f.readlines():
+        lineno += 1
+        if s.startswith('%'):
+            continue
+        try:
+            expr = _parser.parse(s)
+        except SyntaxError:
+            msg = ("Malformad expression at line %d of '%s':\n%s\n"
+                   "Make sure the file is in the MatrixMarket array format")
+            raise FuchsiaError(msg % (lineno, f.name, s))
+        data.append(expr)
     m = matrix(ncols, nrows, data).T
     return m
 
@@ -1019,9 +1037,16 @@ def main():
         if tpath is not None and T is not None:
             T = partial_fraction(T, x)
             export_matrix_to_file(tpath, T)
-    except (FuchsiaError, getopt.GetoptError) as error:
+    except getopt.GetoptError as error:
         logger.error("%s", error)
         exit(1)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except FuchsiaError as e:
+        msg = str(e)
+        tab = '  '
+        msg = tab+msg.replace('\n', '\n'+tab)
+        logger.error(msg)
+        exit(1)
