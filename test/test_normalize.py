@@ -63,10 +63,8 @@ class Test(unittest.TestCase):
             [0, (1+e)/3/x]
         ])
 
-        for N, T in normalize(M, x, e): pass
-        N = N.simplify_rational()
-        t.assertEqual(N, transform(M, x, T).simplify_rational())
-        t.assertTrue(is_normalized(N, x, e))
+        with t.assertRaises(FuchsiaError):
+            for N, T in normalize(M, x, e): pass
 
     def test_normalize_4(t):
         # Test with non-zero normalized eigenvalues

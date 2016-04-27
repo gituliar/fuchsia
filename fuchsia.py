@@ -155,7 +155,7 @@ def singularities(M, x):
     >>> x, y = var("x y")
     >>> M = matrix([[1/x, 0], [1/(x+y)**3, 1/(x+y)]])
     >>> s = singularities(M, x)
-    >>> sorted(s.items())
+    >>> sorted(s.items(), key=lambda item: item[0])
     [(0, 0), (-y, 2), (+Infinity, 0)]
     """
     M = M.simplify_rational()
