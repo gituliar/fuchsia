@@ -1,7 +1,7 @@
 #!/usr/bin/env sage
 """\
 Usage:
-    fuchsia [-hv] [-l <path>] [-P <path>] <command> <args>...
+    fuchsia [-hv] [-f <fmt>] [-l <path>] [-P <path>] <command> <args>...
 
 Commands:
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
@@ -24,6 +24,7 @@ Commands:
 
 Options:
     -h          show this help message
+    -f <fmt>    matrix file format: mtx or m (default: mtx)
     -l <path>   save log information to this file
     -v          be verbose and print log information
     -P <path>   save profile report into this file
@@ -906,15 +907,37 @@ def is_normalized(M, x, eps):
                 return False
     return True
 
-###############################################################################
+#==============================================================================
 # Import/Export routines
-###############################################################################
+#==============================================================================
+
+def import_matrix_from_file(filename, fmt="mtx"):
+    """Read and return a matrix stored in a given format from a named file.
+    """
+    with open(filename, 'r') as f:
+        if fmt == "mtx":
+            return import_matrix_matrixmarket(f)
+        elif fmt == "m":
+            return import_matrix_mathematica(f)
+        else:
+            raise FuchsiaError("Unknown matrix format '%s'" % fmt)
 
 _parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
 
-def import_matrix(f):
-    """Read and return a matrix, stored in the MatrixMarket
-    array format, from a file-like object.
+def import_matrix_mathematica(f):
+    """Read and return a matrix, stored in the Mathematica format, from a file-like object.
+    """
+    data =  f.read()
+    data = data.translate(None, ' \n{}')
+    data = data.replace(',', '\n')
+    n = int((data.count('\n')+1)**0.5)
+
+    import StringIO
+    sio = StringIO.StringIO("%d %d\n" % (n, n) + data)
+    return import_matrix_matrixmarket(sio)
+
+def import_matrix_matrixmarket(f):
+    """Read and return a matrix, stored in the MatrixMarket array format, from a file-like object.
     """
     lineno = 0
     while True:
@@ -943,16 +966,39 @@ def import_matrix(f):
     m = matrix(ncols, nrows, data).T
     return m
 
-def import_matrix_from_file(filename):
-    """Read and return a matrix stored in MatrixMarket array
-    format from a named file.
-    """
-    with open(filename, 'r') as f:
-        return import_matrix(f)
 
-def export_matrix(f, m):
-    """Write a matrix to a file-like object using MatrixMarket
-    array format.
+def export_matrix_to_file(filename, m, fmt="mtx"):
+    """Write a matrix in a given format to a named file.
+    """
+    with open(filename, 'w') as f:
+        if fmt == "mtx":
+            export_matrix_matrixmarket(f, m)
+        elif fmt == "m":
+            export_matrix_mathematica(f, m)
+        else:
+            raise FuchsiaError("Unknown matrix format '%s'" % fmt)
+
+def export_matrix_mathematica(f, m):
+    i = 0
+    f.write("{")
+    m = m.T
+    n = m.nrows()
+    for row in m.rows():
+        i += 1
+        f.write("{")
+        j = 0
+        for mij in row:
+            j += 1
+            f.write(str(mij).replace(' ', ''))
+            if j < n:
+                f.write(',')
+        f.write("}")
+        if i < n:
+            f.write(",")
+    f.write('}')
+
+def export_matrix_matrixmarket(f, m):
+    """Write a matrix to a file-like object using a given format.
     """
     f.write("%%MatrixMarket matrix array Fuchsia[symbolic] general\n")
     f.write("%d %d\n" % (m.nrows(), m.ncols()))
@@ -963,12 +1009,6 @@ def export_matrix(f, m):
         for mij in col:
             f.write(str(mij).replace(' ', ''))
             f.write('\n')
-
-def export_matrix_to_file(filename, m):
-    """Write a matrix to a named file using MatrixMarket array format.
-    """
-    with open(filename, 'w') as f:
-        export_matrix(f, m)
 
 ###############################################################################
 
@@ -1000,13 +1040,14 @@ def main():
     try:
         print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
         print "Authors: %s\n" % __author__
-        mpath = tpath = profpath = None
+        mpath = tpath = profpath = fmt = None
         M = T = x_fy = None
         x, epsilon = SR.var("x eps")
         logger.setLevel(logging.INFO)
-        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:P:x:y:e:m:t:")
+        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:f:P:x:y:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
+            if key == "-f": fmt = value or "mtx"
             if key == "-l":
                 fh = logging.FileHandler(value, "w")
                 fh.setFormatter(logging.Formatter(logger_format))
@@ -1020,26 +1061,25 @@ def main():
             if key == "-t": tpath = value
         with profile(profpath):
             if len(args) == 2 and args[0] == 'fuchsify':
-                M = import_matrix_from_file(args[1])
+                M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)
                 M, t2 = fuchsify(M, x)
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'normalize':
-                M = import_matrix_from_file(args[1])
+                M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)
                 i = 0
                 for M, t2 in normalize(M, x, epsilon):
-                    i += 1
-                T = t1*t2
+                    pass
             elif len(args) == 2 and args[0] == 'factorize':
-                M = import_matrix_from_file(args[1])
+                M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)
                 M, t2 = factorize(M, x, epsilon)
                 T = t1*t2
             elif len(args) >= 2 and args[0] == 'transform':
-                M = import_matrix_from_file(args[1])
+                M = import_matrix_from_file(args[1], fmt=fmt)
                 if x_fy is None:
-                    t = import_matrix_from_file(args[2])
+                    t = import_matrix_from_file(args[2], fmt=fmt)
                     M = transform(M, x, t)
                 else:
                     x, fy = x_fy.left(), x_fy.right()
@@ -1057,12 +1097,12 @@ def main():
         if M is not None:
             M = partial_fraction(M, x)
             if mpath is not None: 
-                export_matrix_to_file(mpath, M)
+                export_matrix_to_file(mpath, M, fmt=fmt)
             else:
                 print M
         if tpath is not None and T is not None:
             T = partial_fraction(T, x)
-            export_matrix_to_file(tpath, T)
+            export_matrix_to_file(tpath, T, fmt=fmt)
     except getopt.GetoptError as error:
         logger.error("%s", error)
         exit(1)
@@ -1071,8 +1111,7 @@ if __name__ == '__main__':
     try:
         main()
     except FuchsiaError as e:
-        msg = str(e)
-        tab = '  '
+        msg, tab = str(e), '  '
         msg = tab+msg.replace('\n', '\n'+tab)
         logger.error(msg)
         exit(1)
