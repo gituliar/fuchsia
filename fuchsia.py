@@ -1043,11 +1043,12 @@ def main():
         mpath = tpath = profpath = fmt = None
         M = T = x_fy = None
         x, epsilon = SR.var("x eps")
+        fmt = "mtx"
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:f:P:x:y:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
-            if key == "-f": fmt = value or "mtx"
+            if key == "-f": fmt = value
             if key == "-l":
                 fh = logging.FileHandler(value, "w")
                 fh.setFormatter(logging.Formatter(logger_format))
