@@ -16,6 +16,9 @@ Commands:
         find a transformation that will make a given normalized
         matrix proportional to the infinitesimal parameter
 
+    sort [-m <path>] [-t <path>] <matrix>
+        find a block-triangular form of the given matrix
+
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
@@ -370,6 +373,104 @@ def any_integer(rng, ring, excluded):
         if p not in excluded:
             return p
         r *= 2
+
+
+#==================================================================================================
+# Transformation routines 
+#==================================================================================================
+
+def block_triangular_form(m):
+    """Find a block-triangular form of the given matrix.
+
+    Returns a tuple `(M, T, B)` where:
+      * `M` is a new matrix;
+      * `T` is a transformation matrix;
+      * `B` is a list of tuples (ki, ni), so that an i-th block is given by
+        `M.submatrix(ki, ki, ni, ni)`.
+    """
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("Matrix mask before transformation:\n%s\n" % matrix_mask_str(m))
+
+    n = m.nrows()
+    deps_1_1 = {}
+    for i, row in enumerate(m.rows()):
+        deps_1_1[i] = set(j for j,ex in enumerate(row) if not bool(ex==0))
+
+    deps_1_all = {}
+    def find_deps_1_all(i):
+        if deps_1_all.has_key(i):
+            return deps_1_all[i]
+        deps_1_all[i] = deps_1_1[i]
+        for j in deps_1_1[i]:
+            if i == j:
+                continue
+            find_deps_1_all(j)
+            deps_1_all[i] = deps_1_all[i].union(deps_1_all[j])
+    [find_deps_1_all(j) for j in xrange(n)]
+
+    deps_coup = dict((i, set([])) for i in xrange(n))
+    for i in xrange(n):
+        for j in xrange(n):
+            if (i in deps_1_all[j]) and (j in deps_1_all[i]):
+                deps_coup[i].update([i,j])
+                deps_coup[j].update([i,j])
+
+    shuffle = []
+    error = False
+    while not error:
+        if not deps_coup:
+            break
+        error = True
+        for i in xrange(n):
+            if not deps_coup.has_key(i):
+                continue
+            b = deps_coup[i].copy()
+            if b != deps_1_all[i]:
+                continue
+            if b == set([]):
+                b = set([i])
+            shuffle += [b]
+            for j in deps_1_all[i].copy():
+                if deps_1_all.has_key(j):
+                    del deps_1_all[j]
+                    del deps_coup[j]
+            for j in xrange(n):
+                if not deps_coup.has_key(j):
+                    continue
+                deps_coup[j].difference_update(b)
+                deps_1_all[j].difference_update(b)
+            if deps_coup.has_key(i):
+                del deps_coup[i]
+            if deps_1_all.has_key(i):
+                del deps_1_all[i]
+            error = False
+            break
+    if error:
+        raise FuchsiaError("Infinite loop")
+
+    t = zero_matrix(SR,n)
+    i = 0
+    blocks = []
+    for block in shuffle:
+        blocks.append((i, len(block)))
+        for j in list(block):
+            t[j,i] = 1
+            i += 1
+    mt = transform(m, None, t)
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("Matrix mask after transformation:\n%s\n" % matrix_mask_str(mt))
+
+    return mt, t, blocks
+
+def matrix_mask(m):
+    n = m.nrows()
+    return matrix(SR, n, n, [int(not bool(ex==0)) for ex in m.list()])
+
+def matrix_mask_str(m):
+    s = ''
+    for row in matrix_mask(m).rows():
+        s += ' '.join([str(ex) for ex in row]).replace('0', '.').replace('1','x') + "\n"
+    return s
 
 
 ###############################################################################
@@ -1077,6 +1178,9 @@ def main():
                 M, t1 = simplify_by_factorization(M, x)
                 M, t2 = factorize(M, x, epsilon)
                 T = t1*t2
+            elif len(args) == 2 and args[0] == 'sort':
+                M = import_matrix_from_file(args[1], fmt=fmt)
+                M, T, B = block_triangular_form(M)
             elif len(args) >= 2 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 if x_fy is None:
