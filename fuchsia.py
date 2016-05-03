@@ -1029,13 +1029,15 @@ def import_matrix_mathematica(f):
     """Read and return a matrix, stored in the Mathematica format, from a file-like object.
     """
     data =  f.read()
-    data = data.translate(None, ' \n{}')
+    data = data.translate(None, ' \n')
+    nr = data.count('},{')+1
+    data = data.translate(None, '{}')
     data = data.replace(',', '\n')
-    n = int((data.count('\n')+1)**0.5)
+    nc = int((data.count('\n')+1)/nr)
 
     import StringIO
-    sio = StringIO.StringIO("%d %d\n" % (n, n) + data)
-    return import_matrix_matrixmarket(sio)
+    sio = StringIO.StringIO("%d %d\n" % (nc, nr) + data)
+    return import_matrix_matrixmarket(sio).T
 
 def import_matrix_matrixmarket(f):
     """Read and return a matrix, stored in the MatrixMarket array format, from a file-like object.
@@ -1082,8 +1084,7 @@ def export_matrix_to_file(filename, m, fmt="mtx"):
 def export_matrix_mathematica(f, m):
     i = 0
     f.write("{")
-    m = m.T
-    n = m.nrows()
+    nc, nr = m.ncols(), m.nrows()
     for row in m.rows():
         i += 1
         f.write("{")
@@ -1091,10 +1092,10 @@ def export_matrix_mathematica(f, m):
         for mij in row:
             j += 1
             f.write(str(mij).replace(' ', ''))
-            if j < n:
+            if j < nc:
                 f.write(',')
         f.write("}")
-        if i < n:
+        if i < nr:
             f.write(",")
     f.write('}')
 
@@ -1111,7 +1112,7 @@ def export_matrix_matrixmarket(f, m):
             f.write(str(mij).replace(' ', ''))
             f.write('\n')
 
-###############################################################################
+#==================================================================================================
 
 def main():
     import getopt

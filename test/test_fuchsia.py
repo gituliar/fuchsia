@@ -5,9 +5,9 @@ from   StringIO import StringIO
 
 from   sage.all import SR
 import fuchsia
-from   fuchsia import (balance, balance_transform, identity_matrix,
-            import_matrix, import_matrix_from_file, export_matrix,
-            factorize, fuchsify, limit_fixed, matrix,
+from   fuchsia import (balance, balance_transform, identity_matrix, import_matrix_mathematica,
+            import_matrix_matrixmarket, import_matrix_from_file, export_matrix_mathematica,
+            export_matrix_matrixmarket, factorize, fuchsify, limit_fixed, matrix,
             matrix_complexity, oo, Rational, reduce_at_one_point,
             simplify_by_jordanification, singularities, transform)
 
@@ -36,12 +36,20 @@ class Test(unittest.TestCase):
         t.assertEqual(set(m.variables()), set([x, eps]))
         t.assertEqual(m, matrix([[eps/x, 0], [-1/x**2, eps/(x + 1)]]))
 
-    def test_import_export_1(t):
+    def test_import_export_matrixmarket(t):
         a, b = SR.var("v1 v2")
         M = matrix([[1, a, b], [a + b, Rational((2, 3)), a/b]])
         fout = StringIO()
-        export_matrix(fout, M)
-        MM = import_matrix(StringIO(fout.getvalue()))
+        export_matrix_matrixmarket(fout, M)
+        MM = import_matrix_matrixmarket(StringIO(fout.getvalue()))
+        t.assertEqual(M, MM)
+
+    def test_import_export_mathematica(t):
+        a, b = SR.var("v1 v2")
+        M = matrix([[1, a, b], [a + b, Rational((2, 3)), a/b]])
+        fout = StringIO()
+        export_matrix_mathematica(fout, M)
+        MM = import_matrix_mathematica(StringIO(fout.getvalue()))
         t.assertEqual(M, MM)
 
     def test_transform_1(t):
