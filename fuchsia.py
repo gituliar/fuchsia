@@ -380,13 +380,13 @@ def any_integer(rng, ring, excluded):
 #==================================================================================================
 
 def block_triangular_form(m):
-    """Find a block-triangular form of the given matrix.
+    """Find a lower block-triangular form of a given matrix.
 
-    Returns a tuple `(M, T, B)` where:
+    Return a tuple `(M, T, B)` where:
       * `M` is a new matrix;
       * `T` is a transformation matrix;
-      * `B` is a list of tuples (ki, ni), so that an i-th block is given by
-        `M.submatrix(ki, ki, ni, ni)`.
+      * `B` is a list of tuples (ki, ni), such that M's i-th
+        diagonal block is given by `M.submatrix(ki, ki, ni, ni)`.
     """
     if logger.isEnabledFor(logging.INFO):
         logger.info("Matrix mask before transformation:\n%s\n" % matrix_mask_str(m))
