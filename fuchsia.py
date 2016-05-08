@@ -716,8 +716,8 @@ def normalize(m, x, eps, seed=0):
             T0 = balance(P, x2, x1, x)
 
         T = (T*T0).simplify_rational()
-        yield m, T
     logger.info("[normalize] DONE\n")
+    return m, T
 
 def find_balances(m, x, eps, state={}):
     if not state.has_key("pairs"):
@@ -1172,8 +1172,7 @@ def main():
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)
                 i = 0
-                for M, t2 in normalize(M, x, epsilon):
-                    pass
+                M, t2 = normalize(M, x, epsilon)
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)

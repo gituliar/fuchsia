@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         #2 Normalize
         t.assertFalse(is_normalized(Mf, x, eps))
         m, t1 = simplify_by_factorization(Mf, x)
-        for Mn, t2 in normalize(m, x, eps): pass
+        Mn, t2 = normalize(m, x, eps)
         Tn = t1*t2
         t.assertTrue((Mn-transform(Mf, x, Tn)).simplify_rational().is_zero())
         t.assertTrue(is_normalized(Mn, x, eps))

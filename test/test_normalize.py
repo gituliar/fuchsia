@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        for N, T in normalize(M, x, SR.var("epsilon")): pass
+        N, T = normalize(M, x, SR.var("epsilon"))
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
             [6/(x-1), 0, 0, 1/x]
         ])
 
-        for N, T in normalize(M, x, SR.var("epsilon")): pass
+        N, T = normalize(M, x, SR.var("epsilon"))
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
         for point, prank in singularities(N, x).iteritems():
@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
         ])
 
         with t.assertRaises(FuchsiaError):
-            for N, T in normalize(M, x, e): pass
+            N, T = normalize(M, x, e)
 
     def test_normalize_4(t):
         # Test with non-zero normalized eigenvalues
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
         ])
 
         with t.assertRaises(FuchsiaError):
-            for N, T in normalize(M, x, e): pass
+            N, T = normalize(M, x, e)
 
     def test_normalize_5(t):
         # An unnormalizable example by A. A. Bolibrukh
@@ -86,4 +86,4 @@ class Test(unittest.TestCase):
         t.assertEqual(f_pranks, [0]*len(f_pranks))
 
         with t.assertRaises(FuchsiaError):
-            for n, nt in normalize(f, x, e): pass
+            n, nt = normalize(f, x, e)
