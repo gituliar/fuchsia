@@ -1,4 +1,3 @@
-import doctest
 import unittest
 from   random import randint
 from   StringIO import StringIO
@@ -221,10 +220,3 @@ class Test(unittest.TestCase):
         MM = MM.simplify_rational()
         t.assertEqual(MM, transform(M, x, T).simplify_rational())
         t.assertLess(matrix_complexity(MM), matrix_complexity(M))
-
-def load_tests(loader, tests, ignore):
-    tests.addTests(doctest.DocTestSuite(fuchsia))
-    return tests
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

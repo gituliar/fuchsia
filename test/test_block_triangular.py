@@ -19,6 +19,3 @@ class Test(unittest.TestCase):
           [0, 0, 1, 0],
           [0, 0, 1, 1]
         ]), mt)
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

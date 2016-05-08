@@ -87,6 +87,3 @@ class Test(unittest.TestCase):
 
         with t.assertRaises(FuchsiaError):
             for n, nt in normalize(f, x, e): pass
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

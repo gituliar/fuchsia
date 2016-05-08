@@ -16,6 +16,3 @@ class Test(unittest.TestCase):
         t.assertEqual(F, transform(M, x, T).simplify_rational())
         F_pranks = singularities(F, x).values()
         t.assertEqual(F_pranks, [0]*len(F_pranks))
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

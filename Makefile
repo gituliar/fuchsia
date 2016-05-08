@@ -1,8 +1,5 @@
 .PHONY: clean dist test
 
-TESTS := ${wildcard test/test_*.py}
-.PHONY: $(TESTS)
-
 dist:
 	sage -python setup.py sdist
 
@@ -11,18 +8,19 @@ register:
 
 upload-pypi:
 	sage -python setup.py sdist upload
+
 upload-http:
 	@echo "Not implemented"
 
 clean:
 	@rm -fr build dist fuchsia.egg-info
-
+	@rm -fr *.pyc */*.pyc
 
 test:
 	sage -python setup.py test
 
-test_fuchsia_py:
-	sage -python -mdoctest fuchsia.py
+fuchsia.py: test/__init__.py
 
-$(TESTS): test/%.py:
-	env SAGE_PATH="$(CURDIR)" sage -python test/$*.py
+test/*.py::
+	env SAGE_PATH="$(CURDIR)" \
+		sage -python -munittest -v test.$(basename $(notdir $@))

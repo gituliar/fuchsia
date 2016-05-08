@@ -48,6 +48,3 @@ class Test(unittest.TestCase):
     def test_henn_324(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "henn_324.mtx"))
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
