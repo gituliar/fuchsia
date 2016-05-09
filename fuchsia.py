@@ -60,6 +60,9 @@ logging.basicConfig(
 logger = logging.getLogger('fuchsia')
 logger_format = '%(levelname)s [%(asctime)s]\n%(message)s'
 
+def is_verbose():
+    return logger.isEnabledFor(logging.INFO)
+
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "fuchsia@gituliar.org"
 __version__ = open(path.join(path.dirname(__file__),"VERSION")).readline().rstrip('\n')
@@ -677,9 +680,45 @@ def alg1(L0, jordan_cellsizes):
     S.add(fi)
     return S, D
 
-###############################################################################
+#==================================================================================================
 # Step II: Normalize
-###############################################################################
+#==================================================================================================
+
+def is_normalized(M, x, eps):
+    """Return True if (a Fuchsian) matrix M is normalized, that
+    is all the eigenvalues of it's residues in x lie in [-1/2, 1/2)
+    range (in limit eps->0). Return False otherwise.
+
+    Examples:
+    >>> x, e = var("x epsilon")
+    >>> is_normalized(matrix([[(1+e)/3/x, 0], [0, e/x]]), x, e)
+    True
+    """
+    points = singularities(M, x)
+    for x0, p in points.iteritems():
+        M0 = matrix_residue(M, x, x0)
+        for ev in M0.eigenvalues():
+            ev = limit_fixed(ev, eps, 0)
+            if not (Rational((-1, 2)) <= ev and ev < Rational((1, 2))):
+                return False
+    return True
+
+def is_normalized_by_blocks(m, b, x, eps):
+    """Return True if diagonal blocks of `m` are normalized, that is all the eigenvalues of theirs
+    residues in `x` lie in the range [-1/2, 1/2) in eps->0 limit; return False otherwise. Diagonal
+    blocks are defined by the list `b` which corresponds to the equivalent value returned by the
+    `block_triangular_form` routine.
+
+    Examples:
+    >>> x, e = var("x epsilon")
+    >>> is_normalized_by_blocks(matrix([[(1+e)/3/x, 0], [0, e/x]]), [(0,1),(1,1)], x, e)
+    True
+    """
+    for ki, ni in b:
+        mi = m.submatrix(ki, ki, ni, ni).simplify_rational()
+        if not is_normalized(mi, x, eps):
+            return False
+    return True
 
 def normalize(m, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
@@ -718,6 +757,36 @@ def normalize(m, x, eps, seed=0):
         T = (T*T0).simplify_rational()
     logger.info("[normalize] DONE\n")
     return m, T
+
+def normalize_by_blocks(m, b, x, eps):
+    """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
+    find a transformation that will shift all eigenvalues of all residues of all its diagonal
+    blocks into the range [-1/2, 1/2) in eps->0 limit. Return the transformed matrix m and the
+    transformation; raise FuchsiaError if such transformation is not found. Diagonal blocks
+     are defined by the list `b` which corresponds to the equivalent value returned by the
+    `block_triangular_form` routine.
+    """
+    n = m.nrows()
+    t = identity_matrix(SR, n)
+    for i, (ki, ni) in enumerate(b):
+        mi = m.submatrix(ki, ki, ni, ni).simplify_rational()
+        ti = identity_matrix(SR, ni)
+        if is_verbose():
+            msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni,mi)).replace("\n", "\n  ")
+            logger.info(msg)
+
+        mi_fuchs, ti_fuchs = fuchsify(mi, x, eps)
+        ti = ti*ti_fuchs
+
+        mi_norm, ti_norm = normalize(mi_fuchs, x, eps)
+        ti = ti*ti_norm
+
+        mi_eps, ti_eps = factorize(mi_norm, x, eps)
+        ti = ti*ti_eps
+
+        t[ki:ki+ni, ki:ki+ni] = ti
+    mt = transform(m, x, t)
+    return mt, t
 
 def find_balances(m, x, eps, state={}):
     if not state.has_key("pairs"):
@@ -985,28 +1054,6 @@ def simplify_by_factorization(M, x):
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
     return M.simplify_rational(), T
-
-def is_normalized(M, x, eps):
-    """Return True if (a Fuchsian) matrix M is normalized, that
-    is all the eigenvalues of it's residues lie in [-1/2, 1/2)
-    range (in limit eps->0). Return False otherwise.
-
-    Examples:
-    >>> x, e = var("x epsilon")
-    >>> is_normalized(matrix([[(1+e)/3/x, 0], [0, e/x]]), x, e)
-    True
-    """
-    points = singularities(M, x)
-    for x0, p in points.iteritems():
-        # m should also be Fuchsian
-        if p > 0:
-            return False
-        M0 = matrix_residue(M, x, x0)
-        for ev in M0.eigenvalues():
-            ev = limit_fixed(ev, eps, 0)
-            if not (Rational((-1, 2)) <= ev and ev < Rational((1, 2))):
-                return False
-    return True
 
 #==============================================================================
 # Import/Export routines
