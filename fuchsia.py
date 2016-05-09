@@ -899,6 +899,60 @@ def factorize(M, x, epsilon, seed=0):
         # No, I don't.
     raise FuchsiaError("can not factor epsilon")
 
+def block_fuchsify(M, x, eps):
+    """Same as fuchsify(M, x), but using a different algorithm and
+    faster for matrices M that can be reduced to block-diagonal
+    form with small blocks.
+    """
+    # Convert to block-triangular form
+    M, T1, B = block_triangular_form(M)
+
+    # Factorize diagonal blocks
+    T2 = identity_matrix(SR, M.nrows())
+    for n, k in B:
+        m = M.submatrix(n, n, k, k)
+        m, t1 = fuchsify(m, x)
+        m, t2 = normalize(m, x, eps)
+        m, t3 = factorize(m, x, eps)
+        T2[n:n+k, n:n+k] = (t1*t2*t3).simplify_rational()
+    M = transform(M, x, T2)
+
+    # Reduce off-diagonal blocks
+    T3 = identity_matrix(SR, M.nrows())
+    for n, k in B:
+        #     (a 0 0)
+        # M = (b c 0)
+        #     (.....)
+        #a = M.submatrix(n, n, k, k)
+        b = M.submatrix(n, 0, k, n)
+        #c = M.submatrix(0, 0, n, n)
+        for point, rank in singularities(b, x).iteritems():
+            while rank > 0:
+                b0 = matrix_c0(M.submatrix(n, 0, k, n), x, point, rank)
+                if b0.is_zero():
+                    rank -= 1
+                    continue
+                a0 = matrix_c0(M.submatrix(n, n, k, k), x, point, 0)
+                c0 = matrix_c0(M.submatrix(0, 0, n, n), x, point, 0)
+                d_symbols = [gensym() for i in xrange(k*n)]
+                d = matrix(SR, k, n, d_symbols)
+                r = rank if point != oo else -rank
+                eqs = (d*(r + 0) + a0*d - d*c0 + b0).list()
+                sols = solve(eqs, d_symbols)
+                for solution in sols:
+                    d = d.subs(solution)
+                    break
+                assert not (set(d.variables()) - set([eps]))
+                #     (1 0 0)
+                # T ~ (d 1 0)
+                #     (.....)
+                T = identity_matrix(SR, M.nrows())
+                T[n:n+k, 0:n] = d/(x - point)**r if point != oo else d/x**r
+                M = transform(M, x, T).simplify_rational()
+                T3 = T3*T
+                rank -= 1
+    return M, (T1*T2*T3).simplify_rational()
+
 def matrix_complexity(M):
     return len(str(M.list()))
 
