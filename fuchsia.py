@@ -1038,6 +1038,10 @@ def simplify_by_factorization(M, x):
             dT = identity_matrix(M.base_ring(), n)
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
+    logger.info(
+            "stripping common factors with this transform:\n"
+            "diagonal_matrix([\n  %s\n])",
+            ",\n  ".join(str(e) for e in T.diagonal()))
     return M.simplify_rational(), T
 
 def is_normalized(M, x, eps):
