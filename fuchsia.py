@@ -1006,11 +1006,10 @@ def block_fuchsify(M, x, eps):
                 d_symbols = [gensym() for i in xrange(k*n)]
                 d = matrix(SR, k, n, d_symbols)
                 r = rank if point != oo else -rank
-                eqs = (d*(r + 0) + a0*d - d*c0 + b0).list()
-                sols = solve(eqs, d_symbols)
-                for solution in sols:
-                    d = d.subs(solution)
-                    break
+                eqs = (d*r + a0*d - d*c0 + b0).list()
+                solutions = solve(eqs, d_symbols)
+                assert solutions
+                d = d.subs(solutions[0])
                 assert not (set(d.variables()) - set([eps]))
                 #     (1 0 0)
                 # T ~ (d 1 0)
