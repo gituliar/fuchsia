@@ -211,7 +211,7 @@ def matrix_taylor0(M, x, point, exp):
     [1 0 0 0]
     """
     return matrix([
-        [taylor(e, x, 0, 0) for e in row]
+        [limit_fixed(e, x, 0) for e in row]
         for row in M.subs({x: x+point})*x**exp
     ])
 
@@ -225,8 +225,12 @@ def matrix_taylor1(M, x, point, exp):
     >>> matrix_taylor1(matrix([[x/(x-1), 1/x, x, 1]]), x, 0, 1)
     [0 0 0 1]
     """
+    def taylor1(e, x):
+        l0 = limit_fixed(e, x, 0)
+        l1 = limit_fixed((e - l0)/x, x, 0)
+        return l1
     return matrix([
-        [taylor(e, x, 0, 1).coefficient(x) for e in row]
+        [taylor1(e, x) for e in row]
         for row in M.subs({x: x+point})*x**exp
     ])
 

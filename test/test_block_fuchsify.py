@@ -46,3 +46,18 @@ class Test(unittest.TestCase):
         t.assertEqual(MM, transform(M, x, T).simplify_rational())
         pranks = singularities(MM, x).values()
         t.assertEqual(pranks, [0]*len(pranks))
+
+    def test_block_fuchsify_5(t):
+        x, eps = SR.var("x eps")
+        M = matrix([
+            [eps/(x - 1), 0, 0],
+            [(x**3 + x**2 - 3*x - 3)/(2*x**3 - 2*x**2 - x + 1),
+                2*eps/(x - 3), 0],
+            [-(x**3 + 3*x**2 - 3*x + 2)/(2*x**3 + x**2 - 2*x) + 2*(x**3 - x**2 - x + 1)/(2*x + 1),
+                -3*(x**3 + x - 1)/(3*x**3 + x - 2),
+                4*eps/(x - 5)]
+        ])
+        MM, T = block_fuchsify(M, x, eps)
+        t.assertEqual(MM, transform(M, x, T).simplify_rational())
+        pranks = singularities(MM, x).values()
+        t.assertEqual(pranks, [0]*len(pranks))
