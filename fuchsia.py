@@ -19,6 +19,9 @@ Commands:
     sort [-m <path>] [-t <path>] <matrix>
         find a block-triangular form of the given matrix
 
+    reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
+        find a canonical form of the given matrix
+
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
@@ -465,6 +468,14 @@ def block_triangular_form(m):
 
     return mt, t, blocks
 
+def canonical_form(m, x, eps):
+    m_t, t_t, b = block_triangular_form(m)
+    m_n, t_n = normalize_by_blocks(m_t, b, x, eps)
+    m_f, t_f = fuchsify_by_blocks(m_n, b, x, eps)
+    m_eps, t_eps = factorize(m_f, x, eps)
+    t = t_t*t_n*t_f*t_eps
+    return m_eps, t
+
 def matrix_mask(m):
     n = m.nrows()
     return matrix(SR, n, n, [int(not bool(ex==0)) for ex in m.list()])
@@ -476,9 +487,16 @@ def matrix_mask_str(m):
     return s
 
 
-###############################################################################
+#==================================================================================================
 # Step I: Fuchsify
-###############################################################################
+#==================================================================================================
+
+def is_fuchsian(m, x):
+    points = singularities(m, x)
+    for x0, p in points.iteritems():
+        if p > 0:
+            return False
+    return True
 
 def fuchsify(M, x, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -546,6 +564,37 @@ def fuchsify(M, x, seed=0):
         poincare_map[point] = prank - 1
     combinedT = combinedT.simplify_rational()
     return M, combinedT
+
+def fuchsify_by_blocks(m, b, x, eps):
+    n = m.nrows()
+    t = identity_matrix(SR, n)
+    mm = m
+    for i, (ki, ni) in enumerate(reversed(b[:-1])):
+        ti = identity_matrix(SR, n)
+        for j, (kj, nj) in enumerate(b[-i-1:]):
+            fuchsian = False
+            while not fuchsian:
+                fuchsian = True
+                bj = m.submatrix(kj, ki, nj, ni)
+                pts = singularities(bj, x)
+                for x0, p in pts.iteritems():
+                    if p < 1:
+                        continue
+                    fuchsian = False
+                    a0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
+                    b0 = matrix_c0(bj, x, x0, p)
+                    c0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
+        
+                    d_vars = [gensym() for i in xrange(ni*nj)]
+                    d = matrix(SR, nj, ni, d_vars)
+                    eq = d + eps/p*(a0*d - d*c0) + b0/p
+
+                    sol = solve(eq.list(), *d_vars, solution_dict=True)
+                    d = d.subs(sol[0])
+
+                    t[kj:kj+nj, ki:ki+ni] += d/(x-x0)**p if x0 != oo else -d*(x**p)
+                m = transform(mm, x, t).simplify_rational()
+    return m, t.simplify_rational()
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -785,7 +834,7 @@ def normalize_by_blocks(m, b, x, eps):
         ti = ti*ti_eps
 
         t[ki:ki+ni, ki:ki+ni] = ti
-    mt = transform(m, x, t)
+    mt = transform(m, x, t).simplify_rational()
     return mt, t
 
 def find_balances(m, x, eps, state={}):
@@ -917,9 +966,9 @@ def eigenvectors_right(m):
         m._cache["eigenvectors_right"] = res
     return m._cache["eigenvectors_right"]
 
-###############################################################################
+#==================================================================================================
 # Step III: Factorize
-###############################################################################
+#==================================================================================================
 
 def gensym():
     sym = SR.symbol()
@@ -1285,6 +1334,9 @@ def main():
             elif len(args) == 2 and args[0] == 'sort':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 M, T, B = block_triangular_form(M)
+            elif len(args) == 2 and args[0] == 'reduce':
+                m = import_matrix_from_file(args[1], fmt=fmt)
+                M, T = canonical_form(m, x, epsilon)
             elif len(args) >= 2 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 if x_fy is None:
