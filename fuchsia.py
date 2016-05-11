@@ -987,6 +987,9 @@ def factorize(M, x, epsilon, seed=0):
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
     n = M.nrows()
+    M = M.simplify_rational()
+    if epsilon not in (M/epsilon).variables():
+        return M, identity_matrix(SR, n)
     rng = Random(seed)
     mu = gensym()
     T_symbols = [gensym() for i in xrange(n*n)]
@@ -1004,15 +1007,17 @@ def factorize(M, x, epsilon, seed=0):
         # Right now S likely has a number of free variables in
         # it; we can set them to arbibtrary values, as long as
         # it'll make S invertible.
+        rndrange = 0
         while True:
             try:
                 sT = S.subs([
-                    e==rng.randint(-99, 99)
+                    e==rng.randint(-rndrange, rndrange)
                     for e in S.variables() if e != epsilon
                 ])
                 sT = sT.simplify_rational()
                 M = transform(M, x, sT).simplify_rational()
             except (ZeroDivisionError, ValueError):
+                rndrange += 1 + rndrange//4
                 continue
             break
         # We're leaking a bunch of temprary variables here,
