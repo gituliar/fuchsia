@@ -161,7 +161,7 @@ def poincare_rank_at_oo(M, x):
     for expr in (M.subs({x: 1/x})/x**2).list():
         if x not in expr.variables():
             continue
-        solutions, ks = solve(Integer(1)/expr, x,
+        solutions, ks = solve(factor(1/expr), x,
                 solution_dict=True, multiplicities=True)
         for sol, k in zip(solutions, ks):
             if sol[x] == 0:
@@ -187,10 +187,10 @@ def singularities(M, x):
             # If expression is constant in x, no singularity is present.
             # In particular, this prevents solve(1/0) calls.
             continue
-        solutions, ks = solve(Integer(1)/expr, x,
+        solutions, ks = solve(factor(1/expr), x,
                 solution_dict=True, multiplicities=True)
         for sol, k in zip(solutions, ks):
-            val = sol[x]
+            val = expand(sol[x])
             if val in result:
                 result[val] = max(result[val], k - 1)
             else:
