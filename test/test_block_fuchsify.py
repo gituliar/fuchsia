@@ -58,6 +58,18 @@ class Test(unittest.TestCase):
                 4*eps/(x - 5)]
         ])
         MM, T = block_fuchsify(M, x, eps)
-        t.assertEqual(MM, transform(M, x, T).simplify_rational())
+        t.assertTrue((MM - transform(M, x, T).simplify_rational()).is_zero())
+        pranks = singularities(MM, x).values()
+        t.assertEqual(pranks, [0]*len(pranks))
+
+    @unittest.skip("needs more work to pass")
+    def test_block_fuchsify_6(t):
+        x, eps = SR.var("x eps")
+        M = matrix([
+            [0,0],
+            [1/(x**2-x+1)**2, 0]
+        ])
+        MM, T = block_fuchsify(M, x, eps)
+        t.assertTrue((MM - transform(M, x, T).simplify_rational()).is_zero())
         pranks = singularities(MM, x).values()
         t.assertEqual(pranks, [0]*len(pranks))

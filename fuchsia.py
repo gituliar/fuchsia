@@ -134,7 +134,23 @@ def balance_transform(M, P, x1, x2, x):
     mm = (coP + 1/k*P)*M*(coP + k*P) - d/k*P
     return mm
 
-def limit_fixed(expr, x, lim):
+def limit_fixed(expr, x, x0, cas="maxima"):
+    if cas == "maxima":
+        return limit_fixed_maxima(expr, x, x0)
+    elif cas == "maple":
+        return limit_fixed_maple(expr, x, x0)
+    else:
+        raise NotImplemented
+
+def limit_fixed_maple(expr, x, x0):
+    res = maple.limit(simplify(expr), x=x0)
+    try:
+        res = _parser.parse(str(res))
+    except:
+        res = NaN
+    return res
+
+def limit_fixed_maxima(expr, x, x0):
     """Return a limit of expr when x->lim.
 
     The standard 'limit()' function of SageMath does not allow
@@ -142,7 +158,7 @@ def limit_fixed(expr, x, lim):
     argument. If you have a variable, and not it's name, use
     this function instead.
     """
-    l = maxima_calculus.sr_limit(expr, x, lim)
+    l = maxima_calculus.sr_limit(expr, x, x0)
     return expr.parent()(l)
 
 def poincare_rank_at_oo(M, x):
@@ -168,7 +184,7 @@ def poincare_rank_at_oo(M, x):
                 p = max(p, k - 1)
     return p
 
-def singularities(M, x):
+def singularities(m, x, cas="maxima"):
     """Find values of x around which rational matrix M has
     a singularity; return a dictionary with {val: p} entries,
     where p is the Poincare rank of M at x=val.
@@ -180,27 +196,74 @@ def singularities(M, x):
     >>> sorted(s.items())
     [(-1, 2), (0, 0), (+Infinity, 0)]
     """
-    M = M.simplify_rational()
+    m = m.simplify_rational()
     result = {}
-    for expr in M.list():
-        if x not in expr.variables():
-            # If expression is constant in x, no singularity is present.
-            # In particular, this prevents solve(1/0) calls.
-            continue
-        solutions, ks = solve(factor(1/expr), x,
-                solution_dict=True, multiplicities=True)
-        for sol, k in zip(solutions, ks):
-            val = expand(sol[x])
-            if val in result:
-                result[val] = max(result[val], k - 1)
+    for expr in m.list():
+        points_expr = singularities_expr(expr, x, cas=cas)
+        for x0, p in points_expr.iteritems():
+            if x0 in result:
+                result[x0] = max(result[x0], p)
             else:
-                result[val] = k - 1
-    p = poincare_rank_at_oo(M, x)
-    if p >= 0:
-        result[oo] = p
+                result[x0] = p
     return result
 
-def matrix_taylor0(M, x, point, exp):
+def singularities_expr(expr, x, cas="maxima"):
+    if cas == "maple":
+        res = singularities_expr_maple(expr, x)
+    elif cas == "maxima":
+        res = singularities_expr_maxima(expr, x)
+    else:
+        raise NotImplemented
+    return res
+
+def singularities_expr_maple(expr, x):
+    if bool(expr == 0):
+        return {}
+
+    candidates = {}
+    points = [x0 for x0 in f_solve(1/expr, x, cas="maple")]
+    for x0 in points:
+        if x0 not in candidates:
+            candidates[x0] = 0
+        else:
+            candidates[x0] += 1
+
+    result = {}
+    for x0, p in candidates.iteritems():
+        while (p >= 0) and bool(limit_fixed(expr*(x-x0)**(p+1), x, x0,  cas="maple") == 0):
+            print "REJECTING pole p = %s x = %s" % (p, x0)
+            p -= 1
+        if p >= 0:
+            result[x0] = p
+
+    points = f_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x,"maple")
+    for x0 in points:
+        if x0 == 0:
+            if oo not in result:
+                result[oo] = 0
+            else:
+                result[oo] += 1
+    return result
+
+def singularities_expr_maxima(expr, x):
+    if expr.is_zero():
+        return {}
+
+    result = {}
+    points, ps = solve(factor(1/expr), x, solution_dict=True, multiplicities=True)
+    for sol, p in zip(points, ps):
+        x0 = expand(sol[x])
+        if p >= 1:
+            result[x0] = p-1
+
+    points, ps = solve(factor(1/(expr.subs({x: 1/x})/x**2)), x, solution_dict=True, multiplicities=True)
+    for sol, p in zip(points, ps):
+        if sol[x] == 0 and p >= 1:
+            result[oo] = p-1
+    return result
+
+
+def matrix_taylor0(m, x, x0, exp, cas="maxima"):
     """Return the 0-th coefficient of Taylor expansion of
     a matrix M around a finite point x=point, assuming that
     M(x->point)~1/(x-point)**exp.
@@ -210,10 +273,7 @@ def matrix_taylor0(M, x, point, exp):
     >>> matrix_taylor0(matrix([[x/(x-1), 1/x, x, 1]]), x, 1, 1)
     [1 0 0 0]
     """
-    return matrix([
-        [limit_fixed(e, x, 0) for e in row]
-        for row in M.subs({x: x+point})*x**exp
-    ])
+    return m.apply_map(lambda ex: limit_fixed(ex*(x-x0)**exp, x, x0, cas))
 
 def matrix_taylor1(M, x, point, exp):
     """Return the 1-th coefficient of Taylor expansion of
@@ -234,7 +294,7 @@ def matrix_taylor1(M, x, point, exp):
         for row in M.subs({x: x+point})*x**exp
     ])
 
-def matrix_c0(M, x, point, p):
+def matrix_c0(M, x, point, p, cas="maxima"):
     """Return the 0-th coefficient of M's expansion at x=point,
     assuming Poincare rank of M at that point is p. If point is
     +Infinity, return the coefficient at the highest power of x.
@@ -256,9 +316,9 @@ def matrix_c0(M, x, point, p):
     [1 0]
     """
     if point == oo:
-        return matrix_taylor0(M.subs({x: 1/x}), x, 0, p-1)
+        return matrix_taylor0(M.subs({x: 1/x}), x, 0, p-1, cas)
     else:
-        return matrix_taylor0(M, x, point, p+1)
+        return matrix_taylor0(M, x, point, p+1, cas)
 
 def matrix_c1(M, x, point, p):
     """Return the 1-st coefficient of M's expansion at x=point,
@@ -281,7 +341,7 @@ def matrix_c1(M, x, point, p):
     else:
         return matrix_taylor1(M, x, point, p+1)
 
-def matrix_residue(M, x, x0):
+def matrix_residue(M, x, x0, cas="maxima"):
     """Return matrix residue of M at x=x0, assuming that M's
     Poincare rank at x=x0 is zero.
 
@@ -301,7 +361,7 @@ def matrix_residue(M, x, x0):
     if M._cache.has_key(key):
         return M._cache[key]
 
-    m0 = matrix_c0(M, x, x0, 0)
+    m0 = matrix_c0(M, x, x0, 0, cas)
     if x0 == oo:
         res = -m0
     else:
@@ -473,12 +533,12 @@ def block_triangular_form(m):
     return mt, t, blocks
 
 def canonical_form(m, x, eps):
-    m_t, t_t, b = block_triangular_form(m)
-    m_n, t_n = normalize_by_blocks(m_t, b, x, eps)
-    m_f, t_f = fuchsify_by_blocks(m_n, b, x, eps)
-    m_eps, t_eps = factorize(m_f, x, eps)
-    t = t_t*t_n*t_f*t_eps
-    return m_eps, t
+    m, t1, b = block_triangular_form(m)
+    m, t2 = normalize_by_blocks(m, b, x, eps)
+    m, t3 = fuchsify_by_blocks(m, b, x, eps)
+    m, t4 = factorize(m, x, eps)
+    t = t1*t2*t3*t4
+    return m, t
 
 def matrix_mask(m):
     n = m.nrows()
@@ -495,11 +555,15 @@ def matrix_mask_str(m):
 # Step I: Fuchsify
 #==================================================================================================
 
-def is_fuchsian(m, x):
-    points = singularities(m, x)
-    for x0, p in points.iteritems():
-        if p > 0:
-            return False
+def is_fuchsian(m, x, cas="maxima"):
+    for i, expr in enumerate(m.list()):
+        if expr.is_zero():
+            continue
+        #expr = expr.subs({eps: 13})
+        points = singularities_expr(expr, x, cas=cas)
+        for x0, p in points.iteritems():
+            if p > 0:
+                return False
     return True
 
 def fuchsify(M, x, seed=0):
@@ -569,36 +633,38 @@ def fuchsify(M, x, seed=0):
     combinedT = combinedT.simplify_rational()
     return M, combinedT
 
-def fuchsify_by_blocks(m, b, x, eps):
+def fuchsify_by_blocks(m, b, x, eps, cas="maxima"):
     n = m.nrows()
-    t = identity_matrix(SR, n)
-    mm = m
-    for i, (ki, ni) in enumerate(reversed(b[:-1])):
-        ti = identity_matrix(SR, n)
-        for j, (kj, nj) in enumerate(b[-i-1:]):
-            fuchsian = False
-            while not fuchsian:
-                fuchsian = True
-                bj = m.submatrix(kj, ki, nj, ni)
-                pts = singularities(bj, x)
+    m0, t = m, identity_matrix(SR, n)
+    for i, (ki, ni) in enumerate(b):
+        for j, (kj, nj) in enumerate(reversed(b[:i])):
+            logger.info("processing blocks (%d, %d) (%d, %d)\n" % (kj, nj, ki, ni))
+            pts = singularities(m.submatrix(ki, kj, ni, nj), x, cas=cas)
+            logger.info("singular points = %s" % pts)
+            while any(pts.values()):
+                bj = m.submatrix(ki, kj, ni, nj)
+                if bj.is_zero():
+                    break
                 for x0, p in pts.iteritems():
                     if p < 1:
                         continue
-                    fuchsian = False
-                    a0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
-                    b0 = matrix_c0(bj, x, x0, p)
-                    c0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
+                    a0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
+                    b0 = matrix_c0(bj, x, x0, p, cas=cas)
+                    c0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
         
                     d_vars = [gensym() for i in xrange(ni*nj)]
-                    d = matrix(SR, nj, ni, d_vars)
+                    d = matrix(SR, ni, nj, d_vars)
                     eq = d + eps/p*(a0*d - d*c0) + b0/p
-
                     sol = solve(eq.list(), *d_vars, solution_dict=True)
                     d = d.subs(sol[0])
 
-                    t[kj:kj+nj, ki:ki+ni] += d/(x-x0)**p if x0 != oo else -d*(x**p)
-                m = transform(mm, x, t).simplify_rational()
-    return m, t.simplify_rational()
+                    t0 = identity_matrix(SR, n)
+                    t0[ki:ki+ni, kj:kj+nj] += d/(x-x0)**p if x0 != oo else -d*(x**p)
+                    m = transform(m, x, t0).simplify_rational()
+
+                    t = (t*t0).simplify_rational()
+                    pts[x0] -= 1
+    return m, t
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -809,7 +875,7 @@ def normalize(m, x, eps, seed=0):
 
         T = (T*T0).simplify_rational()
     logger.info("[normalize] DONE\n")
-    return m, T
+    return m.simplify_rational(), T
 
 def normalize_by_blocks(m, b, x, eps):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
@@ -855,7 +921,7 @@ def find_balances(m, x, eps, state={}):
 
     for x1, x2 in pairs:
         logger.info("Looking for the balance between x = %s and x = %s" % (x1,x2))
-        a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
+        a0, b0 = matrix_residue(m, x, x1, cas="maxima"), matrix_residue(m, x, x2, cas="maxima")
 
         a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
         for ev, evec, emult in a0_evr:
@@ -979,6 +1045,25 @@ def gensym():
     SR.symbols[str(sym)] = sym
     return sym
 
+def f_solve(eqs, var, cas="maxima"):
+    if cas == "maxima":
+        return solve(eqs, var, solution_dict=True)
+    elif cas == "maple":
+        s = maple.solve(eqs, var)
+        solution = s.parent().get(s._name).split(',')
+        if solution == ['']:
+            return []
+        res = []
+        for s in solution:
+            try:
+                expr = expand(simplify(_parser.parse(s)))
+                res.append(expr)
+            except SyntaxError as error:
+                print "ERROR:  \n%s\n  %s\n" % (s, error)
+                continue
+        return res
+    raise FuchsiError("Fuchsia does not have support for 'solve' routine of %s" % cas)
+
 def factorize(M, x, epsilon, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
@@ -1078,6 +1163,10 @@ def block_fuchsify(M, x, eps):
                 T3 = T3*T
                 rank -= 1
     return M, (T1*T2*T3).simplify_rational()
+
+#==================================================================================================
+# Helpers
+#==================================================================================================
 
 def matrix_complexity(M):
     return len(str(M.list()))
@@ -1385,3 +1474,6 @@ if __name__ == '__main__':
         msg = tab+msg.replace('\n', '\n'+tab)
         logger.error(msg)
         exit(1)
+    except Exception as e:
+        if is_verbose():
+            raise
