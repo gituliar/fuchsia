@@ -16,7 +16,7 @@ setup(
     long_description = long_description,
     name = "fuchsia",
     py_modules = ['fuchsia'],
-    test_suite = 'test',
+    test_suite = 'test.full_test_suite',
     url = "http://www.gituliar.org/fuchsia/",
     version = __version__,
 )

@@ -43,6 +43,23 @@ class TimedTextTestResult(unittest.TextTestResult):
 
 unittest.TextTestRunner.resultclass = TimedTextTestResult
 
+class FastTestLoader(unittest.TestLoader):
+    def getTestCaseNames(self, testCaseClass):
+        fnNames = super(FastTestLoader, self).getTestCaseNames(testCaseClass)
+        return [name for name in fnNames if "slow" not in name]
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(fuchsia))
+    return tests
+
+def fast_test_suite():
+    loader = FastTestLoader()
+    tests = doctest.DocTestSuite(fuchsia)
+    tests.addTests(loader.discover("test"))
+    return tests
+
+def full_test_suite():
+    loader = unittest.TestLoader()
+    tests = doctest.DocTestSuite(fuchsia)
+    tests.addTests(loader.discover("test"))
     return tests

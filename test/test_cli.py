@@ -13,9 +13,6 @@ def sh(*cmd):
     return stdout, stderr
 
 class Test(unittest.TestCase):
-    def test_help(t):
-        sh("bin/fuchsia", "-h")
-
     def assertTransformation(t, m1_path, x_name, t_path, m2_path):
         M1 = fuchsia.import_matrix_from_file(m1_path)
         T = fuchsia.import_matrix_from_file(t_path)
@@ -28,6 +25,9 @@ class Test(unittest.TestCase):
         x = SR.var(x_name)
         pranks = fuchsia.singularities(M, x).values()
         t.assertEqual(pranks, [0]*len(pranks))
+
+    def test_help(t):
+        sh("bin/fuchsia", "-h")
 
     def test_fuchsify_1(t):
         with tempfile.NamedTemporaryFile() as mf:

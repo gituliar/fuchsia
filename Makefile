@@ -19,6 +19,10 @@ clean:
 test:
 	sage -python setup.py test
 
+quicktest:
+	env SAGE_PATH="$(CURDIR)" \
+		sage -python -munittest -v test.fast_test_suite
+
 fuchsia.py: test/__init__.py
 
 test/*.py::
