@@ -659,7 +659,8 @@ def fuchsify_by_blocks(m, b, x, eps, cas="maxima"):
                     d = d.subs(sol[0])
 
                     t0 = identity_matrix(SR, n)
-                    t0[ki:ki+ni, kj:kj+nj] += d/(x-x0)**p if x0 != oo else -d*(x**p)
+                    t0[ki:ki+ni, kj:kj+nj] = \
+                            d/(x-x0)**p if not (x0 == oo) else -d*(x**p)
                     m = transform(m, x, t0).simplify_rational()
 
                     t = (t*t0).simplify_rational()
@@ -1148,7 +1149,7 @@ def block_fuchsify(M, x, eps):
                 c0 = matrix_c0(M.submatrix(0, 0, n, n), x, point, 0)
                 d_symbols = [gensym() for i in xrange(k*n)]
                 d = matrix(SR, k, n, d_symbols)
-                r = rank if point != oo else -rank
+                r = rank if not (point == oo) else -rank
                 eqs = (d*r + a0*d - d*c0 + b0).list()
                 solutions = solve(eqs, d_symbols)
                 assert solutions
@@ -1158,7 +1159,8 @@ def block_fuchsify(M, x, eps):
                 # T ~ (d 1 0)
                 #     (.....)
                 T = identity_matrix(SR, M.nrows())
-                T[n:n+k, 0:n] = d/(x - point)**r if point != oo else d/x**r
+                T[n:n+k, 0:n] = \
+                        d/(x - point)**r if not (point == oo) else d/x**r
                 M = transform(M, x, T).simplify_rational()
                 T3 = T3*T
                 rank -= 1

@@ -75,12 +75,8 @@ class Test(unittest.TestCase):
         b = [(0,1),(1,1),(2,1)]
         test.assert_fuchsify_by_blocks_works(m, b, x, eps)
 
-    @unittest.skip("needs more work to pass")
     def test_fuchsify_by_blocks_07(test):
         x, eps = SR.var("x ep")
-        #m10 = "-924/5*ep^2 - 154*ep - 1/10*(189728*ep^2 - 12*(8932*ep^2 + 12261*ep)*x + 245347*ep - 9240)/(30*x^2 - 87*x + 77) + 231*(208*(2*ep + 1)*x - 826*ep - 413)/(30*x^2 - 87*x + 77)^2 - 154/5"
-        #m10 = "1 + 1/(30*x^2 - 87*x + 77) + 1/(30*x^2 - 87*x + 77)^2"
-        m10 = "1/(x^2 - x + 1)^2"
         m = matrix([
             [0,0],
             [1/(x**2-x+1)**2, 0]

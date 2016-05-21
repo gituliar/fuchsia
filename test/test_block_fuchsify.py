@@ -62,7 +62,6 @@ class Test(unittest.TestCase):
         pranks = singularities(MM, x).values()
         t.assertEqual(pranks, [0]*len(pranks))
 
-    @unittest.skip("needs more work to pass")
     def test_block_fuchsify_6(t):
         x, eps = SR.var("x eps")
         M = matrix([
