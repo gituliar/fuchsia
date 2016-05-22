@@ -51,7 +51,6 @@ import os.path as path
 from   random import Random
 
 from   sage.all import *
-from   sage.all import SR
 from   sage.misc.parser import Parser
 from   sage.libs.ecl import ecl_eval
 ecl_eval("(ext:set-limit 'ext:heap-size 0)")
@@ -161,29 +160,6 @@ def limit_fixed_maxima(expr, x, x0):
     l = maxima_calculus.sr_limit(expr, x, x0)
     return expr.parent()(l)
 
-def poincare_rank_at_oo(M, x):
-    """Return Poincare rank of matrix M at x=Infinity.
-
-    Examples:
-    >>> x = var("x")
-    >>> poincare_rank_at_oo(matrix([[x, 1, 1/x]]), x)
-    2
-    >>> poincare_rank_at_oo(matrix([[1]]), x)
-    1
-    >>> poincare_rank_at_oo(matrix([[1/x]]), x)
-    0
-    """
-    p = -1
-    for expr in (M.subs({x: 1/x})/x**2).list():
-        if x not in expr.variables():
-            continue
-        solutions, ks = solve(factor(1/expr), x,
-                solution_dict=True, multiplicities=True)
-        for sol, k in zip(solutions, ks):
-            if sol[x] == 0:
-                p = max(p, k - 1)
-    return p
-
 def singularities(m, x, cas="maxima"):
     """Find values of x around which rational matrix M has
     a singularity; return a dictionary with {val: p} entries,
@@ -191,10 +167,13 @@ def singularities(m, x, cas="maxima"):
 
     Example:
     >>> x = var("x")
-    >>> M = matrix([[1/x, 0], [1/(x+1)**3, 1/(x+1)]])
-    >>> s = singularities(M, x)
+    >>> s = singularities(matrix([[1/x, 0], [1/(x+1)**3, 1/(x+1)]]), x)
     >>> sorted(s.items())
     [(-1, 2), (0, 0), (+Infinity, 0)]
+
+    >>> s = singularities(matrix([[x, 1, 1/x]]), x)
+    >>> sorted(s.items())
+    [(0, 0), (+Infinity, 2)]
     """
     m = m.simplify_rational()
     result = {}
@@ -449,7 +428,6 @@ def any_integer(rng, ring, excluded):
             return p
         r *= 2
 
-
 #==================================================================================================
 # Transformation routines 
 #==================================================================================================
@@ -555,7 +533,6 @@ def matrix_mask_str(m):
         s += ' '.join([str(ex) for ex in row]).replace('0', '.').replace('1','x') + "\n"
     return s
 
-
 #==================================================================================================
 # Step I: Fuchsify
 #==================================================================================================
@@ -564,7 +541,6 @@ def is_fuchsian(m, x, cas="maxima"):
     for i, expr in enumerate(m.list()):
         if expr.is_zero():
             continue
-        #expr = expr.subs({eps: 13})
         points = singularities_expr(expr, x, cas=cas)
         for x0, p in points.iteritems():
             if p > 0:
@@ -965,7 +941,6 @@ def find_balances(m, x, eps, state={}):
         if (x1,x2) not in state["processed_pairs"]:
             state["processed_pairs"].append((x1,x2))
 
-
 def find_balances_by_cond(a0_ev, b0_ev, cond):
     res = []
     for a0_eval, a0_evecs, a0_evmult in a0_ev:
@@ -1116,60 +1091,6 @@ def factorize(M, x, epsilon, seed=0):
         return M, sT
         # No, I don't.
     raise FuchsiaError("can not factor epsilon")
-
-def block_fuchsify(M, x, eps):
-    """Same as fuchsify(M, x), but using a different algorithm and
-    faster for matrices M that can be reduced to block-diagonal
-    form with small blocks.
-    """
-    # Convert to block-triangular form
-    M, T1, B = block_triangular_form(M)
-
-    # Factorize diagonal blocks
-    T2 = identity_matrix(SR, M.nrows())
-    for n, k in B:
-        m = M.submatrix(n, n, k, k)
-        m, t1 = fuchsify(m, x)
-        m, t2 = normalize(m, x, eps)
-        m, t3 = factorize(m, x, eps)
-        T2[n:n+k, n:n+k] = (t1*t2*t3).simplify_rational()
-    M = transform(M, x, T2)
-
-    # Reduce off-diagonal blocks
-    T3 = identity_matrix(SR, M.nrows())
-    for n, k in B:
-        #     (a 0 0)
-        # M = (b c 0)
-        #     (.....)
-        #a = M.submatrix(n, n, k, k)
-        b = M.submatrix(n, 0, k, n)
-        #c = M.submatrix(0, 0, n, n)
-        for point, rank in singularities(b, x).iteritems():
-            while rank > 0:
-                b0 = matrix_c0(M.submatrix(n, 0, k, n), x, point, rank)
-                if b0.is_zero():
-                    rank -= 1
-                    continue
-                a0 = matrix_c0(M.submatrix(n, n, k, k), x, point, 0)
-                c0 = matrix_c0(M.submatrix(0, 0, n, n), x, point, 0)
-                d_symbols = [gensym() for i in xrange(k*n)]
-                d = matrix(SR, k, n, d_symbols)
-                r = rank if not (point == oo) else -rank
-                eqs = (d*r + a0*d - d*c0 + b0).list()
-                solutions = solve(eqs, d_symbols)
-                assert solutions
-                d = d.subs(solutions[0])
-                assert not (set(d.variables()) - set([eps]))
-                #     (1 0 0)
-                # T ~ (d 1 0)
-                #     (.....)
-                T = identity_matrix(SR, M.nrows())
-                T[n:n+k, 0:n] = \
-                        d/(x - point)**r if not (point == oo) else d/x**r
-                M = transform(M, x, T).simplify_rational()
-                T3 = T3*T
-                rank -= 1
-    return M, (T1*T2*T3).simplify_rational()
 
 #==================================================================================================
 # Helpers
@@ -1326,7 +1247,6 @@ def import_matrix_matrixmarket(f):
         data.append(expr)
     m = matrix(ncols, nrows, data).T
     return m
-
 
 def export_matrix_to_file(filename, m, fmt="mtx"):
     """Write a matrix in a given format to a named file.
