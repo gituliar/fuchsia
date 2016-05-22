@@ -250,18 +250,23 @@ def singularities_expr_maxima(expr, x):
         return {}
 
     result = {}
-    points, ps = solve(factor(1/expr), x, solution_dict=True, multiplicities=True)
+    eq = factor(1/expr)
+    points, ps = solve(eq, x, solution_dict=True, multiplicities=True)
     for sol, p in zip(points, ps):
+        if x not in sol:
+            raise Exception("Maxima can't solve this equation: %s" % eq)
         x0 = expand(sol[x])
         if p >= 1:
             result[x0] = p-1
 
-    points, ps = solve(factor(1/(expr.subs({x: 1/x})/x**2)), x, solution_dict=True, multiplicities=True)
+    eq = factor(1/(expr.subs({x: 1/x})/x**2))
+    points, ps = solve(eq, x, solution_dict=True, multiplicities=True)
     for sol, p in zip(points, ps):
+        if x not in sol:
+            raise Exception("Maxima can't solve this equation: %s" % eq)
         if sol[x] == 0 and p >= 1:
             result[oo] = p-1
     return result
-
 
 def matrix_taylor0(m, x, x0, exp, cas="maxima"):
     """Return the 0-th coefficient of Taylor expansion of
