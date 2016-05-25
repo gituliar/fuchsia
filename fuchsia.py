@@ -66,7 +66,7 @@ def is_verbose():
     return logger.isEnabledFor(logging.INFO)
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
-__author_email__ = "fuchsia@gituliar.org"
+__author_email__ = "oleksandr@gituliar.net"
 __version__ = open(path.join(path.dirname(__file__),"VERSION")).readline().rstrip('\n')
 try:
     __commit__ = open(path.join(path.dirname(__file__),"COMMIT")).readline().rstrip('\n')
@@ -199,21 +199,13 @@ def singularities_expr_maple(expr, x):
     if bool(expr == 0):
         return {}
 
-    candidates = {}
+    result = {}
     points = [x0 for x0 in f_solve(1/expr, x, cas="maple")]
     for x0 in points:
-        if x0 not in candidates:
-            candidates[x0] = 0
+        if x0 not in result:
+            result[x0] = 0
         else:
-            candidates[x0] += 1
-
-    result = {}
-    for x0, p in candidates.iteritems():
-        while (p >= 0) and bool(limit_fixed(expr*(x-x0)**(p+1), x, x0,  cas="maple") == 0):
-            print "REJECTING pole p = %s x = %s" % (p, x0)
-            p -= 1
-        if p >= 0:
-            result[x0] = p
+            result[x0] += 1
 
     points = f_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x,"maple")
     for x0 in points:
@@ -1349,13 +1341,11 @@ def main():
             elif len(args) == 2 and args[0] == 'normalize':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 M, t1 = simplify_by_factorization(M, x)
-                i = 0
                 M, t2 = normalize(M, x, epsilon)
+                T = t1*t2
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1], fmt=fmt)
-                M, t1 = simplify_by_factorization(M, x)
-                M, t2 = factorize(M, x, epsilon)
-                T = t1*t2
+                M, T = factorize(M, x, epsilon)
             elif len(args) == 2 and args[0] == 'sort':
                 M = import_matrix_from_file(args[1], fmt=fmt)
                 M, T, B = block_triangular_form(M)
