@@ -144,7 +144,7 @@ def limit_fixed(expr, x, x0, cas="maxima"):
 def limit_fixed_maple(expr, x, x0):
     res = maple.limit(simplify(expr), x=x0)
     try:
-        res = _parser.parse(str(res))
+        res = parse(str(res))
     except:
         res = NaN
     return res
@@ -1029,7 +1029,7 @@ def f_solve(eqs, var, cas="maxima"):
         res = []
         for s in solution:
             try:
-                expr = expand(simplify(_parser.parse(s)))
+                expr = expand(simplify(parse(s)))
                 res.append(expr)
             except SyntaxError as error:
                 print "ERROR:  \n%s\n  %s\n" % (s, error)
@@ -1183,6 +1183,16 @@ def simplify_by_factorization(M, x):
 # Import/Export routines
 #==============================================================================
 
+_parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
+
+def parse(s):
+    """Convert a given string to a Sage expression.
+
+    >>> parse("(1 + I*eps)*(1 - I*eps)").simplify_rational()
+    eps^2 + 1
+    """
+    return _parser.parse(s).subs({var("I"): I})
+
 def import_matrix_from_file(filename, fmt="mtx"):
     """Read and return a matrix stored in a given format from a named file.
     """
@@ -1193,8 +1203,6 @@ def import_matrix_from_file(filename, fmt="mtx"):
             return import_matrix_mathematica(f)
         else:
             raise FuchsiaError("Unknown matrix format '%s'" % fmt)
-
-_parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
 
 def import_matrix_mathematica(f):
     """Read and return a matrix, stored in the Mathematica format, from a file-like object.
@@ -1231,7 +1239,7 @@ def import_matrix_matrixmarket(f):
         if s.startswith('%'):
             continue
         try:
-            expr = _parser.parse(s)
+            expr = parse(s)
         except SyntaxError:
             msg = ("Malformad expression at line %d of '%s':\n%s\n"
                    "Make sure the file is in the MatrixMarket array format")
@@ -1327,8 +1335,8 @@ def main():
                 logger.addHandler(fh)
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
-            if key == "-x": x = _parser.parse(value)
-            if key == "-y": x_fy = _parser.parse(value)
+            if key == "-x": x = parse(value)
+            if key == "-y": x_fy = parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
