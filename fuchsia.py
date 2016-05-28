@@ -1194,16 +1194,20 @@ def parse(s):
     """
     return _parser.parse(s)
 
-def import_matrix_from_file(filename, fmt="mtx"):
-    """Read and return a matrix stored in a given format from a named file.
+def import_matrix_from_file(filename):
+    """Read and return a matrix from a named file. Both Mathematica
+    and MatrixMarket formats are supported; the exact format
+    will be autodetected.
     """
     with open(filename, 'r') as f:
-        if fmt == "mtx":
+        hd = f.read(2)
+        f.seek(0)
+        if hd == "%%":
             return import_matrix_matrixmarket(f)
-        elif fmt == "m":
+        elif hd == "{{":
             return import_matrix_mathematica(f)
         else:
-            raise FuchsiaError("Unknown matrix format '%s'" % fmt)
+            raise ValueError("File '%s' is not in a known matrix format" % filename)
 
 def import_matrix_mathematica(f):
     """Read and return a matrix, stored in the Mathematica format, from a file-like object.
@@ -1343,28 +1347,28 @@ def main():
             if key == "-t": tpath = value
         with profile(profpath):
             if len(args) == 2 and args[0] == 'fuchsify':
-                M = import_matrix_from_file(args[1], fmt=fmt)
+                M = import_matrix_from_file(args[1])
                 M, t1 = simplify_by_factorization(M, x)
                 M, t2 = fuchsify(M, x)
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'normalize':
-                M = import_matrix_from_file(args[1], fmt=fmt)
+                M = import_matrix_from_file(args[1])
                 M, t1 = simplify_by_factorization(M, x)
                 M, t2 = normalize(M, x, epsilon)
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'factorize':
-                M = import_matrix_from_file(args[1], fmt=fmt)
+                M = import_matrix_from_file(args[1])
                 M, T = factorize(M, x, epsilon)
             elif len(args) == 2 and args[0] == 'sort':
-                M = import_matrix_from_file(args[1], fmt=fmt)
+                M = import_matrix_from_file(args[1])
                 M, T, B = block_triangular_form(M)
             elif len(args) == 2 and args[0] == 'reduce':
-                m = import_matrix_from_file(args[1], fmt=fmt)
+                m = import_matrix_from_file(args[1])
                 M, T = canonical_form(m, x, epsilon)
             elif len(args) >= 2 and args[0] == 'transform':
-                M = import_matrix_from_file(args[1], fmt=fmt)
+                M = import_matrix_from_file(args[1])
                 if x_fy is None:
-                    t = import_matrix_from_file(args[2], fmt=fmt)
+                    t = import_matrix_from_file(args[2])
                     M = transform(M, x, t)
                 else:
                     x, fy = x_fy.left(), x_fy.right()
