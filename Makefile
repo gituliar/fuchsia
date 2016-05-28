@@ -21,10 +21,10 @@ test:
 
 quicktest:
 	env SAGE_PATH="$(CURDIR)" \
-		sage -python -munittest -v test.fast_test_suite
+		sage -python -munittest -fv test.fast_test_suite
 
 fuchsia.py: test/__init__.py
 
 test/*.py::
 	env SAGE_PATH="$(CURDIR)" \
-		sage -python -munittest -v test.$(basename $(notdir $@))
+		sage -python -munittest -fv test.$(basename $(notdir $@))

@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "git_409.mtx"))
 
-    def test_git_410(t):
+    def test_git_410_slow(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "git_410.mtx"))
 
