@@ -4,6 +4,9 @@ Usage:
     fuchsia [-hv] [-f <fmt>] [-l <path>] [-P <path>] <command> <args>...
 
 Commands:
+    reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
+        find a canonical form of the given matrix
+
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
         find a transformation that will transform a given matrix
         into Fuchsian form
@@ -19,14 +22,12 @@ Commands:
     sort [-m <path>] [-t <path>] <matrix>
         find a block-triangular form of the given matrix
 
-    reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
-        find a canonical form of the given matrix
-
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
-    transform [-m <path>] -y <expr> <matrix>
-        change a free variable according to the given expression
+    changevar [-x <name>] [-m <path>] <matrix> <expr>
+        transform matrix by susbtituting free variable by a
+        given expression
 
 Options:
     -h          show this help message
@@ -35,7 +36,6 @@ Options:
     -v          be verbose and print log information
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
-    -y <expr>   expression for the new free variable (example: "x=(1-y^2)/(1+y^2)")
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -43,6 +43,7 @@ Options:
 Arguments:
     <matrix>    read the input matrix from this file
     <transform> read the transformation matrix from this file
+    <expr>      arbitrary expression
 """
 from   collections import defaultdict
 from   itertools import combinations
@@ -1183,7 +1184,7 @@ def simplify_by_factorization(M, x):
 # Import/Export routines
 #==============================================================================
 
-_parser = Parser(make_int=ZZ, make_float=RR,
+_parser = Parser(make_int=SR, make_float=SR,
         make_var=lambda v: I if v in "Ii" else SR.var(v))
 
 def parse(s):
@@ -1326,7 +1327,7 @@ def main():
         print('\033[35;1mFuchsia v%s (commit: %s)\033[0m' % (__version__, __commit__))
         print "Authors: %s\n" % __author__
         mpath = tpath = profpath = fmt = None
-        M = T = x_fy = None
+        M = T = None
         x, epsilon = SR.var("x eps")
         fmt = "mtx"
         logger.setLevel(logging.INFO)
@@ -1341,7 +1342,6 @@ def main():
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = parse(value)
-            if key == "-y": x_fy = parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
@@ -1365,20 +1365,20 @@ def main():
             elif len(args) == 2 and args[0] == 'reduce':
                 m = import_matrix_from_file(args[1])
                 M, T = canonical_form(m, x, epsilon)
-            elif len(args) >= 2 and args[0] == 'transform':
+            elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
-                if x_fy is None:
-                    t = import_matrix_from_file(args[2])
-                    M = transform(M, x, t)
-                else:
-                    x, fy = x_fy.left(), x_fy.right()
-                    y = None
-                    [y for y in fy.variables() if y != epsilon]
-                    if y is None:
-                        raise FuchsiaError("No new variable found in the expression given by option -y '%s'" % x_fy)
-                    assert y.is_symbol()
-                    M = change_variable(M, x, y, fy)
-                    x = y
+                t = import_matrix_from_file(args[2])
+                M = transform(M, x, t)
+            elif len(args) == 3 and args[0] == 'changevar':
+                M = import_matrix_from_file(args[1])
+                fy = parse(args[2])
+                extravars = set(fy.variables()) - set([epsilon])
+                if len(extravars) != 1:
+                    raise getopt.GetoptError(
+                            "need to have one free variable in '%s'" % args[2])
+                y = extravars.pop()
+                M = change_variable(M, x, y, fy)
+                x = y
             elif len(args) == 0:
                 usage()
             else:
