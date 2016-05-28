@@ -1197,7 +1197,7 @@ def parse(s):
 
 def import_matrix_from_file(filename):
     """Read and return a matrix from a named file. Both Mathematica
-    and MatrixMarket formats are supported; the exact format
+    and MatrixMarket array formats are supported. The exact format
     will be autodetected.
     """
     with open(filename, 'r') as f:
@@ -1211,7 +1211,8 @@ def import_matrix_from_file(filename):
             raise ValueError("File '%s' is not in a known matrix format" % filename)
 
 def import_matrix_mathematica(f):
-    """Read and return a matrix, stored in the Mathematica format, from a file-like object.
+    """Read and return a matrix, stored in the Mathematica format,
+    from a file-like object.
     """
     data =  f.read()
     data = data.translate(None, ' \n')
@@ -1225,7 +1226,8 @@ def import_matrix_mathematica(f):
     return import_matrix_matrixmarket(sio).T
 
 def import_matrix_matrixmarket(f):
-    """Read and return a matrix, stored in the MatrixMarket array format, from a file-like object.
+    """Read and return a matrix, stored in the MatrixMarket
+    array format, from a file-like object.
     """
     lineno = 0
     while True:
@@ -1255,7 +1257,9 @@ def import_matrix_matrixmarket(f):
     return m
 
 def export_matrix_to_file(filename, m, fmt="mtx"):
-    """Write a matrix in a given format to a named file.
+    """Save matrix into a file in a given matrix format. Set
+    'fmt' to "mtx" for MatrixMarket array format, or to "m"
+    for Mathematica format.
     """
     with open(filename, 'w') as f:
         if fmt == "mtx":
@@ -1266,6 +1270,7 @@ def export_matrix_to_file(filename, m, fmt="mtx"):
             raise FuchsiaError("Unknown matrix format '%s'" % fmt)
 
 def export_matrix_mathematica(f, m):
+    """Write matrix to a file-like object using Mathematica format."""
     i = 0
     f.write("{")
     nc, nr = m.ncols(), m.nrows()
@@ -1284,7 +1289,8 @@ def export_matrix_mathematica(f, m):
     f.write('}')
 
 def export_matrix_matrixmarket(f, m):
-    """Write a matrix to a file-like object using a given format.
+    """Write matrix to a file-like object using MatrixMarket
+    array format.
     """
     f.write("%%MatrixMarket matrix array Fuchsia[symbolic] general\n")
     f.write("%d %d\n" % (m.nrows(), m.ncols()))
@@ -1331,10 +1337,15 @@ def main():
         x, epsilon = SR.var("x eps")
         fmt = "mtx"
         logger.setLevel(logging.INFO)
-        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:f:P:x:y:e:m:t:")
+        kwargs, args = getopt.gnu_getopt(sys.argv[1:], "hvl:f:P:x:e:m:t:")
         for key, value in kwargs:
             if key == "-h": usage()
-            if key == "-f": fmt = value
+            if key == "-f":
+                if value not in ["m", "mtx"]:
+                    raise getopt.GetoptError(
+                            "'%s' is not a known matrix format; "
+                            "'m' and 'mtx' are supported" % value)
+                fmt = value
             if key == "-l":
                 fh = logging.FileHandler(value, "w")
                 fh.setFormatter(logging.Formatter(logger_format))
