@@ -2,7 +2,7 @@ from   setuptools import setup
 
 from   fuchsia import __author__, __author_email__, __version__
 
-with open('README.md') as f:
+with open('README') as f:
     long_description = f.read()
 
 setup(

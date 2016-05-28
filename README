@@ -1,0 +1,29 @@
+*Fuchsia* is a reducer of differential equations for multiloop
+master integrals.
+
+In concrete terms, let's say you have a system of differential
+equations of this form:
+
+    d/dx J = M(x, epsilon) * J,
+
+    where J is a column vector of unknown functions,
+          M is a matrix of rational functions,
+          x is a free variable,
+          epsilon is an infinitesimal parameter
+
+*Fuchsia* will, if possible, transform this system to an equivalent
+Fuchsian system of this form:
+
+    d/dx J' = epsilon * S(x) * J'
+
+... with the transformation itself defined by matrix T like this:
+
+    J = T * J'
+
+Such a transformation is useful, because you can now easilly
+find J' (and therefore, J) as a series in epsilon.
+
+To find this transformation *Fuchsia* uses algorithm developed
+by Roman Lee [1].
+
+[1] https://arxiv.org/abs/1411.0911v1
