@@ -1183,7 +1183,8 @@ def simplify_by_factorization(M, x):
 # Import/Export routines
 #==============================================================================
 
-_parser = Parser(make_int=ZZ, make_float=RR, make_var=SR.var)
+_parser = Parser(make_int=ZZ, make_float=RR,
+        make_var=lambda v: I if v in "Ii" else SR.var(v))
 
 def parse(s):
     """Convert a given string to a Sage expression.
@@ -1191,7 +1192,7 @@ def parse(s):
     >>> parse("(1 + I*eps)*(1 - I*eps)").simplify_rational()
     eps^2 + 1
     """
-    return _parser.parse(s).subs({var("I"): I})
+    return _parser.parse(s)
 
 def import_matrix_from_file(filename, fmt="mtx"):
     """Read and return a matrix stored in a given format from a named file.
