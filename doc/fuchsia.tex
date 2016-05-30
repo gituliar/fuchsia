@@ -154,6 +154,7 @@ The whole method can be divided into three main steps as described in the rest o
 
 
 \subsubsection{Fuchsification}
+\label{sec:fuchs}
 
 By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$ at all singular points $x=x_k$ including $\infty$ to the Fuchsian form given by a matrix $\M B(x,\eps)$.
 
@@ -196,6 +197,7 @@ Together with Pfl\"ugel they developed algorithms implementing their method~\cit
 
 
 \subsubsection{Normalization}
+\label{sec:norm}
 
 By {\em normalization} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a given Fuchsian matrix with eigenvalues $m_i + n_i \, \eps$ to the equivalent Fuchsian matrix with eigenvalues $n_i \, \eps$, where $m_i$ and $n_i$ are integer numbers.
 
@@ -213,15 +215,27 @@ Unfortunately, we can not provide a general algorithm how to choose such substit
 In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines, which are described in details in the next section.
 
 
+\subsubsection{Factorization}
+\label{sec:fact}
+By {\em factorization} we mean to find a rational transformation which transforms a given Fuchsian matrix with normalized eigenvalues to canonical form.
+
+
 \subsubsection{Block-triangular form}
 
-It is usually happens that a matrix which defines our ODEs is sparse, i.e., has many zeros.
-We can use that fact to shuffle our matrix to the block-triangular form which will drastically improve fuchsification and normalization steps described before, see~\cite[Section 7]{Lee15}.
+It is usually happens that a matrix which defines an ODEs is sparse, i.e., has many zeros.
+We can use that fact to shuffle the matrix to a block-triangular form, that can drastically improve fuchsification and normalization steps described in previous sections.
 (You will find \code{block\_triangular\_form} routine in \fuchsia which finds a block-triangular form of a given matrix.)
+Below we describe \ldots ; for more details see~\cite[Section 7]{Lee15}, similar ideas were also discussed in \cite{Git15}.
 
 \begin{equation}
 \label{eq:bdiag}
-\M A = 
+\frac{\D}{\D x}
+\left(
+\begin{matrix}
+  \bar{f_1} \\ \bar{f_2} \\ \bar{f_3} \\ \vdots \\ \bar{f_k}
+\end{matrix}
+\right)
+= 
 \left(
 \begin{matrix}
   \M A_1 & 0      & 0 & 0 & 0
@@ -234,20 +248,30 @@ We can use that fact to shuffle our matrix to the block-triangular form which wi
 \\
   \M B_n & \M B_{n-1} & \M B_{n-2} & \cdots & \M A_k
 \end{matrix}
-\right), \qquad n=\frac{k(k-1)}{2}
+\right)
+\left(
+\begin{matrix}
+  \bar{f_1} \\ \bar{f_2} \\ \bar{f_3} \\ \vdots \\ \bar{f_k}
+\end{matrix}
+\right)
+,
 \end{equation}
+where $n=k(k-1)/2$.
 
-In order to normalize a whole matrix it is enough to separately fuchsify and then normalize each diagonal block.
-The reason is that characteristic polynomial of the block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.
+We start by putting {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M A_i(x,\eps)$, see eq.~\eqref{eq:bdiag}, to canonical form.
+At first we fuchsify matrices $\M A_i(x,\eps)$ as described in Section~\ref{sec:fuchs}.
+Next, since a characteristic polynomial of the block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.
 \begin{equation}
-  \det{\M A(x,\eps)} = \det{\M A_1(x,\eps)} \ldots  \det{\M A_k(x,\eps)}.
+  \det{\M A(x,\eps)} = \det{\M A_1(x,\eps)} \ldots  \det{\M A_k(x,\eps)}
+  ,
 \end{equation}
+we can normalize a whole matrix by normalizing each diagonal block separately, as described in Section~\ref{sec:norm}.
+Finally, we find such transformations which put diagonal blocks to the canonical form, as described in Section~\ref{sec:fact}.
 
-Next, to fuchsify a whole matrix we step-by-step fuchsify non-diagonal blocks $\M B_i(x,\eps)$ starting with $i=1$ and proceed with gradually increasing $i$ as shown in eq.~\eqref{eq:bdiag}.
+Next, we fuchsify {\bf non-diagonal blocks}.
+\ldots
 
-
-\subsubsection{Factorization}
-By {\em factorization} we mean to find a rational transformation which transforms a given Fuchsian matrix with normalized eigenvalues to canonical form \cite{Henn13}.
+Finally, we factorize a whole matrix as described in Section~\ref{sec:fact}.
 
 
 \section{Using \fuchsia}
@@ -285,13 +309,16 @@ where
 In the following we provide a complete help information printed by \code{fuchsia.py --help}:
 {\small
 \begin{verbatim}
-Fuchsia v16.4.8 (commit: 59b7847)
+Fuchsia v16.5.25 (commit: e9aaaf6)
 Authors: Oleksandr Gituliar, Vitaly Magerya
-        
+
 Usage:
-    fuchsia [-hv] [-P <path>] <command> <args>...
+    fuchsia [-hv] [-f <fmt>] [-l <path>] [-P <path>] <command> <args>...
 
 Commands:
+    reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
+        find a canonical form of the given matrix
+
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
         find a transformation that will transform a given matrix
         into Fuchsian form
@@ -304,14 +331,23 @@ Commands:
         find a transformation that will make a given normalized
         matrix proportional to the infinitesimal parameter
 
+    sort [-m <path>] [-t <path>] <matrix>
+        find a block-triangular form of the given matrix
+
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
+    changevar [-x <name>] [-m <path>] <matrix> <expr>
+        transform matrix by susbtituting free variable by a
+        given expression
+
 Options:
     -h          show this help message
-    -v          be verbose and print additional information
+    -f <fmt>    matrix file format: mtx or m (default: mtx)
+    -l <path>   save log information to this file
+    -v          be verbose and print log information
     -P <path>   save profile report into this file
-    -x <name>   use this name for the independent variable (default: x)
+    -x <name>   use this name for the free variable (default: x)
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -319,6 +355,7 @@ Options:
 Arguments:
     <matrix>    read the input matrix from this file
     <transform> read the transformation matrix from this file
+    <expr>      arbitrary expression
 \end{verbatim}}
 
 
