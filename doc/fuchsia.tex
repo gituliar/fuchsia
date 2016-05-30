@@ -190,7 +190,7 @@ Let us comment on some properties of the transformation in eq.~\eqref{eq:bal}.
         Though, introduction of a new singular point may look like a complication, in fact it is not since all apparent singularities disappear during the normalization step.
 \end{itemize}
 
-In \fuchsia, fuchsification step is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines, which are described in details in the next section.
+In \fuchsia, fuchsification step is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
 
 Finally, let us mention, that a similar problem of reducing a Poincar\'e rank of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
 Together with Pfl\"ugel they developed algorithms implementing their method~\cite{BP99} and available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
@@ -212,13 +212,28 @@ It may happen, that some $m_i$ in the initial matrix are non-integer numbers whi
 In this case we suggest to look for some variable change which leads to the appropriate form of $m_i$.
 Unfortunately, we can not provide a general algorithm how to choose such substitution, so for the moment it is a try-fail approach.
 
-In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines, which are described in details in the next section.
+In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
 
 
 \subsubsection{Factorization}
 \label{sec:fact}
-By {\em factorization} we mean to find a rational transformation which transforms a given Fuchsian matrix with normalized eigenvalues to canonical form.
+By {\em factorization} we mean to find a rational transformation which transforms a given Fuchsian matrix with normalized eigenvalues at all singular points to canonical form.
+Let us assume that $\M T(\eps)$ is such a matrix, then a new matrix, according to eq.~\eqref{eq:bta}, is given by
+\begin{equation}
+  \M B(x,\eps) = \eps\, \sum \frac{\M B_i}{x-x_i} = \sum \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
+\end{equation}
+or explicitly
+\begin{equation}
+  \M B_i = \M T^{-1}(\eps) \frac{\M A_i(\eps)}{\eps} \M T(\eps), \quad \text{for} \quad i=1..k.
+\end{equation}
+Since $\M B_i$ is constant for any $\eps$, in order to find components of $n\times n$ matrix $\M T(\eps)$, we write a system of linear equations for some fixed value of $\mu$ at an every singular point $x=x_i$, i.e.,
+\begin{equation}
+  \frac{\M A_i(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_i(\mu)}{\mu},
+\end{equation}
+where we now treat components of $\M T(\eps,\mu) = \M T(\eps) \; \M T^{-1}(\mu)$ as unknown variables.
+The initial transformation we are looking for is then given by $\M T(\eps) = \M T(\eps,\mu_0)$ for some arbitrary chosen number $\mu = \mu_0$, provided that $\M T(\eps, \mu_0)$ is not singular.
 
+In \fuchsia this step is implemented as \code{factorize} routine, see Section~\ref{sec:usage_py}.
 
 \subsubsection{Block-triangular form}
 
@@ -360,6 +375,7 @@ Arguments:
 
 
 \subsection{Usage from \sage or \python}
+\label{sec:usage_py}
 
 \begin{description}
 
@@ -464,12 +480,23 @@ formatted using MatrixMarket array format.
 
 \end{description}
 
+
 \section{Summary}
 \label{sec:4}
 
-{\it Prospects: non-rational transformations (e.g. sunrise graphs). }
+In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to canonical form.
+\fuchsia is free and open-source: it is build in \python using \maximasage computer algebra system which are available free of charge.
+To find the corresponding analytical transformation \fuchsia uses a method proposed by Roman Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
+
+In additional, an optimization for block-triangular (or sparse) matrices is also implemented, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 real and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
+In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynoms with complex coefficients in \maximasage system, which we hope to improve in the next version of the program.
+Another promising direction for improvements could be support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
 
 \section*{Acknowledgment}
+
+We gratefully acknowledge discussions with Roman Lee and Costas Papadopolous, examples of differential equations they provided are very much appreciated.
+
+This work has been supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
 
 \bibliography{fuchsia}
 
