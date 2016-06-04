@@ -12,7 +12,8 @@
 \definecolor{fuchsia}{RGB}{140,0,130}
 \def\F#1{\mathbf{#1}} % use this to style function names
 \def\M#1{\mathbb{#1}} % use this to style matrix names
-\def\functionitem#1#2{\item[$\F{#1}(#2)$]}
+\def\functionitem#1#2{\item[$\F{#1}(#2)$\hfill\textit{(function)}]}
+\def\classitem#1{\item[$#1$\hfill\textit{(class)}]}
 
 \input include/commands.tex
 
@@ -236,6 +237,7 @@ The initial transformation we are looking for is then given by $\M T(\eps) = \M 
 In \fuchsia this step is implemented as \code{factorize} routine, see Section~\ref{sec:usage_py}.
 
 \subsubsection{Block-triangular form}
+\label{sec:blockreduce}
 
 It is usually happens that a matrix which defines an ODEs is sparse, i.e., has many zeros.
 We can use that fact to shuffle the matrix to a block-triangular form, that can drastically improve fuchsification and normalization steps described in previous sections.
@@ -294,17 +296,22 @@ Finally, we factorize a whole matrix as described in Section~\ref{sec:fact}.
 
 \subsection{Installation}
 
-To run \fuchsia you need \sage 7.0\footnote{Prior versions of \sage contain some critical bugs \fuchsia is sensitive to, later versions were not tested with \fuchsia.
-For those reasons we strongly recommend you to use \sage 7.0.} to be installed on your computer.
-Though, there are many pre-compiled packages of \sage for various \linux distributions, we recommend to compile it from sources which a straightforward process (despite of its size) and can be done without administration rights.
-Visit \url{http://www.sagemath.org} for further installation instructions.
+To run \fuchsia you need \sage version 7.0 or higher to be installed on your computer.
+You can find installation instructions for \sage over at it's website, \url{http://www.sagemath.org}.
+\footnote{
+    Some \linux distributions have \sage available in their package repositories; we do not recomment using those.
+    A number of \maxima releases contain bugs which \fuchsia is sensitive to, and so far the official \sage builds have avoided those releases (unlike a number of \linux distributions).
+}
 
-\sage is a free open-source mathematics software system licensed under GPL.
-It is written in \python~2.7 and combines together many existing open-source projects among which are reliable and open-source tools for symbolic calculation: \texttt{Maxima}, \texttt{GiNaC}, \texttt{Magma}, \texttt{Singular}, and others; the former one is heavily used in our code.
+\sage is a free and open-source Computer Algebra System licensed under GPL.
+It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Magma}, \texttt{Singular} and others with the goal of providing the best free CAS.
+In particular our code heavily relies on the interface to \maxima.
 
 To install \fuchsia run the following command in your shell:
 
-\code{\$ sage -pip install fuchsia}
+\begin{verbatim}
+    $ sage -pip install fuchsia
+\end{verbatim}
 
 This will install the latest stable version of \fuchsia from the Python Package Index (PyPI) to your \sage environment.
 If you are interested in the latest development version then visit \url{https://github.com/gituliar/fuchsia/}.
@@ -313,7 +320,9 @@ If you are interested in the latest development version then visit \url{https://
 
 An easy way to use \fuchsia is to run \code{fuchsia.py} shell script, which has the following invocation signature:
 
-\code{\$ fuchsia.py <action> <options>}
+\begin{verbatim}
+    $ fuchsia.py <action> <options>
+\end{verbatim}
 
 where
 \begin{itemize}
@@ -377,106 +386,216 @@ Arguments:
 \subsection{Usage from \sage or \python}
 \label{sec:usage_py}
 
+You can use \fuchsia as a library by starting \sage prompt and importing \texttt{fuchsia} module like this:
+
+\begin{verbatim}
+    $ sage
+    ┌────────────────────────────────────────────────────────────────────┐
+    │ SageMath Version 7.1, Release Date: 2016-03-20                     │
+    │ Type "notebook()" for the browser-based notebook interface.        │
+    │ Type "help()" for help.                                            │
+    └────────────────────────────────────────────────────────────────────┘
+    sage: from fuchsia import *
+\end{verbatim}
+
+Read the next section for the list of functions you'll get after import.
+To give you a feel for the API, let's try reducing an example matrix.
+
+\begin{verbatim}
+    sage: x, eps = var("x eps")
+    sage: M = matrix([
+      [(2-eps)/x, 0, 0],
+      [x/(x-1), eps/x, 0],
+      [(1+2*eps)/x**3, 0, (1+eps)/x/(x+1)]
+    ])
+\end{verbatim}
+
+First, let's see where the singularities of this matrix lie:
+
+\begin{verbatim}
+    sage: singularities(M, x)
+    {-1: 0, 0: 2, 1: 0, +Infinity: 1}
+\end{verbatim}
+
+So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=2$, 1 at $\code{x}=\infty$ and 0 everywhere else.
+To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to fuchsify this matrix like so:
+
+\begin{verbatim}
+    sage: Mf, Tf = fuchsify(M, x)
+    sage: Mf
+    [ -(eps - 2)/x           0                          0]
+    [   -1/(x - 1)  (eps -1)/x                          0]
+    [(2*eps + 1)/x           0  (eps + 2*x + 3)/(x^2 + x)]
+    sage: singularities(Mf, x)
+    {-1: 0, 0: 0, 1: 0, +Infinity: 0}
+\end{verbatim}
+
+So far, so good. Now, let's take a look at the eigenvalues of \code{Mf} residues:
+
+\begin{verbatim}
+    sage: [matrix_residue(Mf, x, x0).eigenvalues()
+    ....:  for x0 in [-1, 0, 1, Infinity]]
+    [[-eps - 1, 0, 0],
+     [-eps + 2, eps - 1, eps + 3],
+     [0, 0, 0],
+     [-eps + 1, eps - 2, -2]]
+\end{verbatim}
+
+Many of these eigenvalues are not equal to zero in limit $\code{eps}\to0$, so \code{Mf} is not normalized.
+On the other hand, all of the eigenvalues are of the form $n + m*\code{eps}$, so there's a chance we'll be able to normalize \code{Mf}.
+Let's try:
+
+\begin{verbatim}
+    sage: Mn, Tn = normalize(Mf, x, eps)
+    sage: Mn
+    [-eps/x                                                            ...
+    [(4*eps^3 - 8*eps^2 - (4*eps^2 - 6*eps + 3)*x + 5*eps)/((4*eps^3 - ...
+    [((2*eps + 1)*x + 3*eps + 1)/(x^2 + x)                             ...
+    sage: [matrix_residue(Mn, x, x0).eigenvalues()
+    ....:  for x0 in [-1, 0, 1, Infinity]]
+    [[-eps, 0, 0],
+     [-eps, eps, eps],
+     [0, 0, 0],
+     [-eps, eps, 0]]
+\end{verbatim}
+
+So, the matrix is normalized, but it grew quite a bit larger.
+This happens.
+Sometimes it's possible to simplify it a bit like so:
+
+\begin{verbatim}
+    sage: Ms, Ts = simplify_by_jordanification(Mn, x)
+    sage: Ms
+    [               -eps/x      0              0]
+    [            1/(x - 1)  eps/x              0]
+    [1/2*(eps + 1)/(x + 1)      0  eps/(x^2 + x)]
+\end{verbatim}
+
+That's much better.
+
+Finally, we need to factorize \code{Ms} to complete the reduction:
+
+\begin{verbatim}
+    sage: Mr, Tr = factorize(Ms, x, eps)
+    sage: Mr
+    [         -eps/x      0              0]
+    [1/4*eps/(x - 1)  eps/x              0]
+    [5/8*eps/(x + 1)      0  eps/(x^2 + x)]
+\end{verbatim}
+
+This is the fully transformed matrix.
+As you can see, it is both proportional to \code{eps} and Fuchsian.
+To make sure we got it right, we can double-check the full transformation:
+
+\begin{verbatim}
+    sage: T = (Tf*Tn*Ts*Tr).simplify_rational()
+    sage: (Mr - transform(M, x, T)).is_zero()
+    True
+\end{verbatim}
+
+Note that we're using construct \texttt{(A - B).is\_zero()} to compare matrices instead of the more obvious \texttt{bool(A == B)}.
+This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structually.
+
+Of course, you don't need to walk through all these steps yourself every time.
+Normally, you just need to call this one function to do all the reduction work:
+
+\begin{verbatim}
+    sage: MM, TT = canonical_form(M, x, eps)
+    sage: MM
+    [                          -eps/x      0              0]
+    [                 1/4*eps/(x - 1)  eps/x              0]
+    [1/4*(9*eps*x + 13*eps)/(x^2 + x)      0  eps/(x^2 + x)]
+    sage: (MM - transform(M, x, TT)).is_zero()
+    True
+\end{verbatim}
+
+Notice that this matrix is slightly more complex than the one we obtained step by step above.
+This also happens.
+The final form we're computing is not unique, and it will be different depending on the precise sequence of reduction steps you've taken.
+
+Also, many of the transformations take a special $seed$ parameter to control the order of operations they perform internally.
+By supplying different seeds, you will obtain different results as well.
+
+\subsubsection{Function reference}
+
 \begin{description}
 
+\functionitem{canonical\_form}{\M M, x, epsilon, seed=0}
+Fully reduce a system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
+Return a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
+Raise $FuchsiaError$ if the system is irreducible.
+
+Reduction is performed by first coverting $\M M$ to block-triangular form, then reducing the diagonal blocks via $\F{fuchsify}$, $\F{normalize}$ and $\F{factorize}$, reducing off-diagonal blocks as described in Section~\ref{sec:blockreduce}, and finally factorizing $epsilon$ via $\F{factorize}$.
+
 \functionitem{fuchsify}{\M M, x, seed=0}
-Reduce a system defined by matrix $\M M$ and independent variable
-$x$ to Fuchsian form. That is, make sure that the Poincare rank
-of all singularities of the transformed matrix $\M M'$ are
-$0$. Return a pair of values: the transformed matrix $\M M'$
-and the transformation $\M T$. If the system is irreducible,
-raise $FuchsiaError$.
+Reduce a system defined by matrix $\M M$ and independent variable $x$ to Fuchsian form.
+That is, make sure that Poincar\'e ranks of all singularities of the transformed matrix $\M M'$ are $0$.
+Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If the system is irreducible, raise $FuchsiaError$.
 
 \functionitem{normalize}{\M M, x, epsilon, seed=0}
-Transform a Fuchsian system defined by matrix $\M M$, independent
-variable $x$ and infinitesimal parameter $epsilon$ to a normalized
-form. That is, make sure that eigenvalues of all matrix residues
-of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$
-in the limit $epsilon\to0$. Return a pair of values: the
-transformed matrix $\M M'$ and the transformation $\M T$. If
-such transformation can not be found, raise $FuchsiaError$.
+Transform a Fuchsian system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$ to a normalized form.
+That is, make sure that eigenvalues of all matrix residues of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$ in the limit $epsilon\to0$.
+Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If such transformation can not be found, raise $FuchsiaError$.
 
-\functionitem{factor\_epsilon}{\M M, x, epsilon, seed=0}
-Transform a normalized system defined by matrix $\M M$, independent
-variable $x$ and infinitesimal parameter $epsilon$ so that the
-transformed matrix $\M M'$ is proportional to $epsilon$. Return a
-pair of values: the transformed matrix $\M M'$ and the transformation
-$\M T$. If such transformation can not be found, raise $FuchsiaError$.
+\functionitem{factorize}{\M M, x, epsilon, seed=0}
+Transform a normalized system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$ so that the
+transformed matrix $\M M'$ is proportional to $epsilon$.
+Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If such transformation can not be found, raise $FuchsiaError$.
 
 \functionitem{simplify\_by\_jordanification}{\M M, x}
-Try to simplify a system defined by matrix $\M M$ and independent
-variable $x$ by constant transformations that transform leading
-expansion coefficients of $\M M$ into their Jordan forms. Return a
-pair of values: the simplified matrix $\M M'$ and the transformation
-$\M T$. If none of the attempted transformations reduce the
-complexity of $\M M$ (as measured by $\F{matrix\_complexity}$),
-return the original matrix and the identity transformation.
+Try to simplify a system defined by matrix $\M M$ and independent variable $x$ by constant transformations that transform leading expansion coefficients of $\M M$ into their Jordan forms.
+Return a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
+If none of the attempted transformations reduce the complexity of $\M M$ (as measured by $\F{matrix\_complexity}$), return the original matrix and the identity transformation.
 
 \functionitem{simplify\_by\_factorization}{\M M, x}
-Try to simplify a system defined by matrix $\M M$ and independent
-variable $x$ by a constant transformation that extracts common
-factors found in $\M M$ (if any). Return a pair of values:
-the simplified matrix $\M M'$ and the transformation $\M T$.
+Try to simplify a system defined by matrix $\M M$ and independent variable $x$ by a constant transformation that extracts common factors found in $\M M$ (if any).
+Return a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
 
 \functionitem{matrix\_complexity}{\M M}
-This function is used as a measure of matrix complexity by
-$\F{fuchsify}$ and simplification function. Currently it is
-defined as the length of textual representation of matrix $\M M$.
+This function is used as a measure of matrix complexity by $\F{fuchsify}$ and simplification function.
+Currently it is defined as the length of textual representation of matrix $\M M$.
 
 \functionitem{balance}{\M P, x_1, x_2, x}
-Return a \textit{balance} transformation between points $x=x_1$
-and $x=x_2$ using projector matrix $\M P$.
+Return a \textit{balance} transformation between points $x=x_1$ and $x=x_2$ using projector matrix $\M P$.
 
 \functionitem{transform}{\M M, x, \M T}
-Transform a system defined by matrix $\M M$ and independent
-variable $x$ using transformation matrix $\M T$. Return the
-transformed matrix $\M M'$.
+Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$.
+Return the transformed matrix $\M M'$.
 
 \functionitem{balance\_transform}{\M M, \M P, x_1, x_2, x}
-Same as $\F{transform}(\M M, x, \F{balance}(\M P, x_1, x_2, x))$,
-but implemented more efficiently: since the inverse of
-$\F{balance}(\M P, x_1, x_2, x)$ is $\F{balance}(\M P, x_2, x_1, x)$,
-this function can avoid a time-consuming matrix inversion
-operation that $\F{transform}$ must perform.
+Same as $\F{transform}(\M M, x, \F{balance}(\M P, x_1, x_2, x))$, but implemented more efficiently: since the inverse of $\F{balance}(\M P, x_1, x_2, x)$ is $\F{balance}(\M P, x_2, x_1, x)$, this function can avoid a time-consuming matrix inversion operation that $\F{transform}$ must perform.
 
 \functionitem{singularities}{\M M, x}
-Find values of $x$ around which matrix $\M M$ has a singularity in
-$x$. Return a dictionary with $\{x_i: p_i\}$ entries, where $p_i$
-is the Poincare rank of $\M M$ at $x=x_i$. The set of singular points
-can include $+Infinity$, if $\M M$ has a singularity at $x\to\infty$.
+Find values of $x$ around which matrix $\M M$ has a singularity in $x$.
+Return a dictionary with $\{x_i: p_i\}$ entries, where $p_i$ is the Poincar\'e rank of $\M M$ at $x=x_i$.
+The set of singular points can include $Infinity$, if $\M M$ has a singularity at $x\to\infty$.
 
 \functionitem{matrix\_c0}{\M M, x, x_0, p}
-Return the 0-th coefficient of the series expansion of matrix
-$\M M$ around $x=x_0$, assuming Poincare rank of $\M M$ at that
-point is $p$. If $x_0$ is $+Infinity$, return the coefficient
-at the highest power of $x$.
+Return the 0-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
+If $x_0$ is $Infinity$, return the coefficient at the highest power of $x$.
 
 \functionitem{matrix\_c1}{\M M, x, x_0, p}
-Return the 1-th coefficient of the series expansion of matrix
-$\M M$ around $x=x_0$, assuming Poincare rank of $\M M$ at that
-point is $p$. If $x_0$ is $+Infinity$, return the coefficient
-at the second-to-highest power of $x$.
+Return the 1-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
+If $x_0$ is $Infinity$, return the coefficient at the second-to-highest power of $x$.
 
 \functionitem{matrix\_residue}{\M M, x, x_0}
-Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that
-Poincare rank of $\M M$ at $x=x_0$ is $0$. Return matrix residue
-at infinity if $x=+Infinity$.
+Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
+Return matrix residue at infinity if $x=Infinity$.
 
-\functionitem{export\_matrix}{file, \M M}
-Write matrix $\M M$ to a file-like object $file$ using MatrixMarket
-array format. For description of this format see \cite{BPR96}.
-
-\functionitem{export\_matrix\_to\_file}{filename, \M M}
-Write matrix $\M M$ to a file $filename$ using MatrixMarket
-array format.
-
-\functionitem{import\_matrix}{file}
-Read a symbolic matrix from a file-like object $file$, assuming
-it is formatted using MatrixMarket array format.
+\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt="mtx"}
+Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is $"mtx"$ (which is the default), or Mathematica format if $fmt$ is $"m"$.
 
 \functionitem{import\_matrix\_from\_file}{filename}
-Read a symbolic matrix from a file $filename$, assuming it is
-formatted using MatrixMarket array format.
+Read a symbolic matrix from a file $filename$.
+Both Mathematica and MatrixMarket array formats are supported.
+The exact format will be autodetected.
+
+\classitem{FuchsiaError}
+This is the class of exceptions raised by \fuchsia routines.
+It signifies inability to perform requested reduction. 
 
 \end{description}
 

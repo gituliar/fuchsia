@@ -45,6 +45,26 @@ Arguments:
     <transform> read the transformation matrix from this file
     <expr>      arbitrary expression
 """
+
+__all__ = [
+    "balance",
+    "balance_transform",
+    "export_matrix_to_file",
+    "factorize",
+    "fuchsify",
+    "canonical_form",
+    "import_matrix_from_file",
+    "matrix_c0",
+    "matrix_c1",
+    "matrix_complexity",
+    "matrix_residue",
+    "normalize",
+    "simplify_by_factorization",
+    "simplify_by_jordanification",
+    "singularities",
+    "transform"
+]
+
 from   collections import defaultdict
 from   itertools import combinations
 import logging
@@ -508,11 +528,11 @@ def block_triangular_form(m):
 
     return mt, t, blocks
 
-def canonical_form(m, x, eps):
+def canonical_form(m, x, eps, seed=0):
     m, t1, b = block_triangular_form(m)
-    m, t2 = normalize_by_blocks(m, b, x, eps)
+    m, t2 = normalize_by_blocks(m, b, x, eps, seed)
     m, t3 = fuchsify_by_blocks(m, b, x, eps)
-    m, t4 = factorize(m, x, eps)
+    m, t4 = factorize(m, x, eps, seed)
     t = t1*t2*t3*t4
     return m, t
 
@@ -852,7 +872,7 @@ def normalize(m, x, eps, seed=0):
     logger.info("[normalize] DONE\n")
     return m.simplify_rational(), T
 
-def normalize_by_blocks(m, b, x, eps):
+def normalize_by_blocks(m, b, x, eps, seed):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
     find a transformation that will shift all eigenvalues of all residues of all its diagonal
     blocks into the range [-1/2, 1/2) in eps->0 limit. Return the transformed matrix m and the
@@ -869,13 +889,13 @@ def normalize_by_blocks(m, b, x, eps):
             msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni,mi)).replace("\n", "\n  ")
             logger.info(msg)
 
-        mi_fuchs, ti_fuchs = fuchsify(mi, x, eps)
+        mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
         ti = ti*ti_fuchs
 
-        mi_norm, ti_norm = normalize(mi_fuchs, x, eps)
+        mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
         ti = ti*ti_norm
 
-        mi_eps, ti_eps = factorize(mi_norm, x, eps)
+        mi_eps, ti_eps = factorize(mi_norm, x, eps, seed)
         ti = ti*ti_eps
 
         t[ki:ki+ni, ki:ki+ni] = ti
