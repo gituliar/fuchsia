@@ -1238,9 +1238,9 @@ def import_matrix_matrixmarket(f):
     try:
         nrows, ncols = map(int, s.split())
     except ValueError:
-        msg = ("Can not determine size of the matrix in '%s'\n"
+        msg = ("Can not determine size of the matrix\n"
                "Make sure the file is in the MatrixMarket array format")
-        raise FuchsiaError(msg % f.name)
+        raise FuchsiaError(msg)
     data = []
     for s in f.readlines():
         lineno += 1
@@ -1249,9 +1249,9 @@ def import_matrix_matrixmarket(f):
         try:
             expr = parse(s)
         except SyntaxError:
-            msg = ("Malformad expression at line %d of '%s':\n%s\n"
+            msg = ("Malformad expression at line %d:\n%s\n"
                    "Make sure the file is in the MatrixMarket array format")
-            raise FuchsiaError(msg % (lineno, f.name, s))
+            raise FuchsiaError(msg % (lineno, s))
         data.append(expr)
     m = matrix(ncols, nrows, data).T
     return m
