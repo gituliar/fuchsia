@@ -246,33 +246,34 @@ Below we describe an algorithm to fuchsify and normalize a given matrix taking i
 Let us consider a block-triangular matrix of the form
 \begin{equation}
 \label{eq:bdiag}
+\M A(x,\eps)=
 \left(
 \begin{matrix}
-  \M D_1 & 0      & 0 & 0 & 0
+  \M A_{11} & 0      & 0 & 0 & 0
 \\
-  \M B_1 & \M D_2 & 0 & 0 & 0
+  \M A_{21} & \M A_{22} & 0 & 0 & 0
 \\
-  \M B_3 & \M B_2 & \M D_3 & 0 & 0
+  \M A_{31} & \M A_{32} & \M A_{33} & 0 & 0
 \\
   \vdots & \cdots & \cdots & \ddots & 0
 \\
-  \M B_n & \M B_{n-1} & \M B_{n-2} & \cdots & \M D_k
+  \M A_{k1} & \M A_{k2} & \M A_{k3} & \cdots & \M A_{kk}
 \end{matrix}
 \right)
-,
+.
 \end{equation}
-where $n=k(k-1)/2$.
 
-We start by reducing {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M D_i(x,\eps)$ to canonical form as described in the previous sections by fuchsification, normalization, and factorization.
-Since a characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.
+We start by reducing {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M A_{ii}(x,\eps)$ to canonical form as described in the previous sections, i.e., by fuchsification, normalization, and factorization.
+Since a characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
 \begin{equation}
-  \det{\M D(x,\eps)} = \det{\M D_1(x,\eps)} \ldots  \det{\M D_k(x,\eps)}
+  \det(\M A(x,\eps)-\lambda \M I) = \det(\M A_{11}(x,\eps) - \lambda\M I) \ldots  \det(\M A_{kk}(x,\eps) - \lambda \M I)
   ,
 \end{equation}
 after we put each diagonal block to the canonical form the whole matrix became normalized.
 
-Next, we need to fuchsify {\bf non-diagonal blocks}.
-\ldots
+Next, we fuchsify {\bf non-diagonal blocks} given by rectangular matrices $\M A_{ij}(x,\eps)$, $i \ne j$ as described in~\cite[Section~7]{Lee15}.
+
+In \fuchsia these two steps are implemented by \code{fuchsify\_by\_blocks} function.
 
 Finally, in order to factorize a whole matrix we proceed as described in Section~\ref{sec:fact}.
 
