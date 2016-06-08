@@ -15,7 +15,7 @@
 {\em Journal Reference:}
     %Leave blank, supplied by Elsevier.
 
-{\em Catalogue identifier:}
+{\em Catalog identifier:}
     %Leave blank, supplied by Elsevier.
 
 {\em Licensing provisions:}
@@ -25,36 +25,35 @@
     \python 2.7
 
 {\em Operating system:}
-    Linux or any other supported by \sage
+    \linux
 
 {\em RAM:}
     Dependent upon the input data. Expect hundreds of megabytes.
 
 {\em Keywords:}
-    Computer algebra, Moser-reduction
+    Computer algebra, Feynman integrals, Canonical form of DEs, Moser-reduction
 
 {\em Classification:}
     5 Computer Algebra, 11.1 High Energy Physics and Computing
 
 {\em External routines/libraries:}
-    \href{http://www.sagemath.org/}{\sage} (version 7.0 or higher)
+    \href{http://www.sagemath.org/}{\sage} 7.0 or higher
 
 {\em Nature of problem:}
-    \ldots{}
+    Necessity to calculate multi-loop Feynman integrals is a common problem in Quantum Field Theory.
+    In recent years, a method of differential equations became popular to perform this task, mainly due to the progress in preforming integration-by-parts reduction.
+    In general, to find solutions for these equations is a very challenging task.
+    However, in the case when a canonical form of the equations is known solutions, and hence initial Feynman integrals, can be found in a trivial way \cite{Henn13}.
 
 {\em Solution method:}
-    Algorithm by R. Lee \cite{Lee15}.
+    \fuchsia finds a canonical form of differential equations (DEs) for Feynman integrals using method proposed by Roman Lee \cite{Lee15}.
+    The method consists of three main steps: fuchsification, normalization, and factorization; and is based on analysis of eigenvalues and eigenvectors of DEs at singular points.
 
 {\em Restrictions:}
-    Not all systems of differential equations can be transformed
-    in the proposed way because some systems are irreducible
-    and the reducibility of some others can not be determined.
-    \fuchsia{} is designed to report if the input belongs to
-    one of these cases.
+    No support for systems with (1) symbolic singular points; (2) eigenvalues of residues other than $n + m \eps$, where $n$ is integer.
 
 {\em Running time:}
-    Dependent upon the input data size and complexity. Around
-    a minute in total for the example $8\times8$ matrix on a PC
-    with a 2GHz Intel Core i5 processor.
+    Depends upon the input data, its size and complexity.
+    Around an hour in total for the example $74\times74$ matrix with 20 singular points on a PC with a 1.7GHz Intel Core i5 CPU.
 
 \end{small}

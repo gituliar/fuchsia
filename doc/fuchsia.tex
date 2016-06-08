@@ -62,56 +62,56 @@ In Section \ref{sec:3} we describe how to install \fuchsia and use it from diffe
 In Section \ref{sec:4} we discuss limitations and possible extensions of the current implemented and the method in general.
 
 
-\section{Introduction to the Lee method}
+\section{Overview of the Lee method}
 \label{sec:2}
 
 
 \subsection{Notation and definitions}
 
-Let us consider a system of ODEs
+Let us consider a system of ordinary differential equations (ODEs)
 \begin{equation}
 \label{eq:df}
   \frac{\D \bar{f}}{\D x} = \M A(x,\eps)\,\bar{f},
 \end{equation}
-where $\bar{f}(x,\eps)$ is a vector of $n$ unknown functions (e.g., master integrals).
+where $\bar{f}(x,\eps)$ is a vector of $n$ unknown functions (e.g., master integrals) and  $\eps$ is an infinitesimally small parameter (e.g., a dimensional regulator in $d=4-2\eps$ dimensions).
 Elements of the $n \times n$ matrix  $\M A(x,\eps)$ are assumed to be rational functions of $x$ and $\eps$ and take the form
 \begin{equation}
 \label{eq:axeps}
-  {\M A}(x,\eps) = \sum_k \frac{1}{(x-x_k)^{1+p_k}} \sum_{i=0}^\infty {\M A}_{ik}(\eps) (x-x_k)^i
+  {\M A}(x,\eps) = \sum_k \frac{1}{(x-x_k)^{1+p_k}} \sum_{i=0}^\infty {\M A}_{ki}(\eps) (x-x_k)^i
 \end{equation}
-with {\em singular points} at $x = x_k$, where $k$ runs over a final set and $x_k$ is a complex number or $\infty$.
-Let us emphasize here that behavior of the system at $x=\infty$ plays a crucial role in the Lee method and should be treated on the same footing as finite singular points.
-We analyze singularities at $x=\infty$ by making $x\to1/x$ substitution and taking $x\to0$ limit; for more details see \cite{Bal08}.
+with {\em singular points} at $x = x_k$, where $k$ runs over a finite set and $x_k$ is a complex number or $\infty$.
+It is important to remember that behavior of the system at $x=\infty$ plays a crucial role in the Lee method and this point should be treated on the same footing as other singular points.
+Singularities at $x=\infty$ can be analyzed by making a substitution $x\to1/x$ and taking a limit $x\to0$; for more details see \cite{Bal08}.
 
 
 \paragraph{Equivalent systems.}
-The system \eqref{eq:df} is not unique in a sense that we can change the {\em basis} $\bar{f}$ using a {\em transformation} $\M T$ to a new one as
+Let us change a {\em basis} of unknown functions from $\bar{f}(x,\eps)$ to $\bar{g}(x,\eps)$ by using a {\em transformation} $\M T(x,\eps)$ as
 \begin{equation}
 \label{eq:gtf}
-  \bar{g} = \M T(x,\eps)\, \bar{f}.
+  \bar{f} = \M T(x,\eps)\, \bar{g}.
 \end{equation}
-That leads to the {\em equivalent system} of ODEs
+This leads to the {\em equivalent system} of ODEs
 \begin{equation}
   \frac{\D \bar{g}}{\D x} = \M B(x,\eps)\,\bar{g},
 \end{equation}
-where
+with a new matrix defined as
 \begin{equation}
 \label{eq:bta}
-  \M B = \M T^{-1} \left( \M A \M T - \frac{\D \M T}{\D x} \right).
+  \M B(x,\eps) = \M T^{-1} \left( \M A \M T - \frac{\D \M T}{\D x} \right).
 \end{equation}
 In general case transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we assume elements of matrices $\M T(x,\eps)$ to be rational functions of $x$ and~$\eps$.
-That guarantees that the equivalent matrix $\M B$ and hence all equivalent systems are in the rational form of eq.~\eqref{eq:axeps}.
+This restriction guarantees that the equivalent matrix $\M B(x,\eps)$ and hence all equivalent systems are in the rational form as in eq.~\eqref{eq:axeps}.
 
 \paragraph{Classification of singularities.}
-For any system \eqref{eq:df}, taking into account a Laurent expansion of eq.~\eqref{eq:axeps}, we can define a rational number
+For any system \eqref{eq:df}, taking into account a Laurent expansion of eq.~\eqref{eq:axeps}, we define a rational number
 \begin{equation}
 \label{eq:mk}
   m_k(\M A) = p_k + \frac{r_k}{n} \ge 0
 \end{equation}
-as the {\em order} or {\em Poincar\'e rank} of $\M A$ at the point $x=x_k$, where $r_k = \rank(A_{0k})$ is the algebraic rank of $A_{0k}(\eps)$ such that $0 \le r_k \le n$; if $p_k + r_k/n < 0$ we set $m_k(\M A) = 0$.
+as the {\em order} or {\em Poincar\'e rank} of $\M A(x,\eps)$ at the point $x=x_k$, where $r_k = \rank(A_{k0})$ is the algebraic rank of $A_{k0}(\eps)$ such that $0 \le r_k \le n$; if $p_k + r_k/n < 0$ we set $m_k(\M A) = 0$.
 
 In principle, orders of equivalent matrices are not the same, i.e., $m_k(\M A) \ne m_k(\M B)$.
-For that reason, in order to make our analysis of singularities complete, we introduce the {\em minimum order} or {\em generalized Poincar\'e rank} of the matrix $\M A$, defined as
+For that reason, in order to make our analysis of singularities complete, we introduce the {\em minimum order} or {\em generalized Poincar\'e rank} of the matrix $\M A(x,\eps)$, defined as
 \begin{equation}
 \label{eq:muk}
   \mu_k(\M A) = \min m_k(\M B), \text{ for } \forall \; \M T.
@@ -119,13 +119,13 @@ For that reason, in order to make our analysis of singularities complete, we int
 If $\mu_k(\M A) < m_k(\M A)$ we say that the matrix $\M A(x,\eps)$ is {\em Moser-reducible}\footnote{After J\"urgen Moser and his study of reducibility in Fuchs' theory \cite{Mos59}.} (or shortly {\em reducible}) at the point $x=x_k$.
 
 It is interesting to note that in the case of an ordinary differential equation of order~$n$, the minimum order $\mu_k$ can be computed explicitly from the power analysis of its coefficients (for more details see generalization of the Fuchs' theorem~\cite{Mos59}).
-In the case of the system~\eqref{eq:df} such an explicit analysis can not be performed and we can use only a {\em recursive criterion} which consist in repeated application of the following steps unless a system is not reducible any more:
+In the case of the system~\eqref{eq:df} however such explicit analysis is not possible; and in order to find $\mu_k$ we can use only a {\em recursive criterion} which consist in repeated application of the following steps:
 \begin{enumerate}
-  \item Check if matrix $\M A(x,\eps)$ is reducible at $x=x_k$ (if no, stop).
+  \item Check if a matrix $\M A(x,\eps)$ is reducible at $x=x_k$, see eq.~\eqref{eq:red_cond}. Stop, if no.
   \item Find a transformation $\M T(x,\eps)$ to decrease the algebraic rank of $\M A(x,\eps)$ at $x=x_k$.
-  \item Apply $\M T(x,\eps)$ and proceed to the step 1.
+  \item Apply $\M T(x,\eps)$ and proceed to the Step 1.
 \end{enumerate}
-We describe these steps in more details in the following section, what we would like to emphasize here is that in order to decrease a generalized Poincar\'e rank $\mu_k(\M A)$ to 0, we should repeat the step~2 at most $n\, m_k(\M A)$ times, which in the case of large $n$ may be a challenging computational problem.
+We describe these steps in more details in the following section, what we would like to emphasize here is that in order to decrease a generalized Poincar\'e rank $\mu_k(\M A)$ to 0, we should repeat the Step~2 at most $n\, m_k(\M A)$ times, which in the case of large $n$ may be a challenging computational problem.
 
 Finally, based on the definitions \eqref{eq:mk} and~\eqref{eq:muk} we say that the point $x=x_k$ of $\M A(x,\eps)$ is
 \begin{itemize}
@@ -134,53 +134,51 @@ Finally, based on the definitions \eqref{eq:mk} and~\eqref{eq:muk} we say that t
   \item {\em regular singularity}, if $0 < \mu_k(\M A) \le 1$;
   \item {\em irregular singularity}, if $\mu_k(\M A) > 1$.
 \end{itemize}
-The matrix $\M A$ is called {\em Fuchsian} if it does not contain irregular singularities at any point $x=x_k$ including $\infty$.
+The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregular singularities at any point $x=x_k$ including $\infty$.
 {\em [Comment on Barkatou and the way he treats $\infty$.]}
 
 
 \subsection{Reduction to canonical form}
 
-Now, after we have introduced notation and key definitions related to the Fuchsian theory of ODEs, we are ready to describe a reduction method of Roman Lee \cite{Lee15}.
-This method tells how to construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M M(x)$.
-(In this paper we assume that $\eps$ is an infinitesimally small parameter, e.g., a dimensional regularization parameter in $d=4-2\eps$ dimensions).
+In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
+Now we are ready to review a reduction method proposed by Roman Lee in~\cite{Lee15}.
+With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M M(x)$.
 After the canonical form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
 
 The whole method can be divided into three main steps as described in the rest of this section.
 
 \begin{enumerate}
-  \item Given a matrix $\M A(x,\eps)$, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps)$, given by eq.~\eqref{eq:bta}, has a Fuchsian form.
-  \item Given a matrix $\M A(x,\eps)$ in the Fuchsian form, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps)$ is normalized, i.e., the eigenvalues of all its residues have the form $n \eps$, where $n$ is integer.
-  \item Given a normalized matrix $\M A(x,\eps)$ in the Fuchsian form, find a transformation $\M T$ such that the equivalent matrix $\M B(x,\eps) = \eps \, \M B(x)$.
+  \item Given a matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M B(x,\eps)$ is Fuchsian.
+  \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in  $n+m\eps$ form, where $n$ is integer, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M B(x,\eps)$ is Fuchsian and normalized.
+  \item Given a Fuchsian and normalized matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix is canonical, i.e., $\M B(x,\eps) = \eps \, \M B(x)$.
 \end{enumerate}
 
 
 \subsubsection{Fuchsification}
 \label{sec:fuchs}
 
-By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$ at all singular points $x=x_k$ including $\infty$ to the Fuchsian form given by a matrix $\M B(x,\eps)$.
+By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$, at all singular points $x=x_k$ including $\infty$, to the Fuchsian form given by a matrix $\M B(x,\eps)$.
 
 The strategy is exactly the same as the recursive criterion for calculating $\mu_k(\M A)$ discussed above, but now the main point is to find $\M T(x,\eps)$ rather than $\mu_k(\M A)$.
-Moreover, we expect $\mu_k(\M A) = 0$ since solutions of our ODEs correspond to Feynman integrals which are known to have only logarithmic singularities only and hence be solution of some Fuchsian ODEs.
+Moreover, we expect $\mu_k(\M A) = 0$ since solutions of our ODEs correspond to Feynman integrals which are known to have only logarithmic singularities, hence be solution of some Fuchsian ODEs.
 
-For completeness let us list a criterion to reduce an algebraic rank of $\M A(x,\eps)$ as proposed by Moser \cite{Mos59}:
+For completeness let us list a criterion to reduce an algebraic rank of $\M A(x,\eps)$ at $x=x_k$ as proposed by Moser \cite{Mos59}:
 
 \textbf{Theorem 1.}
 {\em If $m(\M A) > 1$ the system \eqref{eq:df} is reducible if and only if the polynomial}
 \begin{equation}
 \label{eq:red_cond}
-  x^{r_k} \det\left(\frac{\M A_{0k}}{x} + \M A_{1k} - \lambda \,\M I\right) = 0
+  x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right) = 0
 \end{equation}
-{\em identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{0k})$ and $\M A_{0k}$ is nilpotent, i.e.,}
-\begin{equation}
-  \det \M A_{0k} \ne 0.
-\end{equation}
+{\em identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
+
 If one of these conditions fail then $x=x_k$ is an irregular singularity.
 Otherwise, we proceed with constructing an appropriate transformation, which plays a crucial role in the Lee method and is referred as a {\em $\M Q$-balance} between $x_k$ and $x_0$, given by
 \begin{equation}
   \label{eq:bal}
   \M T(x,\eps) = \M B(\M Q(\eps), x_k, x_0; x) = \M I - \M Q(\eps) + c \frac{x-x_0}{x-x_k} \M Q(\eps),
 \end{equation}
-where $x_0$ and $c$ are numbers and $\M Q(\eps)$ is a projector constructed of the generalized eigenvectors of $\M A_{0k}(\eps)$.
+where $x_0$ and $c$ are numbers and $\M Q(\eps)$ is a projector constructed of the generalized eigenvectors of $\M A_{k0}(\eps)$.
 For the complete description of how to build an appropriate projector $\M Q(\eps)$ see~\cite[p.~9]{Lee15}.
 
 Let us comment on some properties of the transformation in eq.~\eqref{eq:bal}.
@@ -188,7 +186,7 @@ Let us comment on some properties of the transformation in eq.~\eqref{eq:bal}.
   \item When appropriately constructed the $\M Q$-balance decreases $\rank(\M A_{00})$ at $x=x_0$ and does not increase $m_k(\M A)$ at any other point $x=x_k$.
   \item It may happen, that it is not possible to construct an appropriate $\M Q$-balance between $x=x_0$ and any other existing singular point $x=x_k$.
         In that case, a new, apparent, singular point is introduced and used to lower the rank at $x=x_0$.
-        Though, introduction of a new singular point may look like a complication, in fact it is not since all apparent singularities disappear during the normalization step.
+        Though, introduction of a new singular point may look like a complication, in fact it is not, since all apparent singularities disappear during the normalization step.
 \end{itemize}
 
 In \fuchsia, fuchsification step is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
@@ -200,28 +198,28 @@ Together with Pfl\"ugel they developed algorithms implementing their method~\cit
 \subsubsection{Normalization}
 \label{sec:norm}
 
-By {\em normalization} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a given Fuchsian matrix with eigenvalues $m_i + n_i \, \eps$ to the equivalent Fuchsian matrix with eigenvalues $n_i \, \eps$, where $m_i$ and $n_i$ are integer numbers.
+By {\em normalization} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a given Fuchsian matrix with eigenvalues of all its residues in the form $n + m \, \eps$, to the equivalent Fuchsian matrix with eigenvalues in the form $m \, \eps$, where $n$ is integer.
 
 As in the previous step a corresponding transformation can be found by constructing an appropriate balance~\eqref{eq:bal} as described in~\cite[p.~11]{Lee15}.
 Here another property of the balance transformation is used:
 \begin{itemize}
-  \item When appropriately constructed the balance $\M B(\M P(\eps), x_1, x_2; x)$ decreases an eigenvalue of $\M A_{01}(\eps)$ by 1 and increases another eigenvalue of $\M A_{02}(\eps)$ by 1 without affecting Poincar\'e rank at the points $x=x_1$ and $x=x_2$.
+  \item When appropriately constructed the balance $\M B(\M P(\eps), x_1, x_2; x)$ decreases an eigenvalue of $\M A_{10}(\eps)$ by 1 and increases another eigenvalue of $\M A_{20}(\eps)$ by 1 without affecting Poincar\'e rank at the points $x=x_1$ and $x=x_2$.
 \end{itemize}
-Since the sum of eigenvalues of all residues of a given matrix is zero, by applying appropriately constructed balances, we find a transformation which gives $m_i = 0$.
+Since the sum of eigenvalues of all residues of a given matrix is zero, by applying appropriately constructed balances, we find a transformation which gives $m = 0$.
 
-It may happen, that some $m_i$ in the initial matrix are non-integer numbers which leads to fail of the algorithm based on balance transformations.
-In this case we suggest to look for some variable change which leads to the appropriate form of $m_i$.
-Unfortunately, we can not provide a general algorithm how to choose such substitution, so for the moment it is a try-fail approach.
+It may happen, that some $m$'s in the initial matrix are non-integer numbers which leads to fail of the algorithm based on balance transformations.
+In this case we suggest to look for some variable change which leads to the appropriate form of $m$.
+Unfortunately, we can not provide a general algorithm how to choose such substitution, for the moment we use a try-fail approach.
 
 In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
 
 
 \subsubsection{Factorization}
 \label{sec:fact}
-By {\em factorization} we mean to find a rational transformation which transforms a given Fuchsian matrix with normalized eigenvalues at all singular points to canonical form.
-Let us assume that $\M T(\eps)$ is such a matrix, then a new matrix, according to eq.~\eqref{eq:bta}, is given by
+By {\em factorization} we mean to find a rational transformation $\M T(\eps)$ which transforms a given Fuchsian and normalized matrix to the canonical form.
+Let us assume that $\M T(\eps)$ is such a matrix, then an equivalent matrix after transformation, according to eq.~\eqref{eq:bta}, is given by
 \begin{equation}
-  \M B(x,\eps) = \eps\, \sum \frac{\M B_i}{x-x_i} = \sum \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
+  \M B(x,\eps) = \eps\, \sum_i \frac{\M B_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
 \end{equation}
 or explicitly
 \begin{equation}
@@ -240,55 +238,43 @@ In \fuchsia this step is implemented as \code{factorize} routine, see Section~\r
 \label{sec:blockreduce}
 
 It is usually happens that a matrix which defines an ODEs is sparse, i.e., has many zeros.
-We can use that fact to shuffle the matrix to a block-triangular form, that can drastically improve fuchsification and normalization steps described in previous sections.
+We can use that fact to shuffle the matrix to a block-triangular form.
+This can drastically improve fuchsification and normalization steps described in previous sections.
 (You will find \code{block\_triangular\_form} routine in \fuchsia which finds a block-triangular form of a given matrix.)
-Below we describe \ldots ; for more details see~\cite[Section 7]{Lee15}, similar ideas were also discussed in \cite{Git15}.
+Below we describe an algorithm to fuchsify and normalize a given matrix taking into account its block-triangular form; for more details see~\cite[Section~7]{Lee15}, similar ideas were also discussed in \cite{Git15}.
 
+Let us consider a block-triangular matrix of the form
 \begin{equation}
 \label{eq:bdiag}
-\frac{\D}{\D x}
 \left(
 \begin{matrix}
-  \bar{f_1} \\ \bar{f_2} \\ \bar{f_3} \\ \vdots \\ \bar{f_k}
-\end{matrix}
-\right)
-= 
-\left(
-\begin{matrix}
-  \M A_1 & 0      & 0 & 0 & 0
+  \M D_1 & 0      & 0 & 0 & 0
 \\
-  \M B_1 & \M A_2 & 0 & 0 & 0
+  \M B_1 & \M D_2 & 0 & 0 & 0
 \\
-  \M B_3 & \M B_2 & \M A_3 & 0 & 0
+  \M B_3 & \M B_2 & \M D_3 & 0 & 0
 \\
   \vdots & \cdots & \cdots & \ddots & 0
 \\
-  \M B_n & \M B_{n-1} & \M B_{n-2} & \cdots & \M A_k
-\end{matrix}
-\right)
-\left(
-\begin{matrix}
-  \bar{f_1} \\ \bar{f_2} \\ \bar{f_3} \\ \vdots \\ \bar{f_k}
+  \M B_n & \M B_{n-1} & \M B_{n-2} & \cdots & \M D_k
 \end{matrix}
 \right)
 ,
 \end{equation}
 where $n=k(k-1)/2$.
 
-We start by putting {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M A_i(x,\eps)$, see eq.~\eqref{eq:bdiag}, to canonical form.
-At first we fuchsify matrices $\M A_i(x,\eps)$ as described in Section~\ref{sec:fuchs}.
-Next, since a characteristic polynomial of the block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.
+We start by reducing {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M D_i(x,\eps)$ to canonical form as described in the previous sections by fuchsification, normalization, and factorization.
+Since a characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.
 \begin{equation}
-  \det{\M A(x,\eps)} = \det{\M A_1(x,\eps)} \ldots  \det{\M A_k(x,\eps)}
+  \det{\M D(x,\eps)} = \det{\M D_1(x,\eps)} \ldots  \det{\M D_k(x,\eps)}
   ,
 \end{equation}
-we can normalize a whole matrix by normalizing each diagonal block separately, as described in Section~\ref{sec:norm}.
-Finally, we find such transformations which put diagonal blocks to the canonical form, as described in Section~\ref{sec:fact}.
+after we put each diagonal block to the canonical form the whole matrix became normalized.
 
-Next, we fuchsify {\bf non-diagonal blocks}.
+Next, we need to fuchsify {\bf non-diagonal blocks}.
 \ldots
 
-Finally, we factorize a whole matrix as described in Section~\ref{sec:fact}.
+Finally, in order to factorize a whole matrix we proceed as described in Section~\ref{sec:fact}.
 
 
 \section{Using \fuchsia}
