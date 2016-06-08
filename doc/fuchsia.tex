@@ -271,9 +271,16 @@ Since a characteristic polynomial of a block-triangular matrix is a product of c
 \end{equation}
 after we put each diagonal block to the canonical form the whole matrix became normalized.
 
-Next, we fuchsify {\bf non-diagonal blocks} given by rectangular matrices $\M A_{ij}(x,\eps)$, $i \ne j$ as described in~\cite[Section~7]{Lee15}.
+Next, we fuchsify {\bf non-diagonal blocks} given by rectangular matrices $\M A_{ij}(x,\eps)$, $i \ne j$.
+The idea is to find a new basis for $i$-th block in the form
+\begin{equation}
+  \bar{g}_i(x,\eps) = \bar{g}_i(x,\eps) + \M T_{ij} \bar{f}_j(x,\eps),
+\end{equation}
+where $\M T_{ij}$ is $n_i \times n_j$ matrix with constant coefficients, for details how to find it see \cite[Section 7]{Lee15}.
+Our strategy is to loop over $i$ from 2 to $k$ and for every value of $i$ loop over $j$ from $i-1$ to 1.
+That allows to preserve normalization and Fuchsian form of already reduced blocks.
 
-In \fuchsia these two steps are implemented by \code{fuchsify\_by\_blocks} function.
+In \fuchsia the steps described so far are implemented by \code{fuchsify\_by\_blocks} function.
 
 Finally, in order to factorize a whole matrix we proceed as described in Section~\ref{sec:fact}.
 
@@ -600,9 +607,10 @@ Another promising direction for improvements could be support for multivariate p
 
 \section*{Acknowledgment}
 
-We gratefully acknowledge discussions with Roman Lee and Costas Papadopolous, examples of differential equations they provided are very much appreciated.
+We are gratefully thankful for non-trivial examples of differential equations provided by Roman Lee and Costas Papadopolous.
 
-This work has been supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
+This work has been partly supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
+Financial support by DESY during the conference ``Loops and Legs in Quantum Field Theory 2016'' is also gratefully acknowledged. 
 
 \bibliography{fuchsia}
 
