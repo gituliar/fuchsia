@@ -411,13 +411,13 @@ First, let's see where the singularities of this matrix lie:
 So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=2$, 1 at $\code{x}=\infty$ and 0 everywhere else.
 To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to fuchsify this matrix like so:
 
-\begin{Verbatim}
-    \prompt{sage:}{Mf, Tf = fuchsify(M, x)}
-    \prompt{sage:}{Mf}
+\begin{Verbatim}[commandchars=\\!|]
+    \prompt!sage:|!Mf, Tf = fuchsify(M, x)|
+    \prompt!sage:|!Mf|
     [ -(eps - 2)/x           0                          0]
     [   -1/(x - 1)  (eps -1)/x                          0]
     [(2*eps + 1)/x           0  (eps + 2*x + 3)/(x^2 + x)]
-    \prompt{sage:}{singularities(Mf, x)}
+    \prompt!sage:|!singularities(Mf, x)|
     {-1: 0, 0: 0, 1: 0, +Infinity: 0}
 \end{Verbatim}
 
