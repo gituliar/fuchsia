@@ -1,6 +1,6 @@
 \documentclass[12pt,a4paper]{article}
 
-\usepackage{amssymb,amsmath,color,enumitem,hyperref,verbatim,xspace}
+\usepackage{amssymb,amsmath,color,enumitem,fancyvrb,hyperref,xspace}
 \usepackage[affil-it]{authblk}
 
 \bibliographystyle{halpha}
@@ -8,12 +8,11 @@
 
 \setcounter{tocdepth}{2}
 \setlist[description]{style=nextline}
+\fvset{fontsize=\small,commandchars=\\\{\}}
 
-\definecolor{fuchsia}{RGB}{140,0,130}
-\def\F#1{\mathbf{#1}} % use this to style function names
-\def\M#1{\mathbb{#1}} % use this to style matrix names
-\def\functionitem#1#2{\item[$\F{#1}(#2)$\hfill\textit{(function)}]}
-\def\classitem#1{\item[$#1$\hfill\textit{(class)}]}
+\definecolor{fuchsia}{RGB}{123,31,162}
+\definecolor{prompt}{RGB}{245,124,0}
+\definecolor{command}{RGB}{48,63,159}
 
 \input include/commands.tex
 
@@ -303,9 +302,9 @@ In particular our code heavily relies on the interface to \maxima.
 
 To install \fuchsia run the following command in your shell:
 
-\begin{verbatim}
-    $ sage -pip install fuchsia
-\end{verbatim}
+\begin{Verbatim}
+    \prompt{$}{sage -pip install fuchsia}
+\end{Verbatim}
 
 This will install the latest stable version of \fuchsia from the Python Package Index (PyPI) to your \sage environment.
 If you are interested in the latest development version then visit \url{https://github.com/gituliar/fuchsia/}.
@@ -314,9 +313,9 @@ If you are interested in the latest development version then visit \url{https://
 
 An easy way to use \fuchsia is to run \code{fuchsia.py} shell script, which has the following invocation signature:
 
-\begin{verbatim}
-    $ fuchsia.py <action> <options>
-\end{verbatim}
+\begin{Verbatim}
+    \prompt{$}{fuchsia.py <action> <options>}
+\end{Verbatim}
 
 where
 \begin{itemize}
@@ -325,8 +324,7 @@ where
 \end{itemize}
 
 In the following we provide a complete help information printed by \code{fuchsia.py --help}:
-{\small
-\begin{verbatim}
+\begin{Verbatim}
 Fuchsia v16.5.25 (commit: e9aaaf6)
 Authors: Oleksandr Gituliar, Vitaly Magerya
 
@@ -374,7 +372,7 @@ Arguments:
     <matrix>    read the input matrix from this file
     <transform> read the transformation matrix from this file
     <expr>      arbitrary expression
-\end{verbatim}}
+\end{Verbatim}
 
 
 \subsection{Usage from \sage or \python}
@@ -382,132 +380,131 @@ Arguments:
 
 You can use \fuchsia as a library by starting \sage prompt and importing \texttt{fuchsia} module like this:
 
-\begin{verbatim}
-    $ sage
+\begin{Verbatim}
+    \prompt{$}{sage}
     ┌────────────────────────────────────────────────────────────────────┐
     │ SageMath Version 7.1, Release Date: 2016-03-20                     │
     │ Type "notebook()" for the browser-based notebook interface.        │
     │ Type "help()" for help.                                            │
     └────────────────────────────────────────────────────────────────────┘
-    sage: from fuchsia import *
-\end{verbatim}
+    \prompt{sage:}{from fuchsia import *}
+\end{Verbatim}
 
-Read the next section for the list of functions you'll get after import.
-To give you a feel for the API, let's try reducing an example matrix.
+You can read the next section for the list of functions you'll get after import, but to give you a feel for the API, let's try reducing a simple matrix.
 
-\begin{verbatim}
-    sage: x, eps = var("x eps")
-    sage: M = matrix([
-      [(2-eps)/x, 0, 0],
-      [x/(x-1), eps/x, 0],
-      [(1+2*eps)/x**3, 0, (1+eps)/x/(x+1)]
-    ])
-\end{verbatim}
+\begin{Verbatim}
+    \prompt{sage:}{x, eps = var("x eps")}
+    \prompt{sage:}{M = matrix([}
+    \prompt{....:}{  [(2-eps)/x, 0, 0],}
+    \prompt{....:}{  [x/(x-1), eps/x, 0],}
+    \prompt{....:}{  [(1+2*eps)/x**3, 0, (1+eps)/x/(x+1)]}
+    \prompt{....:}{])}
+\end{Verbatim}
 
 First, let's see where the singularities of this matrix lie:
 
-\begin{verbatim}
-    sage: singularities(M, x)
+\begin{Verbatim}
+    \prompt{sage:}{singularities(M, x)}
     {-1: 0, 0: 2, 1: 0, +Infinity: 1}
-\end{verbatim}
+\end{Verbatim}
 
 So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=2$, 1 at $\code{x}=\infty$ and 0 everywhere else.
 To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to fuchsify this matrix like so:
 
-\begin{verbatim}
-    sage: Mf, Tf = fuchsify(M, x)
-    sage: Mf
+\begin{Verbatim}
+    \prompt{sage:}{Mf, Tf = fuchsify(M, x)}
+    \prompt{sage:}{Mf}
     [ -(eps - 2)/x           0                          0]
     [   -1/(x - 1)  (eps -1)/x                          0]
     [(2*eps + 1)/x           0  (eps + 2*x + 3)/(x^2 + x)]
-    sage: singularities(Mf, x)
+    \prompt{sage:}{singularities(Mf, x)}
     {-1: 0, 0: 0, 1: 0, +Infinity: 0}
-\end{verbatim}
+\end{Verbatim}
 
 So far, so good. Now, let's take a look at the eigenvalues of \code{Mf} residues:
 
-\begin{verbatim}
-    sage: [matrix_residue(Mf, x, x0).eigenvalues()
-    ....:  for x0 in [-1, 0, 1, Infinity]]
+\begin{Verbatim}
+    \prompt{sage:}{[matrix_residue(Mf, x, x0).eigenvalues()}
+    \prompt{....:}{  for x0 in [-1, 0, 1, Infinity]]}
     [[-eps - 1, 0, 0],
      [-eps + 2, eps - 1, eps + 3],
      [0, 0, 0],
      [-eps + 1, eps - 2, -2]]
-\end{verbatim}
+\end{Verbatim}
 
 Many of these eigenvalues are not equal to zero in limit $\code{eps}\to0$, so \code{Mf} is not normalized.
 On the other hand, all of the eigenvalues are of the form $n + m*\code{eps}$, so there's a chance we'll be able to normalize \code{Mf}.
 Let's try:
 
-\begin{verbatim}
-    sage: Mn, Tn = normalize(Mf, x, eps)
-    sage: Mn
+\begin{Verbatim}
+    \prompt{sage:}{Mn, Tn = normalize(Mf, x, eps)}
+    \prompt{sage:}{Mn}
     [-eps/x                                                            ...
     [(4*eps^3 - 8*eps^2 - (4*eps^2 - 6*eps + 3)*x + 5*eps)/((4*eps^3 - ...
     [((2*eps + 1)*x + 3*eps + 1)/(x^2 + x)                             ...
-    sage: [matrix_residue(Mn, x, x0).eigenvalues()
-    ....:  for x0 in [-1, 0, 1, Infinity]]
+    \prompt{sage:}{[matrix_residue(Mn, x, x0).eigenvalues()}
+    \prompt{....:}{  for x0 in [-1, 0, 1, Infinity]]}
     [[-eps, 0, 0],
      [-eps, eps, eps],
      [0, 0, 0],
      [-eps, eps, 0]]
-\end{verbatim}
+\end{Verbatim}
 
 So, the matrix is normalized, but it grew quite a bit larger.
 This happens.
 Sometimes it's possible to simplify it a bit like so:
 
-\begin{verbatim}
-    sage: Ms, Ts = simplify_by_jordanification(Mn, x)
-    sage: Ms
+\begin{Verbatim}
+    \prompt{sage:}{Ms, Ts = simplify_by_jordanification(Mn, x)}
+    \prompt{sage:}{Ms}
     [               -eps/x      0              0]
     [            1/(x - 1)  eps/x              0]
     [1/2*(eps + 1)/(x + 1)      0  eps/(x^2 + x)]
-\end{verbatim}
+\end{Verbatim}
 
 That's much better.
 
 Finally, we need to factorize \code{Ms} to complete the reduction:
 
-\begin{verbatim}
-    sage: Mr, Tr = factorize(Ms, x, eps)
-    sage: Mr
+\begin{Verbatim}
+    \prompt{sage:}{Mr, Tr = factorize(Ms, x, eps)}
+    \prompt{sage:}{Mr}
     [         -eps/x      0              0]
     [1/4*eps/(x - 1)  eps/x              0]
     [5/8*eps/(x + 1)      0  eps/(x^2 + x)]
-\end{verbatim}
+\end{Verbatim}
 
 This is the fully transformed matrix.
 As you can see, it is both proportional to \code{eps} and Fuchsian.
 To make sure we got it right, we can double-check the full transformation:
 
-\begin{verbatim}
-    sage: T = (Tf*Tn*Ts*Tr).simplify_rational()
-    sage: (Mr - transform(M, x, T)).is_zero()
+\begin{Verbatim}
+    \prompt{sage:}{T = (Tf*Tn*Ts*Tr).simplify_rational()}
+    \prompt{sage:}{(Mr - transform(M, x, T)).is_zero()}
     True
-\end{verbatim}
+\end{Verbatim}
 
-Note that we're using construct \texttt{(A - B).is\_zero()} to compare matrices instead of the more obvious \texttt{bool(A == B)}.
+Note that we've used construct \texttt{(A - B).is\_zero()} to compare matrices instead of the more obvious \texttt{bool(A == B)}.
 This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structually.
 
 Of course, you don't need to walk through all these steps yourself every time.
 Normally, you just need to call this one function to do all the reduction work:
 
-\begin{verbatim}
-    sage: MM, TT = canonical_form(M, x, eps)
-    sage: MM
+\begin{Verbatim}
+    \prompt{sage:}{MM, TT = canonical_form(M, x, eps)}
+    \prompt{sage:}{MM}
     [                          -eps/x      0              0]
     [                 1/4*eps/(x - 1)  eps/x              0]
     [1/4*(9*eps*x + 13*eps)/(x^2 + x)      0  eps/(x^2 + x)]
-    sage: (MM - transform(M, x, TT)).is_zero()
+    \prompt{sage:}{(MM - transform(M, x, TT)).is_zero()}
     True
-\end{verbatim}
+\end{Verbatim}
 
 Notice that this matrix is slightly more complex than the one we obtained step by step above.
 This also happens.
 The final form we're computing is not unique, and it will be different depending on the precise sequence of reduction steps you've taken.
 
-Also, many of the transformations take a special $seed$ parameter to control the order of operations they perform internally.
+Additionally, many of the transformations take a special $seed$ parameter to control the order of operations they perform internally.
 By supplying different seeds, you will obtain different results as well.
 
 \subsubsection{Function reference}
@@ -515,7 +512,7 @@ By supplying different seeds, you will obtain different results as well.
 \begin{description}
 
 \functionitem{canonical\_form}{\M M, x, epsilon, seed=0}
-Fully reduce a system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
+Fully reduce a system of equations defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
 Return a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
 Raise $FuchsiaError$ if the system is irreducible.
 
@@ -529,7 +526,7 @@ If the system is irreducible, raise $FuchsiaError$.
 
 \functionitem{normalize}{\M M, x, epsilon, seed=0}
 Transform a Fuchsian system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$ to a normalized form.
-That is, make sure that eigenvalues of all matrix residues of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$ in the limit $epsilon\to0$.
+That is, make sure that real parts of eigenvalues of all matrix residues of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$ in the limit $epsilon\to0$.
 Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
 If such transformation can not be found, raise $FuchsiaError$.
 
@@ -549,14 +546,15 @@ Try to simplify a system defined by matrix $\M M$ and independent variable $x$ b
 Return a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
 
 \functionitem{matrix\_complexity}{\M M}
-This function is used as a measure of matrix complexity by $\F{fuchsify}$ and simplification function.
+This function is used as a measure of matrix complexity by $\F{fuchsify}$ and simplification functions.
 Currently it is defined as the length of textual representation of matrix $\M M$.
 
 \functionitem{balance}{\M P, x_1, x_2, x}
 Return a \textit{balance} transformation between points $x=x_1$ and $x=x_2$ using projector matrix $\M P$.
+See eq.~\eqref{eq:bal} for the definition of a \textit{balance}.
 
 \functionitem{transform}{\M M, x, \M T}
-Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$.
+Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$ as specified by eq.~\eqref{eq:bta}.
 Return the transformed matrix $\M M'$.
 
 \functionitem{balance\_transform}{\M M, \M P, x_1, x_2, x}
@@ -577,10 +575,10 @@ If $x_0$ is $Infinity$, return the coefficient at the second-to-highest power of
 
 \functionitem{matrix\_residue}{\M M, x, x_0}
 Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
-Return matrix residue at infinity if $x=Infinity$.
+Return matrix residue at infinity if $x_0$ is $Infinity$.
 
-\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt="mtx"}
-Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is $"mtx"$ (which is the default), or Mathematica format if $fmt$ is $"m"$.
+\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\texttt{"mtx"}}
+Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \texttt{"mtx"} (which is the default), or Mathematica format if $fmt$ is \texttt{"m"}.
 
 \functionitem{import\_matrix\_from\_file}{filename}
 Read a symbolic matrix from a file $filename$.
