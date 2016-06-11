@@ -63,3 +63,7 @@ def full_test_suite():
     tests = doctest.DocTestSuite(fuchsia)
     tests.addTests(loader.discover("test"))
     return tests
+
+def maple_test_suite():
+    fuchsia.setup_fuchsia(use_maple=True)
+    return full_test_suite()

@@ -23,6 +23,10 @@ quicktest:
 	env SAGE_PATH="$(CURDIR)" \
 		sage -python -munittest -fv test.fast_test_suite
 
+mapletest:
+	env SAGE_PATH="$(CURDIR)" \
+		sage -python -munittest -fv test.maple_test_suite
+
 fuchsia.py: test/__init__.py
 
 test/*.py::
