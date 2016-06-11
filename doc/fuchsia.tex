@@ -320,16 +320,17 @@ An easy way to use \fuchsia is to run \code{fuchsia.py} shell script, which has 
 where
 \begin{itemize}
   \item \code{<action>} is one of the algorithms described in the previous section, i.e., \code{fuchsify}, \code{normalize}, \code{factorize}, or auxiliary action \code{transform}, which applies a user-defined transformation to the given matrix.
-  \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia.py --help} command.
+  \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia.py -h} command.
 \end{itemize}
 
-In the following we provide a complete help information printed by \code{fuchsia.py --help}:
+In the following we provide a complete help information printed by \code{fuchsia.py -h}:
 \begin{Verbatim}
-Fuchsia v16.5.25 (commit: e9aaaf6)
+Fuchsia v16.6.8
 Authors: Oleksandr Gituliar, Vitaly Magerya
 
 Usage:
-    fuchsia [-hv] [-f <fmt>] [-l <path>] [-P <path>] <command> <args>...
+    fuchsia [-hv] [--use-maple] [-f <fmt>] [-l <path>] [-P <path>]
+            <command> <args>...
 
 Commands:
     reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
@@ -360,13 +361,14 @@ Commands:
 Options:
     -h          show this help message
     -f <fmt>    matrix file format: mtx or m (default: mtx)
-    -l <path>   save log information to this file
-    -v          be verbose and print log information
+    -l <path>   write log to this file
+    -v          produce a more verbose log
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
+    --use-maple speed up calculations by using Maple when possible
 
 Arguments:
     <matrix>    read the input matrix from this file
@@ -403,8 +405,8 @@ You can read the next section for the list of functions you'll get after import,
 
 First, let's see where the singularities of this matrix lie:
 
-\begin{Verbatim}
-    \prompt{sage:}{singularities(M, x)}
+\begin{Verbatim}[commandchars=\\!|]
+    \prompt!sage:|!singularities(M, x)|
     {-1: 0, 0: 2, 1: 0, +Infinity: 1}
 \end{Verbatim}
 
@@ -484,7 +486,7 @@ To make sure we got it right, we can double-check the full transformation:
     True
 \end{Verbatim}
 
-Note that we've used construct \texttt{(A - B).is\_zero()} to compare matrices instead of the more obvious \texttt{bool(A == B)}.
+Note that we've used construct \code{(A - B).is\_zero()} to compare matrices instead of the more obvious \code{bool(A == B)}.
 This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structually.
 
 Of course, you don't need to walk through all these steps yourself every time.
@@ -577,13 +579,19 @@ If $x_0$ is $Infinity$, return the coefficient at the second-to-highest power of
 Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
 Return matrix residue at infinity if $x_0$ is $Infinity$.
 
-\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\texttt{"mtx"}}
-Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \texttt{"mtx"} (which is the default), or Mathematica format if $fmt$ is \texttt{"m"}.
+\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"mtx"}}
+Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.
 
 \functionitem{import\_matrix\_from\_file}{filename}
 Read a symbolic matrix from a file $filename$.
 Both Mathematica and MatrixMarket array formats are supported.
 The exact format will be autodetected.
+
+\functionitem{setup\_fuchsia}{verbosity=0, use\_maple=\code{False}}
+Modify some of the \fuchsia inner workings.
+In particular, set $verbosity$ to $2$ to enable verbose logging, $1$ to enable normal logging, and $0$ to only log errors.
+
+Set $use\_maple$ to \code{True} to enable usage of \texttt{Maple} to speed up calculations when possible; this may be particularly beneficial for big matrices, and for matrices with singularities at complex points.
 
 \classitem{FuchsiaError}
 This is the class of exceptions raised by \fuchsia routines.
