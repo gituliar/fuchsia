@@ -872,7 +872,7 @@ def normalize(m, x, eps, seed=0):
     logger.info("[normalize] DONE\n")
     return m.simplify_rational(), T
 
-def normalize_by_blocks(m, b, x, eps, seed):
+def normalize_by_blocks(m, b, x, eps, seed=0):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
     find a transformation that will shift all eigenvalues of all residues of all its diagonal
     blocks into the range [-1/2, 1/2) in eps->0 limit. Return the transformed matrix m and the
