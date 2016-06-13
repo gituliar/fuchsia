@@ -31,7 +31,7 @@
     Dependent upon the input data. Expect hundreds of megabytes.
 
 {\em Keywords:}
-    Computer algebra, Feynman integrals, Canonical form of DEs, Moser-reduction
+    Computer algebra, Feynman integrals, differential equations, Canonical form, Fuchsian form, Moser reduction
 
 {\em Classification:}
     5 Computer Algebra, 11.1 High Energy Physics and Computing
@@ -40,17 +40,16 @@
     \href{http://www.sagemath.org/}{\sage} 7.0 or higher
 
 {\em Nature of problem:}
-    Necessity to calculate multi-loop Feynman integrals is a common problem in Quantum Field Theory.
-    In recent years, a method of differential equations became popular to perform this task, mainly due to the progress in preforming integration-by-parts reduction.
-    In general, to find solutions for these equations is a very challenging task.
-    However, in the case when a canonical form of the equations is known solutions, and hence initial Feynman integrals, can be found in a trivial way \cite{Henn13}.
+    Feynman master integrals may be calculated from solutions of a linear system of differential equations with rational coefficients.
+    Such a system can be easily solved as an $\eps$-series when its canonical form is known.
+    Hence, a tool which is able to find canoical transformations can be used to evaluate Feynman master integrals. 
 
 {\em Solution method:}
-    \fuchsia finds a canonical form of differential equations (DEs) for Feynman integrals using method proposed by Roman Lee \cite{Lee15}.
-    The method consists of three main steps: fuchsification, normalization, and factorization; and is based on analysis of eigenvalues and eigenvectors of DEs at singular points.
+    Methods of J.Moser \cite{Mos59} and R.N.Lee \cite{Lee15}.
 
 {\em Restrictions:}
-    No support for systems with (1) symbolic singular points; (2) eigenvalues of residues other than $n + m \eps$, where $n$ is integer.
+    Differential equations only in one variable are considered.
+    A system should be reducible to Fuchsian form and eigenvalues of its residues should be of the form $n + m \eps$, where $n$ is integer.
 
 {\em Running time:}
     Depends upon the input data, its size and complexity.

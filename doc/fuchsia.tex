@@ -42,24 +42,35 @@ We discuss limitations and possible extensions of the proposed implementation.
 
 \section{Introduction}
 
-{\it Feynman integrals calculus: importance, methods to calculate (Smirnov's book \cite{Smi06}), differential equations method (progress \cite{Henn14}) .}
-
-It has passed more than 50 years (?) since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
+It has passed more than 50 years since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
 Since then Feynman integrals calculus has grown to a separate branch of the mathematical physics with a big community of scientists making research in this exciting field.
-With no doubt we can say that none of the recent discoveries in the high-energy particle physics could happen without precise theoretical calculations, which are based in their core on the Feynman integrals calculation techniques. 
-It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and improvement is a very important task.
+With no doubt we can say that none of the recent discoveries in the high-energy particle physics could happen without precise theoretical calculations, which are based on the Feynman integrals calculation techniques. 
+It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and further improvement are very important task.
 
-Recent progress in the computer industry made possible to automate calculation of Feynman integrals; problems which seemed impossible 10 years ago now are successfully solved with state-of-the-art computer algorithms and techniques.
-Among the most popular of them is Feynman parameters~\cite{}, sector decomposition~\cite{}, Mellin-Barns~\cite{}, integration-by-parts~\cite{}, differential equations~\cite{}, and others; for a detailed review of these and other methods see~\cite{Smi06}.
+Recent progress in computational techniques made possible to automate calculation of Feynman integrals; problems which seemed impossible 10 years ago now are successfully solved with state-of-the-art computer algorithms.
+Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and the method of differential equations~\cite{Kot91a,Kot91b,Kot91c}; for a detailed overview of these and other methods see~\cite{Smi06}.
 
-{\it Analyticity of S-matrix and Fuchsian systems of DE. Reduction to Fuchsian form as an independent problem (Moser~\cite{Mos59},Barkatou~\cite{BP09}, \texttt{super\_reduce} in Maple), but mistreating $\infty$.}
+In this paper discuss the method of differential equations.
+In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when a canonical form of this system is known~\cite{Henn13}.
+We consider a general algorithm to find a canonical form of a given system of differential equations in one variable developed by R.N.Lee~\cite{Lee15}.
+This method allows (1) to find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59} and then (2) to normalize eigenvalues of the Fuchsian system in all singular points.
+If these two steps are successfully completed%
+\footnote{In principle, the first step can always be done because Feynman integrals contain only logarithmic singularities. For the discussion of potential complications in the second step see Section~\ref{sec:2}.}
+then a transformation which puts the initial system to canonical form may be easily find.
+In addition to that this method is focused on systems for Feynman integrals, it also may be successfully used for different problems provided that requirement on particular properties of the initial system are satisfied.
 
-{\it Integration-by-parts reduction, canonical form (Henn) \cite{Henn13}, Lee algorithm.}
+Unfortunately, no implementation of the Lee method was made publicly available so far.
+We close this gap and introduce \fuchsia \ --- complete implementation of the method~\cite{Lee15} in the computer algebra system \sage.
+Combined together with Laporta algorithm \cite{Lap00} and its implementations~\cite{Smi08,MS12,Lee12,Lee13,SS13,Smi14}, these tools form a powerful tandem for evaluating Feynman integrals.
 
-This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method \cite{Lee15} and related algorithms implemented in \fuchsia.
+This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method and related algorithms implemented in \fuchsia.
 In Section \ref{sec:3} we describe how to install \fuchsia and use it from different environments, depending on your goal and programming experience.
 In Section \ref{sec:4} we discuss limitations and possible extensions of the current implemented and the method in general.
 
+
+%{\it Analyticity of S-matrix and Fuchsian systems of DE. Reduction to Fuchsian form as an independent problem (Moser~\cite{Mos59},Barkatou~\cite{BP09}, \texttt{super\_reduce} in Maple), but mistreating $\infty$.}
+
+%{\it Integration-by-parts reduction, canonical form (Henn) \cite{Henn13}, Lee algorithm.}
 
 \section{Overview of the Lee method}
 \label{sec:2}
@@ -300,6 +311,8 @@ You can find installation instructions for \sage over at it's website, \url{http
 It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Magma}, \texttt{Singular} and others with the goal of providing the best free CAS.
 In particular our code heavily relies on the interface to \maxima.
 
+\subsubsection{Installation from PyPI}
+
 To install \fuchsia run the following command in your shell:
 
 \begin{Verbatim}
@@ -307,6 +320,9 @@ To install \fuchsia run the following command in your shell:
 \end{Verbatim}
 
 This will install the latest stable version of \fuchsia from the Python Package Index (PyPI) to your \sage environment.
+
+\subsubsection{Installation form sources}
+
 If you are interested in the latest development version then visit \url{https://github.com/gituliar/fuchsia/}.
 
 \subsection{Usage from the command line}
@@ -613,7 +629,7 @@ Another promising direction for improvements could be support for multivariate p
 
 \section*{Acknowledgment}
 
-We are gratefully thankful for non-trivial examples of differential equations provided by Roman Lee and Costas Papadopolous.
+We are gratefully thankful for advanced examples of differential equations provided by Roman Lee and Costas Papadopolous.
 
 This work has been partly supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
 Financial support by DESY during the conference ``Loops and Legs in Quantum Field Theory 2016'' is also gratefully acknowledged. 
