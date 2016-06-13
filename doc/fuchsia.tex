@@ -3,11 +3,10 @@
 \usepackage{amssymb,amsmath,color,enumitem,fancyvrb,hyperref,xspace}
 \usepackage[affil-it]{authblk}
 
-\bibliographystyle{halpha}
+\bibliographystyle{alphaurl}
 %\bibliographystyle{JHEP}
 
 \setcounter{tocdepth}{2}
-\setlist[description]{style=nextline}
 \fvset{fontsize=\small,commandchars=\\\{\}}
 
 \definecolor{fuchsia}{RGB}{123,31,162}
@@ -25,8 +24,8 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-We present a program \fuchsia based on the Lee algorithm \cite{Lee15} which, given a system of first-order linear differential equations with rational function coefficients, constructs an equivalent system in the canonical form and corresponding transformation.
-After such a reduction is successfully done the system can be trivially solved, which makes a reduction step crucial to obtain the solution.
+We present \fuchsia: a tool and a library implementing Lee's algorithm \cite{Lee15} which, given an ODE system with rational function coefficients $\partial_x \V J = \M A(x,\eps)\,\V J$, constructs an equivalent system of the form $\partial_x \V J' = \eps\,\M S(x)\,\V J'$ and corresponding basis transformation $\V J = \M T(x,\eps)\,\V J'$.
+After and if such a reduction is successfully done the system can be trivially solved, which makes a reduction step crucial to obtain the solution.
 
 In principle, \fuchsia can deal with any regular systems, however it's primary task is to reduce differential equations for master integrals which arise from Feynman diagrams.
 It ensures that solutions contain regular singularities only due to the analyticity of S-matrix.
@@ -42,7 +41,7 @@ We discuss limitations and possible extensions of the proposed implementation.
 
 \section{Introduction}
 
-It has passed more than 50 years since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
+More than 60 years has passed since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
 Since then Feynman integrals calculus has grown to a separate branch of the mathematical physics with a big community of scientists making research in this exciting field.
 With no doubt we can say that none of the recent discoveries in the high-energy particle physics could happen without precise theoretical calculations, which are based on the Feynman integrals calculation techniques. 
 It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and further improvement are very important task.
@@ -78,123 +77,147 @@ In Section \ref{sec:4} we discuss limitations and possible extensions of the cur
 
 \subsection{Notation and definitions}
 
-Let us consider a system of ordinary differential equations (ODEs)
+Let us consider a system of ordinary differential equations (ODEs) of this form:
 \begin{equation}
-\label{eq:df}
-  \frac{\D \bar{f}}{\D x} = \M A(x,\eps)\,\bar{f},
+\label{eq:dj}
+    \partial_x \V J(x,\eps) = \M A(x,\eps)\,\V J,
 \end{equation}
-where $\bar{f}(x,\eps)$ is a vector of $n$ unknown functions (e.g., master integrals) and  $\eps$ is an infinitesimally small parameter (e.g., a dimensional regulator in $d=4-2\eps$ dimensions).
-Elements of the $n \times n$ matrix  $\M A(x,\eps)$ are assumed to be rational functions of $x$ and $\eps$ and take the form
+where $\V J(x,\eps)$ is a column-vector of $n$ unknown functions (e.g., master integrals);
+$x$ is a free variable;
+$\eps$ is an infinitesimally small parameter (e.g., a dimensional regulator in $d=4-2\eps$ dimensions);
+$\M A(x,\eps)$ is an $n \times n$ matrix, rational in both $x$ and $\eps$.
+
+In general case $\M A(x,\eps)$ may have a finite number of poles in $x$ at $x\in\{x_k\}$, including a pole at infinity.
+Asymptotical behavior of $\M A(x,\eps)$ around these poles can be described as:
 \begin{equation}
 \label{eq:axeps}
-  {\M A}(x,\eps) = \sum_k \frac{1}{(x-x_k)^{1+p_k}} \sum_{i=0}^\infty {\M A}_{ki}(\eps) (x-x_k)^i
+    \M A(x \to x_k,\eps) =
+    \begin{cases}
+        (\M A_{k0}(\eps) + \M A_{k1}(\eps)\,(x - x_k) + \dots)/(x - x_k)^{1+p_k} & \text{if $x_k\neq\infty$}, \\
+        (\M A_{k0}(\eps) + \M A_{k1}(\eps)\,x^{-1} + \dots)\,x^{-1 + p_k} & \text{if $x_k=\infty$},
+    \end{cases}
 \end{equation}
-with {\em singular points} at $x = x_k$, where $k$ runs over a finite set and $x_k$ is a complex number or $\infty$.
+
+where $p_k$ is the \textit{Poincar\'e rank} of $\M A(x,\eps)$ at singular point $x=x_k$.
+If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian} in $x=x_k$.
+
 It is important to remember that behavior of the system at $x=\infty$ plays a crucial role in the Lee method and this point should be treated on the same footing as other singular points.
-Singularities at $x=\infty$ can be analyzed by making a substitution $x\to1/x$ and taking a limit $x\to0$; for more details see \cite{Bal08}.
 
 
 \paragraph{Equivalent systems.}
-Let us change a {\em basis} of unknown functions from $\bar{f}(x,\eps)$ to $\bar{g}(x,\eps)$ by using a {\em transformation} $\M T(x,\eps)$ as
+Let us change the basis of eq.~\eqref{eq:dj} from $\V J$ to $\V J'$ by using transformation $\M T(x,\eps)$:
 \begin{equation}
-\label{eq:gtf}
-  \bar{f} = \M T(x,\eps)\, \bar{g}.
+  \V J = \M T(x,\eps)\, \V J'.
 \end{equation}
+
 This leads to the {\em equivalent system} of ODEs
 \begin{equation}
-  \frac{\D \bar{g}}{\D x} = \M B(x,\eps)\,\bar{g},
+  \partial_x \V J' = \M A'(x,\eps)\,\V J',
 \end{equation}
-with a new matrix defined as
+with the new matrix
 \begin{equation}
-\label{eq:bta}
-  \M B(x,\eps) = \M T^{-1} \left( \M A \M T - \frac{\D \M T}{\D x} \right).
+\label{eq:ta}
+  \M A'(x,\eps) = \M T^{-1} \left( \M A \M T - \partial_x \M T \right).
 \end{equation}
-In general case transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we assume elements of matrices $\M T(x,\eps)$ to be rational functions of $x$ and~$\eps$.
-This restriction guarantees that the equivalent matrix $\M B(x,\eps)$ and hence all equivalent systems are in the rational form as in eq.~\eqref{eq:axeps}.
+
+In general case transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we'll be using transformation matrices rational in both $x$ and $\eps$.
+This restriction guarantees that the equivalent matrix $\M A'(x,\eps)$ and hence all equivalent systems are in the rational form, thus making expansion~\eqref{eq:axeps} possible.
 
 \paragraph{Classification of singularities.}
-For any system \eqref{eq:df}, taking into account a Laurent expansion of eq.~\eqref{eq:axeps}, we define a rational number
+Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\eqref{eq:axeps} we define a rational number
 \begin{equation}
 \label{eq:mk}
-  m_k(\M A) = p_k + \frac{r_k}{n} \ge 0
+    m_k(\M A) = p_k + \frac{rank(\M A_{k0})}{n}
 \end{equation}
-as the {\em order} or {\em Poincar\'e rank} of $\M A(x,\eps)$ at the point $x=x_k$, where $r_k = \rank(A_{k0})$ is the algebraic rank of $A_{k0}(\eps)$ such that $0 \le r_k \le n$; if $p_k + r_k/n < 0$ we set $m_k(\M A) = 0$.
+as the {\em Moser order} of $\M A(x,\eps)$ at point $x=x_k$.
 
-In principle, orders of equivalent matrices are not the same, i.e., $m_k(\M A) \ne m_k(\M B)$.
-For that reason, in order to make our analysis of singularities complete, we introduce the {\em minimum order} or {\em generalized Poincar\'e rank} of the matrix $\M A(x,\eps)$, defined as
+In principle, Moser orders of equivalent systems are not the same, i.e., $m_k(\M A) \ne m_k(\M A')$.
+For that reason, in order to make our analysis of singularities complete, we introduce the {\em minimum order} of $\M A(x,\eps)$ at $x=x_k$:
 \begin{equation}
 \label{eq:muk}
-  \mu_k(\M A) = \min m_k(\M B), \text{ for } \forall \; \M T.
+  \mu_k(\M A) = \min m_k(\M A'), \text{ for } \forall \; \M T.
 \end{equation}
-If $\mu_k(\M A) < m_k(\M A)$ we say that the matrix $\M A(x,\eps)$ is {\em Moser-reducible}\footnote{After J\"urgen Moser and his study of reducibility in Fuchs' theory \cite{Mos59}.} (or shortly {\em reducible}) at the point $x=x_k$.
 
-It is interesting to note that in the case of an ordinary differential equation of order~$n$, the minimum order $\mu_k$ can be computed explicitly from the power analysis of its coefficients (for more details see generalization of the Fuchs' theorem~\cite{Mos59}).
-In the case of the system~\eqref{eq:df} however such explicit analysis is not possible; and in order to find $\mu_k$ we can use only a {\em recursive criterion} which consist in repeated application of the following steps:
+If $\mu_k(\M A) < m_k(\M A)$ we say that matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
+
+In the case of a single ODE of order~$n$, the minimum Moser order $\mu_k$ can be computed explicitly from the power analysis of its coefficients (for more details see generalization of the Fuchs' theorem~\cite{Mos59}).
+This is not possible for ODE systems like~\eqref{eq:dj}; instead we have a critetion by which we can tell if a system is Moser-reducible or not (see condition~\eqref{eq:red_cond}), and if so, we also have a way to constructs a transformation that reduces $rank(\M A)_{k0}$ by at least $1$.
+
+So, to determine $\mu_k(\M A)$ we must use a {\em recursive criterion} which consist of these steps:
 \begin{enumerate}
-  \item Check if a matrix $\M A(x,\eps)$ is reducible at $x=x_k$, see eq.~\eqref{eq:red_cond}. Stop, if no.
-  \item Find a transformation $\M T(x,\eps)$ to decrease the algebraic rank of $\M A(x,\eps)$ at $x=x_k$.
-  \item Apply $\M T(x,\eps)$ and proceed to the Step 1.
+    \item Check if a matrix $\M A(x,\eps)$ is reducible at $x=x_k$. If not, stop.
+    \item Find a transformation $\M T(x,\eps)$ that decreases $rank(\M A_{k0})$ and thus $m_k(\M A)$.
+    \item Apply $\M T(x,\eps)$ and repeat from Step 1.
 \end{enumerate}
-We describe these steps in more details in the following section, what we would like to emphasize here is that in order to decrease a generalized Poincar\'e rank $\mu_k(\M A)$ to 0, we should repeat the Step~2 at most $n\, m_k(\M A)$ times, which in the case of large $n$ may be a challenging computational problem.
+
+We describe these steps in more details in the following section, what we would like to emphasize here is that in order to decrease Moser order $m_k(\M A)$ to 0 (and, thus, decreasing Poincar\'e rank to zero), we may need to repeat Step~2 up to $n \times m_k(\M A)$ times, which in the case of large $n$ may be a challenging computational problem.
 
 Finally, based on the definitions \eqref{eq:mk} and~\eqref{eq:muk} we say that the point $x=x_k$ of $\M A(x,\eps)$ is
 \begin{itemize}
-  \item {\em regular point}, if $m_k(\M A) = 0$ and $\mu_k(\M A) = 0$;
+  \item {\em regular point}, if $m_k(\M A) = 0$;
   \item {\em apparent singularity}, if $m_k(\M A) > 0$ and $\mu_k(\M A) = 0$;
   \item {\em regular singularity}, if $0 < \mu_k(\M A) \le 1$;
   \item {\em irregular singularity}, if $\mu_k(\M A) > 1$.
 \end{itemize}
 The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregular singularities at any point $x=x_k$ including $\infty$.
-{\em [Comment on Barkatou and the way he treats $\infty$.]}
 
 
 \subsection{Reduction to canonical form}
 
 In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
-Now we are ready to review a reduction method proposed by Roman Lee in~\cite{Lee15}.
+Now we are ready to review reduction method proposed by Roman Lee in~\cite{Lee15}.
 With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M M(x)$.
 After the canonical form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
 
 The whole method can be divided into three main steps as described in the rest of this section.
 
 \begin{enumerate}
-  \item Given a matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M B(x,\eps)$ is Fuchsian.
-  \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in  $n+m\eps$ form, where $n$ is integer, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M B(x,\eps)$ is Fuchsian and normalized.
-  \item Given a Fuchsian and normalized matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix is canonical, i.e., $\M B(x,\eps) = \eps \, \M B(x)$.
+  \item Given a matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M A'(x,\eps)$ is Fuchsian.
+  \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in  $n+m\eps$ form, where $n$ is integer, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M A'(x,\eps)$ is Fuchsian and normalized.
+  \item Given a Fuchsian and normalized matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix is canonical, i.e., $\M A'(x,\eps) = \eps \, \M A'(x)$.
 \end{enumerate}
 
 
 \subsubsection{Fuchsification}
 \label{sec:fuchs}
 
-By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$, at all singular points $x=x_k$ including $\infty$, to the Fuchsian form given by a matrix $\M B(x,\eps)$.
+By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$, at all singular points $x=x_k$ including $\infty$, to the Fuchsian form given by a matrix $\M A'(x,\eps)$.
 
-The strategy is exactly the same as the recursive criterion for calculating $\mu_k(\M A)$ discussed above, but now the main point is to find $\M T(x,\eps)$ rather than $\mu_k(\M A)$.
+The strategy is exactly the same as the recursive criterion for calculating $\mu_k(\M A)$ discussed above, but now our aim is to find $\M T(x,\eps)$ rather than $\mu_k(\M A)$.
 Moreover, we expect $\mu_k(\M A) = 0$ since solutions of our ODEs correspond to Feynman integrals which are known to have only logarithmic singularities, hence be solution of some Fuchsian ODEs.
+If however $\mu_k(\M A)$ will turn out not to be $0$, we'll know that it's impossible to reduce $\M A(x,\eps)$ to Fuchsian form, and we'll have no choice but to abandon further reduction.
 
 For completeness let us list a criterion to reduce an algebraic rank of $\M A(x,\eps)$ at $x=x_k$ as proposed by Moser \cite{Mos59}:
 
 \textbf{Theorem 1.}
-{\em If $m(\M A) > 1$ the system \eqref{eq:df} is reducible if and only if the polynomial}
+{\em If $m_k(\M A) > 1$ the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
 \begin{equation}
 \label{eq:red_cond}
-  x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right) = 0
+    x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right)
 \end{equation}
-{\em identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
+{\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
 
 If one of these conditions fail then $x=x_k$ is an irregular singularity.
-Otherwise, we proceed with constructing an appropriate transformation, which plays a crucial role in the Lee method and is referred as a {\em $\M Q$-balance} between $x_k$ and $x_0$, given by
+Otherwise, we proceed with constructing an appropriate transformation, which plays a crucial role in the Lee method and is referred as a {\em $\M P$-balance} between $x_1$ and $x_2$, given by
 \begin{equation}
-  \label{eq:bal}
-  \M T(x,\eps) = \M B(\M Q(\eps), x_k, x_0; x) = \M I - \M Q(\eps) + c \frac{x-x_0}{x-x_k} \M Q(\eps),
+\label{eq:bal}
+    \mathcal{B}(\M P(\eps), x_1, x_2; x) = \M I - \M P(\eps) + c \frac{x-x_1}{x-x_2} \M P(\eps),
 \end{equation}
-where $x_0$ and $c$ are numbers and $\M Q(\eps)$ is a projector constructed of the generalized eigenvectors of $\M A_{k0}(\eps)$.
-For the complete description of how to build an appropriate projector $\M Q(\eps)$ see~\cite[p.~9]{Lee15}.
+\begin{equation*}
+    c \equiv
+    \begin{cases}
+        1/x_1 & \text{if $x_1=\infty$}, \\
+        x_2 & \text{if $x_2=\infty$}, \\
+        1 & \text{otherwise},
+    \end{cases}
+\end{equation*}
+where $\M P(\eps)$ is an especially crafted projector matrix.
+For the complete description of how to build an appropriate projector $\M P(\eps)$ see~\cite[p.~9]{Lee15}.
 
 Let us comment on some properties of the transformation in eq.~\eqref{eq:bal}.
 \begin{itemize}
-  \item When appropriately constructed the $\M Q$-balance decreases $\rank(\M A_{00})$ at $x=x_0$ and does not increase $m_k(\M A)$ at any other point $x=x_k$.
-  \item It may happen, that it is not possible to construct an appropriate $\M Q$-balance between $x=x_0$ and any other existing singular point $x=x_k$.
+  \item When appropriately constructed the $\M P$-balance decreases $\rank(\M A_{k0})$ at $x=x_k$ and does not increase Poincar'e rank at any other point.
+  \item It may happen, that it is not possible to construct an appropriate $\M P$-balance between $x=x_0$ and any other existing singular point $x=x_k$.
         In that case, a new, apparent, singular point is introduced and used to lower the rank at $x=x_0$.
         Though, introduction of a new singular point may look like a complication, in fact it is not, since all apparent singularities disappear during the normalization step.
 \end{itemize}
@@ -213,7 +236,7 @@ By {\em normalization} we mean to find a rational transformation $\M T(x,\eps)$ 
 As in the previous step a corresponding transformation can be found by constructing an appropriate balance~\eqref{eq:bal} as described in~\cite[p.~11]{Lee15}.
 Here another property of the balance transformation is used:
 \begin{itemize}
-  \item When appropriately constructed the balance $\M B(\M P(\eps), x_1, x_2; x)$ decreases an eigenvalue of $\M A_{10}(\eps)$ by 1 and increases another eigenvalue of $\M A_{20}(\eps)$ by 1 without affecting Poincar\'e rank at the points $x=x_1$ and $x=x_2$.
+    \item When appropriately constructed the balance $\mathcal{B}(\M P(\eps), x_1, x_2; x)$ decreases an eigenvalue of $\M A_{10}(\eps)$ by 1 and increases another eigenvalue of $\M A_{20}(\eps)$ by 1 without affecting Poincar\'e rank at the points $x=x_1$ and $x=x_2$.
 \end{itemize}
 Since the sum of eigenvalues of all residues of a given matrix is zero, by applying appropriately constructed balances, we find a transformation which gives $m = 0$.
 
@@ -227,15 +250,15 @@ In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuc
 \subsubsection{Factorization}
 \label{sec:fact}
 By {\em factorization} we mean to find a rational transformation $\M T(\eps)$ which transforms a given Fuchsian and normalized matrix to the canonical form.
-Let us assume that $\M T(\eps)$ is such a matrix, then an equivalent matrix after transformation, according to eq.~\eqref{eq:bta}, is given by
+Let us assume that $\M T(\eps)$ is such a matrix, then an equivalent matrix after transformation, according to eq.~\eqref{eq:ta}, is given by
 \begin{equation}
-  \M B(x,\eps) = \eps\, \sum_i \frac{\M B_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
+  \M A'(x,\eps) = \eps\, \sum_i \frac{\M A'_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
 \end{equation}
 or explicitly
 \begin{equation}
-  \M B_i = \M T^{-1}(\eps) \frac{\M A_i(\eps)}{\eps} \M T(\eps), \quad \text{for} \quad i=1..k.
+  \M A'_i = \M T^{-1}(\eps) \frac{\M A_i(\eps)}{\eps} \M T(\eps), \quad \text{for} \quad i=1..k.
 \end{equation}
-Since $\M B_i$ is constant for any $\eps$, in order to find components of $n\times n$ matrix $\M T(\eps)$, we write a system of linear equations for some fixed value of $\mu$ at an every singular point $x=x_i$, i.e.,
+Since $\M A'_i$ is constant for any $\eps$, in order to find components of $n\times n$ matrix $\M T(\eps)$, we write a system of linear equations for some fixed value of $\mu$ at an every singular point $x=x_i$, i.e.,
 \begin{equation}
   \frac{\M A_i(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_i(\mu)}{\mu},
 \end{equation}
@@ -284,7 +307,7 @@ after we put each diagonal block to the canonical form the whole matrix became n
 Next, we fuchsify {\bf non-diagonal blocks} given by rectangular matrices $\M A_{ij}(x,\eps)$, $i \ne j$.
 The idea is to find a new basis for $i$-th block in the form
 \begin{equation}
-  \bar{g}_i(x,\eps) = \bar{g}_i(x,\eps) + \M T_{ij} \bar{f}_j(x,\eps),
+  \V J'_i = \V J'_i + \M T_{ij} \V J,
 \end{equation}
 where $\M T_{ij}$ is $n_i \times n_j$ matrix with constant coefficients, for details how to find it see \cite[Section 7]{Lee15}.
 Our strategy is to loop over $i$ from 2 to $k$ and for every value of $i$ loop over $j$ from $i-1$ to 1.
@@ -308,8 +331,8 @@ You can find installation instructions for \sage over at it's website, \url{http
 }
 
 \sage is a free and open-source Computer Algebra System licensed under GPL.
-It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Magma}, \texttt{Singular} and others with the goal of providing the best free CAS.
-In particular our code heavily relies on the interface to \maxima.
+It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Singular}, and others with the goal of providing the best free CAS.
+In particular our code heavily relies on the interface to \maxima~\cite{maxima}.
 
 \subsubsection{Installation from PyPI}
 
@@ -426,8 +449,8 @@ First, let's see where the singularities of this matrix lie:
     {-1: 0, 0: 2, 1: 0, +Infinity: 1}
 \end{Verbatim}
 
-So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=2$, 1 at $\code{x}=\infty$ and 0 everywhere else.
-To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to fuchsify this matrix like so:
+So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=0$, 1 at $\code{x}=\infty$ and 0 everywhere else.
+To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to \textit{fuchsify} this matrix like so:
 
 \begin{Verbatim}[commandchars=\\!|]
     \prompt!sage:|!Mf, Tf = fuchsify(M, x)|
@@ -451,7 +474,7 @@ So far, so good. Now, let's take a look at the eigenvalues of \code{Mf} residues
 \end{Verbatim}
 
 Many of these eigenvalues are not equal to zero in limit $\code{eps}\to0$, so \code{Mf} is not normalized.
-On the other hand, all of the eigenvalues are of the form $n + m*\code{eps}$, so there's a chance we'll be able to normalize \code{Mf}.
+It is however the case that all of the eigenvalues are of the form $n + m*\code{eps}$, so there's a chance we'll be able to normalize \code{Mf}.
 Let's try:
 
 \begin{Verbatim}
@@ -482,7 +505,7 @@ Sometimes it's possible to simplify it a bit like so:
 
 That's much better.
 
-Finally, we need to factorize \code{Ms} to complete the reduction:
+Finally, we need to \textit{factorize} \code{Ms} to complete the reduction:
 
 \begin{Verbatim}
     \prompt{sage:}{Mr, Tr = factorize(Ms, x, eps)}
@@ -494,7 +517,7 @@ Finally, we need to factorize \code{Ms} to complete the reduction:
 
 This is the fully transformed matrix.
 As you can see, it is both proportional to \code{eps} and Fuchsian.
-To make sure we got it right, we can double-check the full transformation:
+To make sure we got everything right, we can double-check the full transformation:
 
 \begin{Verbatim}
     \prompt{sage:}{T = (Tf*Tn*Ts*Tr).simplify_rational()}
@@ -527,7 +550,7 @@ By supplying different seeds, you will obtain different results as well.
 
 \subsubsection{Function reference}
 
-\begin{description}
+\begin{description}[style=nextline]
 
 \functionitem{canonical\_form}{\M M, x, epsilon, seed=0}
 Fully reduce a system of equations defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
@@ -572,7 +595,7 @@ Return a \textit{balance} transformation between points $x=x_1$ and $x=x_2$ usin
 See eq.~\eqref{eq:bal} for the definition of a \textit{balance}.
 
 \functionitem{transform}{\M M, x, \M T}
-Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$ as specified by eq.~\eqref{eq:bta}.
+Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$ as specified by eq.~\eqref{eq:ta}.
 Return the transformed matrix $\M M'$.
 
 \functionitem{balance\_transform}{\M M, \M P, x_1, x_2, x}
@@ -581,19 +604,23 @@ Same as $\F{transform}(\M M, x, \F{balance}(\M P, x_1, x_2, x))$, but implemente
 \functionitem{singularities}{\M M, x}
 Find values of $x$ around which matrix $\M M$ has a singularity in $x$.
 Return a dictionary with $\{x_i: p_i\}$ entries, where $p_i$ is the Poincar\'e rank of $\M M$ at $x=x_i$.
-The set of singular points can include $Infinity$, if $\M M$ has a singularity at $x\to\infty$.
+The set of singular points can include \code{Infinity}, if $\M M$ has a singularity at $x\to\infty$.
 
 \functionitem{matrix\_c0}{\M M, x, x_0, p}
 Return the 0-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is $Infinity$, return the coefficient at the highest power of $x$.
+If $x_0$ is \code{Infinity}, return the coefficient at the highest power of $x$.
+In other words, return $\M A_{k0}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_c1}{\M M, x, x_0, p}
 Return the 1-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is $Infinity$, return the coefficient at the second-to-highest power of $x$.
+If $x_0$ is \code{Infinity}, return the coefficient at the second-to-highest power of $x$.
+In other words, return $\M A_{k1}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_residue}{\M M, x, x_0}
 Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
-Return matrix residue at infinity if $x_0$ is $Infinity$.
+Return matrix residue at infinity if $x_0$ is \code{Infinity}.
+
+The difference between this function and $\F{matrix\_residue}(\M M, x, x_0, 0)$ is the sign when $x_0$ is \code{Infinity}.
 
 \functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"mtx"}}
 Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.
