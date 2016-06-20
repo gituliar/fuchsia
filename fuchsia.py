@@ -106,6 +106,9 @@ def setup_fuchsia(verbosity=0, use_maple=False):
 class FuchsiaError(Exception):
     pass
 
+def is_verbose():
+    return logger.isEnabledFor(logging.INFO)
+
 def cross_product(v1, v2):
     m1, m2 = matrix(v1), matrix(v2)
     return m1.transpose() * m2
@@ -170,7 +173,7 @@ def limit_fixed(expr, x, x0):
         return limit_fixed_maxima(expr, x, x0)
 
 def limit_fixed_maple(expr, x, x0):
-    res = maple.limit(simplify(expr), x=x0)
+    res = maple.limit(expr, **{str(x): x0})
     try:
         res = parse(str(res))
     except:
@@ -225,14 +228,16 @@ def singularities_expr_maple(expr, x):
         return {}
 
     result = {}
-    points = [x0 for x0 in f_solve(1/expr, x)]
+    sols = f_solve(1/expr, x)
+    points = [x0 for x0 in sols[0]] if len(sols) > 0 else []
     for x0 in points:
         if x0 not in result:
             result[x0] = 0
         else:
             result[x0] += 1
 
-    points = f_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x,"maple")
+    sols = f_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x)
+    points = [x0 for x0 in sols[0]] if len(sols) > 0 else []
     for x0 in points:
         if x0 == 0:
             if oo not in result:
@@ -534,8 +539,11 @@ def block_triangular_form(m):
 
 def canonical_form(m, x, eps, seed=0):
     m, t1, b = block_triangular_form(m)
+    logger.info("Start normalization...")
     m, t2 = normalize_by_blocks(m, b, x, eps, seed)
+    logger.info("Start fuchsification...")
     m, t3 = fuchsify_by_blocks(m, b, x, eps)
+    logger.info("Start factorization...")
     m, t4 = factorize(m, x, eps, seed)
     t = t1*t2*t3*t4
     return m, t
@@ -549,6 +557,16 @@ def matrix_mask_str(m):
     for row in matrix_mask(m).rows():
         s += ' '.join([str(ex) for ex in row]).replace('0', '.').replace('1','x') + "\n"
     return s
+
+def matrix_str(m, n=2):
+    buf = ""
+    ind = " "*n
+    for col in m.columns():
+        for ex in col:
+            buf += ind + str(ex) + "\n"
+        buf += "\n"
+    buf = buf[:-1]
+    return buf
 
 #==================================================================================================
 # Step I: Fuchsify
@@ -636,9 +654,8 @@ def fuchsify_by_blocks(m, b, x, eps):
     m0, t = m, identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
         for j, (kj, nj) in enumerate(reversed(b[:i])):
-            logger.info("processing blocks (%d, %d) (%d, %d)\n" % (kj, nj, ki, ni))
             pts = singularities(m.submatrix(ki, kj, ni, nj), x)
-            logger.info("singular points = %s" % pts)
+            printed = False
             while any(pts.values()):
                 bj = m.submatrix(ki, kj, ni, nj)
                 if bj.is_zero():
@@ -646,6 +663,11 @@ def fuchsify_by_blocks(m, b, x, eps):
                 for x0, p in pts.iteritems():
                     if p < 1:
                         continue
+                    if not printed:
+                        printed = True
+                        msg = "Fuchsifying block (%d, %d) (%d, %d)\n  Singular points = %s" \
+                            % (kj, nj, ki, ni, pts)
+                        logger.info(msg)
                     a0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
                     b0 = matrix_c0(bj, x, x0, p)
                     c0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
@@ -889,8 +911,8 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
     for i, (ki, ni) in enumerate(b):
         mi = m.submatrix(ki, ki, ni, ni).simplify_rational()
         ti = identity_matrix(SR, ni)
-        if logger.isEnabledFor(logging.INFO):
-            msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni,mi)).replace("\n", "\n  ")
+        if is_verbose():
+            msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni, matrix_str(mi, 2)))
             logger.info(msg)
 
         mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
@@ -1046,18 +1068,22 @@ def gensym():
 def f_solve(eqs, var):
     if USE_MAPLE:
         s = maple.solve(eqs, var)
-        solution = s.parent().get(s._name).split(',')
-        if solution == ['']:
+        solutions = s.parent().get(s._name).strip('[]').split('],[')
+        solutions = [s.split(',') for s in solutions if s != '']
+        if solutions == []:
             return []
-        res = []
-        for s in solution:
-            try:
-                expr = expand(simplify(parse(s)))
-                res.append(expr)
-            except SyntaxError as error:
-                print "ERROR:  \n%s\n  %s\n" % (s, error)
-                continue
-        return res
+        result = []
+        for solution in solutions:
+            r = []
+            for s in solution:
+                try:
+                    expr = expand(simplify(parse(s)))
+                    r.append(expr)
+                except SyntaxError as error:
+                    print "ERROR:  \n%s\n  %s\n" % (s, error)
+                    continue
+            result.append(r)
+        return result
     else:
         return solve(eqs, var, solution_dict=True)
 
@@ -1082,10 +1108,8 @@ def factorize(M, x, epsilon, seed=0):
         R = matrix_c0(M, x, point, 0)
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
         eqs.extend(eq.list())
-    for solution in solve(eqs, T_symbols, solution_dict=True):
+    for solution in f_solve(eqs, T_symbols):
         S = T.subs(solution)
-        if not S.is_invertible():
-            continue
         # Right now S likely has a number of free variables in
         # it; we can set them to arbibtrary values, as long as
         # it'll make S invertible.

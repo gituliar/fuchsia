@@ -52,7 +52,7 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(fuchsia))
     return tests
 
-def fast_test_suite():
+def test_suite_maxima():
     loader = FastTestLoader()
     tests = doctest.DocTestSuite(fuchsia)
     tests.addTests(loader.discover("test"))
@@ -64,6 +64,6 @@ def full_test_suite():
     tests.addTests(loader.discover("test"))
     return tests
 
-def maple_test_suite():
+def test_suite_maple():
     fuchsia.setup_fuchsia(use_maple=True)
     return full_test_suite()
