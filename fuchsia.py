@@ -544,7 +544,7 @@ def canonical_form(m, x, eps, seed=0):
     logger.info("Start fuchsification...")
     m, t3 = fuchsify_by_blocks(m, b, x, eps)
     logger.info("Start factorization...")
-    m, t4 = factorize(m, x, eps, seed)
+    m, t4 = factorize(m, x, eps, b=b, seed=seed)
     t = t1*t2*t3*t4
     return m, t
 
@@ -921,7 +921,7 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
         mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
         ti = ti*ti_norm
 
-        mi_eps, ti_eps = factorize(mi_norm, x, eps, seed)
+        mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
         ti = ti*ti_eps
 
         t[ki:ki+ni, ki:ki+ni] = ti
@@ -1087,7 +1087,7 @@ def f_solve(eqs, var):
     else:
         return solve(eqs, var, solution_dict=True)
 
-def factorize(M, x, epsilon, seed=0):
+def factorize(M, x, epsilon, b=None, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
     try to find a transformation that will factor out an epsilon
@@ -1100,8 +1100,17 @@ def factorize(M, x, epsilon, seed=0):
         return M, identity_matrix(SR, n)
     rng = Random(seed)
     mu = gensym()
-    T_symbols = [gensym() for i in xrange(n*n)]
-    T = matrix(SR, n, n, T_symbols)
+    if b is None:
+        T_symbols = [gensym() for i in xrange(n*n)]
+        T = matrix(SR, n, n, T_symbols)
+    else:
+        T, T_symbols = matrix(SR, n), []
+        for ki,ni in b:
+            for i in xrange(ki,ki+ni):
+                for j in xrange(ki+ni):
+                    sym = gensym()
+                    T[i,j] = sym
+                    T_symbols.append(sym)
     eqs = []
     for point, prank in singularities(M, x).iteritems():
         assert prank == 0
