@@ -463,7 +463,7 @@ def block_triangular_form(m):
       * `B` is a list of tuples (ki, ni), such that M's i-th
         diagonal block is given by `M.submatrix(ki, ki, ni, ni)`.
     """
-    if logger.isEnabledFor(logging.INFO):
+    if is_verbose():
         logger.info("Matrix mask before transformation:\n%s\n" % matrix_mask_str(m))
 
     n = m.nrows()
@@ -532,7 +532,7 @@ def block_triangular_form(m):
             t[j,i] = 1
             i += 1
     mt = transform(m, None, t)
-    if logger.isEnabledFor(logging.INFO):
+    if is_verbose():
         logger.info("Matrix mask after transformation:\n%s\n" % matrix_mask_str(mt))
 
     return mt, t, blocks
@@ -950,7 +950,7 @@ def find_balances(m, x, eps, state={}):
                 state["is_normalized"] = False
                 break
 
-        if logger.isEnabledFor(logging.INFO):
+        if is_verbose():
             msg = "  Eigenvalues:\n"
             msg += "    x = %s:\n" % x1
             a0_evals = [];
