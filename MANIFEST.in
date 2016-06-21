@@ -1,5 +1,7 @@
-exclude .gitignore
+exclude .gitignore Makefile
+prune bin
 prune doc
+prune examples
 prune papers
-
-include COMMIT
+prune test
+include LICENSE

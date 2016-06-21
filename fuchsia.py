@@ -50,7 +50,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "16.6.8"
+__version__ = "16.6.21"
 
 __all__ = [
     "balance",
