@@ -63,28 +63,28 @@ class Test(unittest.TestCase):
 
     def test_reduce_git410_slow(t):
         with Temp() as mfile, Temp() as tfile:
-            sh("bin/fuchsia", "reduce", "-m", mfile, "-t", tfile,
+            sh("bin/fuchsia", "reduce", "--use-maple", "-m", mfile, "-t", tfile,
                     "examples/git_410.mtx")
             t.assertTransformation("examples/git_410.mtx", "x", tfile, mfile)
             t.assertIsReduced(mfile, "x", "eps")
 
     def test_reduce_lee03_slow(t):
         with Temp() as mfile, Temp() as tfile:
-            sh("bin/fuchsia", "reduce", "-m", mfile, "-t", tfile,
+            sh("bin/fuchsia", "reduce", "--use-maple", "-m", mfile, "-t", tfile,
                     "examples/lee_03.mtx")
             t.assertTransformation("examples/lee_03.mtx", "x", tfile, mfile)
             t.assertIsReduced(mfile, "x", "eps")
 
     def test_reduce_pap01_slow(t):
         with Temp() as mfile, Temp() as tfile:
-            sh("bin/fuchsia", "reduce", "-m", mfile, "-t", tfile,
+            sh("bin/fuchsia", "reduce", "--use-maple", "-m", mfile, "-t", tfile,
                     "-f", "m", "-e", "ep", "examples/pap_01.m")
             t.assertTransformation("examples/pap_01.m", "x", tfile, mfile)
             t.assertIsReduced(mfile, "x", "ep")
 
     def test_reduce_pap02_slow(t):
         with Temp() as mfile, Temp() as tfile:
-            sh("bin/fuchsia", "reduce", "-m", mfile, "-t", tfile,
+            sh("bin/fuchsia", "reduce", "--use-maple", "-m", mfile, "-t", tfile,
                     "-f", "m", "-e", "ep", "examples/pap_02.m")
             t.assertTransformation("examples/pap_02.m", "x", tfile, mfile)
             t.assertIsReduced(mfile, "x", "ep")
