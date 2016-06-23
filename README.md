@@ -2,18 +2,18 @@
 
 In concrete terms, let us say we have a system of differential equations of this form:
 
-    ∂F(x,ϵ)/∂x = M(x,ϵ) F(x,ϵ)
+    ∂f(x,ϵ)/∂x = 𝕄(x,ϵ) f(x,ϵ)
 
-where `M(x,ϵ)` is a given matrix of rational functions in `x` and `ϵ`, i.e, a free variable and an infinitesimal parameter.
-Our ultimately goal is to find a column vector of unknown functions `F(x,ϵ)` as a Laurent series in `ϵ`, which satisfies our equations.
+where `𝕄(x,ϵ)` is a given matrix of rational functions in `x` and `ϵ`, i.e, a free variable and an infinitesimal parameter.
+Our ultimately goal is to find a column vector of unknown functions `f(x,ϵ)` as a Laurent series in `ϵ`, which satisfies our equations.
 
-With the help of *Fuchsia* we can find a transformation matrix `T(x,ϵ)` which turns our system to the equivalent Fuchsian system of this form:
+With the help of *Fuchsia* we can find a transformation matrix `𝕋(x,ϵ)` which turns our system to the equivalent Fuchsian system of this form:
 
-    d/dx G(x,ϵ) = ϵ S(x) G(x,ϵ)
+    ∂g(x,ϵ)/∂x = ϵ 𝕊(x) g(x,ϵ)
 
-where `S(x) = ∑ᵢ Sᵢ/(x-xᵢ)` and `F(x,ϵ) = T(x,ϵ) G(x,ϵ)`.
+where `𝕊(x) = ∑ᵢ 𝕊ᵢ/(x-xᵢ)` and `f(x,ϵ) = 𝕋(x,ϵ) g(x,ϵ)`.
 
-Such a transformation is useful, because we can easily solve the equivalent system for `G(x,ϵ)` (see [1]) and then, multiplying it by `T(x,ϵ)`, find `F(x,ϵ)`.
+Such a transformation is useful, because we can easily solve the equivalent system for `g(x,ϵ)` (see [1]) and then, multiplying it by `𝕋(x,ϵ)`, find `f(x,ϵ)`.
 
 You can learn about the algorithm used in *Fuchsia* to find such transformations from Roman Lee's paper [2].
 
