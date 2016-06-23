@@ -1,30 +1,28 @@
 *Fuchsia* reduces differential equations for Feynman master integrals to canonical form.
 
-In concrete terms, let's say you have a system of differential equations of this form:
+In concrete terms, let us say we have a system of differential equations of this form:
 
-    d/dx F(x, eps) = M(x, eps) F(x, eps)
+    ∂F(x,ϵ)/∂x = M(x,ϵ) F(x,ϵ)
 
-where `x` is a free variable, `M(x, eps)` is a matrix of rational functions (in `x` and `eps`), and `F(x, eps)` is a column vector of unknown functions we are looking for as a Laurent series in `eps`, an infinitesimal parameter.
+where `M(x,ϵ)` is a given matrix of rational functions in `x` and `ϵ`, i.e, a free variable and an infinitesimal parameter.
+Our ultimately goal is to find a column vector of unknown functions `F(x,ϵ)` as a Laurent series in `ϵ`, which satisfies our equations.
 
-The task of *Fuchsia* is to find an equivalent Fuchsian system of this form:
+With the help of *Fuchsia* we can find a transformation matrix `T(x,ϵ)` which turns our system to the equivalent Fuchsian system of this form:
 
-    d/dx G(x, eps) = eps S(x) G(x, eps)
+    d/dx G(x,ϵ) = ϵ S(x) G(x,ϵ)
 
-where S(x) = sum_i { S_i / (x - x_i) } and the transformation itself defined by matrix `T(x, eps)' like this:
+where `S(x) = ∑ᵢ Sᵢ/(x-xᵢ)` and `F(x,ϵ) = T(x,ϵ) G(x,ϵ)`.
 
-    F(x, eps) = T(x, eps) G(x, eps)
+Such a transformation is useful, because we can easily solve the equivalent system for `G(x,ϵ)` (see [1]) and then, multiplying it by `T(x,ϵ)`, find `F(x,ϵ)`.
 
-Such a transformation is useful, because from it one can easily
-find J' (and therefore J) as a series in eps.
+You can learn about the algorithm used in *Fuchsia* to find such transformations from Roman Lee's paper [2].
 
-You can learn about the algorithm *Fuchsia* uses to perform this
-transformation from Roman Lee's paper at [1].
+*Fuchsia* is available both as a command line utility and as a (Python) library for SageMath [3].
+It will run on most Unix-like operating systems.
 
-*Fuchsia* is available both as a command line utility and as a
-(Python) library for SageMath [2]. It will run on most Unix-like
-operating systems. You can learn about it's installation and
-usage from [3].
+Documentation with more information, installation and usage details is here [4].
 
-[1] https://arxiv.org/abs/1411.0911v1
-[2] http://www.sagemath.org/
-[3] http://www.gituliar.net/fuchsia/fuchsia.pdf
+  * [1] https://arxiv.org/abs/1304.1806
+  * [2] https://arxiv.org/abs/1411.0911
+  * [3] http://www.sagemath.org/
+  * [4] http://www.gituliar.net/fuchsia/fuchsia.pdf
