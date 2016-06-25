@@ -4,11 +4,13 @@ from   StringIO import StringIO
 
 from   sage.all import SR
 import fuchsia
-from   fuchsia import (balance, balance_transform, identity_matrix, import_matrix_mathematica,
-            import_matrix_matrixmarket, import_matrix_from_file, export_matrix_mathematica,
-            export_matrix_matrixmarket, factorize, fuchsify, limit_fixed, matrix,
-            matrix_complexity, oo, Rational, reduce_at_one_point,
-            simplify_by_jordanification, singularities, transform)
+from   fuchsia import \
+    balance, balance_transform, identity_matrix, import_matrix_mathematica, \
+    import_matrix_matrixmarket, import_matrix_from_file, \
+    export_matrix_mathematica, export_matrix_matrixmarket, factorize, \
+    fuchsify, limit_fixed, matrix, matrix_complexity, oo, Rational, \
+    reduce_at_one_point, simplify_by_jordanification, singularities, \
+    transform, FuchsiaError
 
 def randpoly(x, maxrank=3):
     return sum(randint(-3, 3)*x**i for i in range(maxrank + 1))
@@ -208,6 +210,13 @@ class Test(unittest.TestCase):
         F = F.simplify_rational()
         for f in F.list():
             t.assertEqual(limit_fixed(f, e, 0), 0)
+
+    def test_factorize_2(t):
+        x = SR.var("x")
+        e = SR.var("epsilon")
+        M = matrix([[e*e/x]])
+        with t.assertRaises(FuchsiaError):
+            F,T = factorize(M, x, e)
 
     def test_simplify_by_jordanification(t):
         x = SR.var("x")

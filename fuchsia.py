@@ -1131,14 +1131,15 @@ def factorize(M, x, epsilon, b=None, seed=0):
                 ])
                 sT = sT.simplify_rational()
                 M = transform(M, x, sT).simplify_rational()
+                # We're leaking a bunch of temprary variables here,
+                # which accumulate in SR.variables, but who cares?
+                return M, sT
             except (ZeroDivisionError, ValueError):
-                rndrange += 1 + rndrange//4
-                continue
-            break
-        # We're leaking a bunch of temprary variables here,
-        # which accumulate in SR.variables, but do I care?
-        return M, sT
-        # No, I don't.
+                rndrange += 1 + rndrange//16
+                # We've tried a bunch of substituions, and they didn't
+                # work. Is the matrix at all invertible? Let's check.
+                if rndrange == 16 and not S.is_invertible():
+                    break
     raise FuchsiaError("can not factor epsilon")
 
 #==================================================================================================

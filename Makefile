@@ -1,4 +1,4 @@
-.PHONY: dist
+.PHONY: dist test
 
 # Test actions
 
