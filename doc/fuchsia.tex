@@ -99,13 +99,15 @@ Asymptotical behavior of $\M A(x,\eps)$ around these poles can be described as:
 \end{equation}
 
 where $p_k$ is the \textit{Poincar\'e rank} of $\M A(x,\eps)$ at singular point $x=x_k$.
-If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian} in $x=x_k$.
+If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian in $x=x_k$}.
+If all $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian}.
 
-It is important to remember that behavior of the system at $x=\infty$ plays a crucial role in the Lee method and this point should be treated on the same footing as other singular points.
-
+Behavior of the system at $x=\infty$ is a bit of special case, but it is essential in the overall reduction process.
+One must always keep in mind the $\infty$ point, and treat it on the same footing as other singular points.
 
 \paragraph{Equivalent systems.}
-Let us change the basis of eq.~\eqref{eq:dj} from $\V J$ to $\V J'$ by using transformation $\M T(x,\eps)$:
+We are interested in transforming system~\eqref{eq:dj} into a simpler form.
+For this purpose let's consider a change of basis from $\V J$ into $\V J'$ using linear transformation $\M T(x,\eps)$:
 \begin{equation}
   \V J = \M T(x,\eps)\, \V J'.
 \end{equation}
@@ -114,91 +116,16 @@ This leads to the {\em equivalent system} of ODEs
 \begin{equation}
   \partial_x \V J' = \M A'(x,\eps)\,\V J',
 \end{equation}
-with the new matrix
+with the new matrix being
 \begin{equation}
 \label{eq:ta}
   \M A'(x,\eps) = \M T^{-1} \left( \M A \M T - \partial_x \M T \right).
 \end{equation}
 
-In general case transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we'll be using transformation matrices rational in both $x$ and $\eps$.
+Generally speaking, transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we'll require transformation matrices to be rational in both $x$ and $\eps$.
 This restriction guarantees that the equivalent matrix $\M A'(x,\eps)$ and hence all equivalent systems are in the rational form, thus making expansion~\eqref{eq:axeps} possible.
 
-\paragraph{Classification of singularities.}
-Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\eqref{eq:axeps} we define a rational number
-\begin{equation}
-\label{eq:mk}
-    m_k(\M A) = p_k + \frac{rank(\M A_{k0})}{n}
-\end{equation}
-as the {\em Moser order} of $\M A(x,\eps)$ at point $x=x_k$.
-
-In principle, Moser orders of equivalent systems are not the same, i.e., $m_k(\M A) \ne m_k(\M A')$.
-For that reason, in order to make our analysis of singularities complete, we introduce the {\em minimum order} of $\M A(x,\eps)$ at $x=x_k$:
-\begin{equation}
-\label{eq:muk}
-  \mu_k(\M A) = \min m_k(\M A'), \text{ for } \forall \; \M T.
-\end{equation}
-
-If $\mu_k(\M A) < m_k(\M A)$ we say that matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
-
-In the case of a single ODE of order~$n$, the minimum Moser order $\mu_k$ can be computed explicitly from the power analysis of its coefficients (for more details see generalization of the Fuchs' theorem~\cite{Mos59}).
-This is not possible for ODE systems like~\eqref{eq:dj}; instead we have a critetion by which we can tell if a system is Moser-reducible or not (see condition~\eqref{eq:red_cond}), and if so, we also have a way to constructs a transformation that reduces $rank(\M A)_{k0}$ by at least $1$.
-
-So, to determine $\mu_k(\M A)$ we must use a {\em recursive criterion} which consist of these steps:
-\begin{enumerate}
-    \item Check if a matrix $\M A(x,\eps)$ is reducible at $x=x_k$. If not, stop.
-    \item Find a transformation $\M T(x,\eps)$ that decreases $rank(\M A_{k0})$ and thus $m_k(\M A)$.
-    \item Apply $\M T(x,\eps)$ and repeat from Step 1.
-\end{enumerate}
-
-We describe these steps in more details in the following section, what we would like to emphasize here is that in order to decrease Moser order $m_k(\M A)$ to 0 (and, thus, decreasing Poincar\'e rank to zero), we may need to repeat Step~2 up to $n \times m_k(\M A)$ times, which in the case of large $n$ may be a challenging computational problem.
-
-Finally, based on the definitions \eqref{eq:mk} and~\eqref{eq:muk} we say that the point $x=x_k$ of $\M A(x,\eps)$ is
-\begin{itemize}
-  \item {\em regular point}, if $m_k(\M A) = 0$;
-  \item {\em apparent singularity}, if $m_k(\M A) > 0$ and $\mu_k(\M A) = 0$;
-  \item {\em regular singularity}, if $0 < \mu_k(\M A) \le 1$;
-  \item {\em irregular singularity}, if $\mu_k(\M A) > 1$.
-\end{itemize}
-The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregular singularities at any point $x=x_k$ including $\infty$.
-
-
-\subsection{Reduction to canonical form}
-
-In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
-Now we are ready to review reduction method proposed by Roman Lee in~\cite{Lee15}.
-With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M M(x)$.
-After the canonical form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
-
-The whole method can be divided into three main steps as described in the rest of this section.
-
-\begin{enumerate}
-  \item Given a matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M A'(x,\eps)$ is Fuchsian.
-  \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in  $n+m\eps$ form, where $n$ is integer, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix $\M A'(x,\eps)$ is Fuchsian and normalized.
-  \item Given a Fuchsian and normalized matrix $\M A(x,\eps)$, find a rational transformation $\M T(x,\eps)$ such that the equivalent matrix is canonical, i.e., $\M A'(x,\eps) = \eps \, \M A'(x)$.
-\end{enumerate}
-
-
-\subsubsection{Fuchsification}
-\label{sec:fuchs}
-
-By {\em fuchsification} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a matrix $\M A(x,\eps)$, at all singular points $x=x_k$ including $\infty$, to the Fuchsian form given by a matrix $\M A'(x,\eps)$.
-
-The strategy is exactly the same as the recursive criterion for calculating $\mu_k(\M A)$ discussed above, but now our aim is to find $\M T(x,\eps)$ rather than $\mu_k(\M A)$.
-Moreover, we expect $\mu_k(\M A) = 0$ since solutions of our ODEs correspond to Feynman integrals which are known to have only logarithmic singularities, hence be solution of some Fuchsian ODEs.
-If however $\mu_k(\M A)$ will turn out not to be $0$, we'll know that it's impossible to reduce $\M A(x,\eps)$ to Fuchsian form, and we'll have no choice but to abandon further reduction.
-
-For completeness let us list a criterion to reduce an algebraic rank of $\M A(x,\eps)$ at $x=x_k$ as proposed by Moser \cite{Mos59}:
-
-\textbf{Theorem 1.}
-{\em If $m_k(\M A) > 1$ the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
-\begin{equation}
-\label{eq:red_cond}
-    x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right)
-\end{equation}
-{\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
-
-If one of these conditions fail then $x=x_k$ is an irregular singularity.
-Otherwise, we proceed with constructing an appropriate transformation, which plays a crucial role in the Lee method and is referred as a {\em $\M P$-balance} between $x_1$ and $x_2$, given by
+In particular, we'll be using transformation constructed by stepwise application of a \textit{$\M P$-balance between $x=x_1$ and $x=x_2$}, defined like so:
 \begin{equation}
 \label{eq:bal}
     \mathcal{B}(\M P(\eps), x_1, x_2; x) = \M I - \M P(\eps) + c \frac{x-x_1}{x-x_2} \M P(\eps),
@@ -211,21 +138,101 @@ Otherwise, we proceed with constructing an appropriate transformation, which pla
         1 & \text{otherwise},
     \end{cases}
 \end{equation*}
-where $\M P(\eps)$ is an especially crafted projector matrix.
-For the complete description of how to build an appropriate projector $\M P(\eps)$ see~\cite[p.~9]{Lee15}.
+where $\M P(\eps)$ is a projector matrix (that is, $\M P^2=\M P$).
 
-Let us comment on some properties of the transformation in eq.~\eqref{eq:bal}.
+\paragraph{Classification of singularities.}
+Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\eqref{eq:axeps} we define a rational number
+\begin{equation}
+\label{eq:mk}
+    m_k(\M A) = p_k + \frac{rank(\M A_{k0})}{n}
+\end{equation}
+as the {\em Moser order} of $\M A(x,\eps)$ at point $x=x_k$.
+
+Equivalent systems do not necessarily have identical Moser orders.
+In fact \cite{Mos59} introduces an algorithm that constructs a transformation decreasing $rank(\M A_{k0})$ by at least one (thus reducing $m_k(\M A)$),\footnote{Note that if $rank(\M A_{k0})$ reaches zero, this means that $\M A_{k0}$ is now zero itself, and thus Poincar\'e rank $p_k$ was decreased by at least one.} or certifies that no further order reduction can be achieved.
+
+Let's then denote the {\em minimal order} of $\M A(x,\eps)$ at $x=x_k$ as:
+\begin{equation}
+\label{eq:muk}
+  \mu_k(\M A) = \min m_k(\M A'), \text{ for } \forall \; \M T.
+\end{equation}
+
+If $\mu_k(\M A) < m_k(\M A)$ we say that matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
+
+With this in mind we can classify a point $x=x_k$ of $\M A(x,\eps)$ as:
 \begin{itemize}
-  \item When appropriately constructed the $\M P$-balance decreases $\rank(\M A_{k0})$ at $x=x_k$ and does not increase Poincar'e rank at any other point.
-  \item It may happen, that it is not possible to construct an appropriate $\M P$-balance between $x=x_0$ and any other existing singular point $x=x_k$.
-        In that case, a new, apparent, singular point is introduced and used to lower the rank at $x=x_0$.
-        Though, introduction of a new singular point may look like a complication, in fact it is not, since all apparent singularities disappear during the normalization step.
+  \item {\em regular point}, if $m_k(\M A) = 0$;
+  \item {\em apparent singularity}, if $m_k(\M A) > 0$ and $\mu_k(\M A) = 0$;
+  \item {\em regular singularity}, if $0 < \mu_k(\M A) \le 1$;
+  \item {\em irregular singularity}, if $\mu_k(\M A) > 1$.
 \end{itemize}
+The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregular singularities at any value of $x$ including $\infty$.
 
-In \fuchsia, fuchsification step is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
 
-Finally, let us mention, that a similar problem of reducing a Poincar\'e rank of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
+\subsection{Reduction to canonical form}
+
+In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
+Now we are ready to review reduction method proposed by Roman Lee in~\cite{Lee15}.
+With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M S(x)$.
+After the canonical form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
+
+The whole method is performed in these three steps:
+
+\begin{enumerate}
+    \item Given a matrix $\M A(x,\eps)$, find an equivalent system $\M A'(x,\eps)$ and corresponding transformation $\M T(x,\eps)$, such that $\M A'(x,\eps)$ is Fuchsian. We call this step \textit{fuchsification}.
+    \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in $n+m\eps$ form, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all in the form $k\eps$. We call this step \textit{normalization}.
+    \item Given a normalized matrix $\M A(x,\eps)$, find an equivalent canonical matrix $\M A'(x)$, i.e. such that $\M A'(x,\eps) = \eps \, \M S'(x)$. We call this step \textit{factorization}.
+\end{enumerate}
+
+
+\subsubsection{Fuchsification}
+\label{sec:fuchs}
+
+To \textit{fuchsify} a system~\eqref{eq:dj} is to find an equivalent Fuchsian system.
+This, of course, is only possible if $\M A(x,\eps)$ has no irregular singularities, or in other words $\mu_k(\M A)\le1$ for all $k$.\footnote{
+    We expect this to be often the case in practice, in particular for ODEs corresponding to Feynman integrals which are known to have only logarithmic singularities, hence be solutions of some Fuchsian ODEs.
+}
+
+In the case of a single ODE of order~$n$, the minimal Moser order can be computed explicitly from the power analysis of its coefficients (see generalization of the Fuchs' theorem in~\cite{Mos59}).
+This is not possible for ODE systems like~\eqref{eq:dj}.
+Instead we have a criterion of Moser-reducibility in the form of:
+
+\textbf{Theorem 1.}
+{\em If $m_k(\M A) > 1$ the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
+\begin{equation}
+\label{eq:red_cond}
+    x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right)
+\end{equation}
+{\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
+
+% TODO: what about x_k = \infty ?
+
+If one of these conditions fail then $x=x_k$ is an irregular singularity.
+
+In addition to this criterion we have a method to construct a transformation that lowers Moser order at $x_i$, if the system is at all Moser-reducible at that point (possibly at the expense of increasing Poincar\'e rank $p_j$ at one other point, $x_j$, by one).
+This is done by selecting a projector matrix $\M P$ equal to a sum of products of a particular subset of (generalized) eigenvectors of $\M A_{i0}$ and $\M A_{j0}$, and constructing a $\M P$-balance between $x_i$ and~$x_j$.
+
+The reader can find the details of this construction in \cite{Lee15}, but it is important to note that even if the system is Moser-reducible at $x_i$, it is only sometimes possible to construct a transformation that lowers $m_i(\M A)$ without increasing Poincar\'e rank at $x_j$.
+Sometimes the best we can do is to choose $x_j$ to be some regular point (with $p_j=-1$), and use a transformation that decreases $m_i(\M A)$ at the expense at increasing $p_j$ to $0$, effectively introducing an apparent singularity where there was none before.\footnote{
+    In practice these apparent singularities are not a major problem, since they are subsequentially removed during the normalization step.
+    Still, we try no to introduce them if possible to decrease intermediate expression sizes and increase overall performance.
+}
+
+With this in mind, to reduce a system to Fuchsian form we need to combine the reducibility check with the Moser rank-lowering transformation in stepwise fashion, like so:
+
+\begin{enumerate}
+    \item Select some point $x_k$ with $m_k(\M A) > 1$. If none exist, reduction is complete.
+    \item Check if $\M A(x,\eps)$ is reducible at $x=x_k$. If not, fail.
+    \item Find a transformation $\M T(x,\eps) = \mathcal{B}(\M P(\eps), x_k, x_j; x)$ that lowers $m_k(\M A)$.
+    \item Apply $\M T(x,\eps)$ and repeat from Step 1.
+\end{enumerate}
+
+In \fuchsia, this process is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines; see Section~\ref{sec:usage_py} for their usage.
+
+Finally, let us mention that a similar problem of reducing Poincar\'e ranks and Moser orders of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
 Together with Pfl\"ugel they developed algorithms implementing their method~\cite{BP99} and available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
+
+% TODO: how does our method differ from with super-reduce?
 
 
 \subsubsection{Normalization}
