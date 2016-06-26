@@ -207,13 +207,11 @@ Instead we have a criterion of Moser-reducibility in the form of:
 {\em If $m_k(\M A) > 1$ the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
 \begin{equation}
 \label{eq:red_cond}
-    x^{r_k} \det\left(\frac{\M A_{k0}}{x} + \M A_{k1} - \lambda \,\M I\right)
+    \Delta^{r_k} \det\left(\frac{\M A_{k0}}{\Delta} + \M A_{k1} - \lambda \,\M I\right),
 \end{equation}
-{\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\M A_{k0}$ is nilpotent, i.e., has only zero eigenvalues.}
+{\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\Delta=x-x_k$ if $x_k\ne\infty$, or $\Delta=1/x$ if $x_k=\infty$.}
 
-% TODO: what about x_k = \infty ?
-
-If one of these conditions fail then $x=x_k$ is an irregular singularity.
+If this condition fails then $x=x_k$ is an irregular singularity.
 
 In addition to this criterion we have a method to construct a transformation that lowers Moser order at $x_i$, if the system is at all Moser-reducible at that point (possibly at the expense of increasing Poincar\'e rank $p_j$ at one other point, $x_j$, by one).
 This is done by selecting a projector matrix $\M P$ equal to a sum of products of a particular subset of (generalized) eigenvectors of $\M A_{i0}$ and $\M A_{j0}$, and constructing a $\M P$-balance between $x_i$ and~$x_j$.
