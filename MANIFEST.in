@@ -1,5 +1,4 @@
 exclude .gitignore Makefile
-prune bin
 prune doc
 prune examples
 prune papers

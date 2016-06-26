@@ -1,6 +1,6 @@
-COMMIT
+build/
 dist/
-tmp/
+temp/
 *.dvi
 *.nb
 *.pyc
