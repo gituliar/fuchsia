@@ -87,3 +87,11 @@ class Test(unittest.TestCase):
 
         with t.assertRaises(FuchsiaError):
             n, nt = normalize(f, x, e)
+
+    @unittest.skip("Needs more optimization")
+    def test_normalize_6(t):
+        x, eps = SR.var("x eps")
+        M = import_matrix_from_file("examples/pap_03_52.mtx")
+        N, T = normalize(M, x, eps)
+        N = N.simplify_rational()
+        t.assertEqual(N, transform(M, x, T).simplify_rational())
