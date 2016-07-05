@@ -50,7 +50,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "16.6.27"
+__version__ = "16.7.5"
 
 __all__ = [
     "balance",
@@ -120,6 +120,43 @@ def dot_product(v1, v2):
 
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
+
+def fuchsia_simplify(obj, x=None):
+    if USE_MAPLE:
+        def maple_simplify(ex):
+            if hasattr(ex, "variables") and ((x is None) or (x in ex.variables())):
+                res = maple.normal(ex)
+                return parse(str(res))
+            else:
+                return ex
+        if hasattr(obj, "apply_map"):
+            return obj.apply_map(maple_simplify)
+        else:
+            return maple_simplify(obj)
+    else:
+        return obj.simplify_rational()
+
+def fuchsia_solve(eqs, var):
+    if USE_MAPLE:
+        s = maple.solve(eqs, var)
+        solutions = s.parent().get(s._name).strip('[]').split('],[')
+        solutions = [s.split(',') for s in solutions if s != '']
+        if solutions == []:
+            return []
+        result = []
+        for solution in solutions:
+            r = []
+            for s in solution:
+                try:
+                    expr = expand(simplify(parse(s)))
+                    r.append(expr)
+                except SyntaxError as error:
+                    print "ERROR:  \n%s\n  %s\n" % (s, error)
+                    continue
+            result.append(r)
+        return result
+    else:
+        return solve(eqs, var, solution_dict=True)
 
 def change_variable(m, x, y, fy):
     mm = m.subs({x: fy}) * derivative(fy, y)
@@ -228,7 +265,7 @@ def singularities_expr_maple(expr, x):
         return {}
 
     result = {}
-    sols = f_solve(1/expr, x)
+    sols = fuchsia_solve(1/expr, x)
     points = [x0 for x0 in sols[0]] if len(sols) > 0 else []
     for x0 in points:
         if x0 not in result:
@@ -236,7 +273,7 @@ def singularities_expr_maple(expr, x):
         else:
             result[x0] += 1
 
-    sols = f_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x)
+    sols = fuchsia_solve((1/(expr.subs({x: 1/x})/x**2)).simplify_rational(), x)
     points = [x0 for x0 in sols[0]] if len(sols) > 0 else []
     for x0 in points:
         if x0 == 0:
@@ -604,8 +641,8 @@ def fuchsify(M, x, seed=0):
             if prank2 < 0: continue
             v = find_dual_basis_spanning_left_invariant_subspace(B0, U, rng)
             if v is None: continue
-            P = (U*v).simplify_rational()
-            M2 = balance_transform(M, P, p1, p2, x).simplify_rational()
+            P = fuchsia_simplify(U*v, x)
+            M2 = fuchsia_simplify(balance_transform(M, P, p1, p2, x), x)
             yield p2, P, M2
     combinedT = identity_matrix(M.base_ring(), M.nrows())
     reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
@@ -633,9 +670,9 @@ def fuchsify(M, x, seed=0):
                         key=lambda (point2, P, M2): matrix_complexity(M2))
             except ValueError as e:
                 point2 = any_integer(rng, M.base_ring(), poincare_map)
-                P = (U*V).simplify_rational()
+                P = fuchsia_simplify(U*V, x)
                 M = balance_transform(M, P, point, point2, x)
-                M = M.simplify_rational()
+                M = fuchsia_simplify(M, x)
                 logger.info(
                         "Will introduce an apparent singularity at %s.",
                         point2)
@@ -646,7 +683,7 @@ def fuchsify(M, x, seed=0):
             if point2 not in poincare_map:
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
-    combinedT = combinedT.simplify_rational()
+    combinedT = fuchsia_simplify(combinedT, x)
     return M, combinedT
 
 def fuchsify_by_blocks(m, b, x, eps):
@@ -681,9 +718,9 @@ def fuchsify_by_blocks(m, b, x, eps):
                     t0 = identity_matrix(SR, n)
                     t0[ki:ki+ni, kj:kj+nj] = \
                             d/(x-x0)**p if not (x0 == oo) else -d*(x**p)
-                    m = transform(m, x, t0).simplify_rational()
+                    m = fuchsia_simplify(transform(m, x, t0), x)
 
-                    t = (t*t0).simplify_rational()
+                    t = fuchsia_simplify(t*t0, x)
                     pts[x0] -= 1
     return m, t
 
@@ -705,9 +742,9 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         U, V = alg1x(A0, A1, x)
         P = U*V
         M = balance_transform(M, P, v, v2, x)
-        M = M.simplify_rational()
+        M = fuchsia_simplify(M, x)
         combinedT = combinedT * balance(P, v, v2, x)
-    combinedT = combinedT.simplify_rational()
+    combinedT = fuchsia_simplify(combinedT, x)
     return M, combinedT
 
 def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
@@ -745,7 +782,7 @@ def alg1x(A0, A1, x):
         [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
         for k in xrange(ncells)
     ])
-    L0 = L0.simplify_rational()
+    L0 = fuchsia_simplify(L0, x)
     L1 = matrix([
         [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
         for k in xrange(ncells)
@@ -855,7 +892,7 @@ def is_normalized_by_blocks(m, b, x, eps):
     True
     """
     for ki, ni in b:
-        mi = m.submatrix(ki, ki, ni, ni).simplify_rational()
+        mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         if not is_normalized(mi, x, eps):
             return False
     return True
@@ -874,7 +911,7 @@ def normalize(m, x, eps, seed=0):
     i = 0
     while True:
         i += 1
-        m = partial_fraction(m, x)
+        m = fuchsia_simplify(m, x)
         logger.info("[normalize] STEP #%s\n" % i)
         balances = find_balances(m, x, eps, state)
         b = select_balance(balances, eps, state)
@@ -894,9 +931,9 @@ def normalize(m, x, eps, seed=0):
             m = balance_transform(m, P, x2, x1, x)
             T0 = balance(P, x2, x1, x)
 
-        T = (T*T0).simplify_rational()
+        T = fuchsia_simplify(T*T0, x)
     logger.info("[normalize] DONE\n")
-    return m.simplify_rational(), T
+    return m, T
 
 def normalize_by_blocks(m, b, x, eps, seed=0):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
@@ -906,26 +943,31 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
      are defined by the list `b` which corresponds to the equivalent value returned by the
     `block_triangular_form` routine.
     """
+    logger.info("normalize_by blocks [START]")
     n = m.nrows()
     t = identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
-        mi = m.submatrix(ki, ki, ni, ni).simplify_rational()
+        mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         ti = identity_matrix(SR, ni)
         if is_verbose():
             msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni, matrix_str(mi, 2)))
             logger.info(msg)
 
+        logger.info("normalize_by blocks -> fuchsify [START]")
         mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
         ti = ti*ti_fuchs
 
+        logger.info("normalize_by blocks -> normalize [START]")
         mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
         ti = ti*ti_norm
 
+        logger.info("normalize_by blocks -> factorize [START]")
         mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
         ti = ti*ti_eps
 
         t[ki:ki+ni, ki:ki+ni] = ti
-    mt = transform(m, x, t).simplify_rational()
+    mt = fuchsia_simplify(transform(m, x, t), x)
+    logger.info("normalize_by blocks [DONE]")
     return mt, t
 
 def find_balances(m, x, eps, state={}):
@@ -989,7 +1031,7 @@ def find_balances_by_cond(a0_ev, b0_ev, cond):
                 continue
             for a0_evec in a0_evecs:
                 for b0_evec in b0_evecs:
-                    scale = dot_product(a0_evec, b0_evec).simplify_rational()
+                    scale = fuchsia_simplify(dot_product(a0_evec, b0_evec))
                     balance = [a0_eval, b0_eval, a0_evec, b0_evec, scale]
                     if scale == 0:
                         logger.debug("Balance rejected:\n    a0_eval = %s\n    b0_eval = %s\n    a0_evec = %s\n    b0_evec = %s\n    scale   = %s" % tuple(balance))
@@ -1065,28 +1107,6 @@ def gensym():
     SR.symbols[str(sym)] = sym
     return sym
 
-def f_solve(eqs, var):
-    if USE_MAPLE:
-        s = maple.solve(eqs, var)
-        solutions = s.parent().get(s._name).strip('[]').split('],[')
-        solutions = [s.split(',') for s in solutions if s != '']
-        if solutions == []:
-            return []
-        result = []
-        for solution in solutions:
-            r = []
-            for s in solution:
-                try:
-                    expr = expand(simplify(parse(s)))
-                    r.append(expr)
-                except SyntaxError as error:
-                    print "ERROR:  \n%s\n  %s\n" % (s, error)
-                    continue
-            result.append(r)
-        return result
-    else:
-        return solve(eqs, var, solution_dict=True)
-
 def factorize(M, x, epsilon, b=None, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
@@ -1095,7 +1115,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
     n = M.nrows()
-    M = M.simplify_rational()
+    M = fuchsia_simplify(M, x)
     if epsilon not in (M/epsilon).variables():
         return M, identity_matrix(SR, n)
     rng = Random(seed)
@@ -1117,7 +1137,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
         R = matrix_c0(M, x, point, 0)
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
         eqs.extend(eq.list())
-    for solution in f_solve(eqs, T_symbols):
+    for solution in fuchsia_solve(eqs, T_symbols):
         S = T.subs(solution)
         # Right now S likely has a number of free variables in
         # it; we can set them to arbibtrary values, as long as
@@ -1129,8 +1149,8 @@ def factorize(M, x, epsilon, b=None, seed=0):
                     e==rng.randint(-rndrange, rndrange)
                     for e in S.variables() if e != epsilon
                 ])
-                sT = sT.simplify_rational()
-                M = transform(M, x, sT).simplify_rational()
+                sT = fuchsia_simplify(sT,x)
+                M = fuchsia_simplify(transform(M, x, sT), x)
                 # We're leaking a bunch of temprary variables here,
                 # which accumulate in SR.variables, but who cares?
                 return M, sT
@@ -1163,7 +1183,7 @@ def simplify_by_jordanification(M, x):
     for point, prank in singularities(M, x).iteritems():
         R = matrix_c0(M, x, point, prank)
         J, T = R.jordan_form(transformation=True)
-        MM = transform(M, x, T).simplify_rational()
+        MM = fuchsia_simplify(transform(M, x, T), x)
         C = matrix_complexity(MM)
         if C < minC:
             minM = MM
@@ -1235,7 +1255,7 @@ def simplify_by_factorization(M, x):
             "stripping common factors with this transform:\n"
             "diagonal_matrix([\n  %s\n])",
             ",\n  ".join(str(e) for e in T.diagonal()))
-    return M.simplify_rational(), T
+    return fuchsia_simplify(M, x), T
 
 #==============================================================================
 # Import/Export routines

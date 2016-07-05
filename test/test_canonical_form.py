@@ -31,3 +31,7 @@ class Test(unittest.TestCase):
     def test_henn_324(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
             "..", "examples", "henn_324.mtx"))
+
+    def test_pap_03_52_slow(t):
+        t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
+            "..", "examples", "pap_03_52.mtx"))
