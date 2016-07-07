@@ -125,7 +125,7 @@ def fuchsia_simplify(obj, x=None):
     if USE_MAPLE:
         def maple_simplify(ex):
             if hasattr(ex, "variables") and ((x is None) or (x in ex.variables())):
-                res = maple.normal(ex)
+                res = maple.factor(maple.simplify(ex))
                 return parse(str(res))
             else:
                 return ex
