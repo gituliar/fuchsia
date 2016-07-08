@@ -3,4 +3,3 @@ In this directory you will find matrices which appear in real problems of physic
   * `lee_[01,02,03].mtx` (from R.Lee)
   * `pop_01.m` (from C.Papadopoulos at LL2016)
   * `pop_02.m` same as above, but with some `ep` factored out
-  * `sch_ll16.mtx` (from C.Schneider's talk at LL2016)
