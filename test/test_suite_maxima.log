@@ -1,70 +1,70 @@
 common_factor (fuchsia)
-Doctest: fuchsia.common_factor ... ok, 0.665 sec
+Doctest: fuchsia.common_factor ... ok, 0.663 sec
 is_normalized (fuchsia)
-Doctest: fuchsia.is_normalized ... ok, 0.101 sec
+Doctest: fuchsia.is_normalized ... ok, 0.100 sec
 is_normalized_by_blocks (fuchsia)
-Doctest: fuchsia.is_normalized_by_blocks ... ok, 0.044 sec
+Doctest: fuchsia.is_normalized_by_blocks ... ok, 0.045 sec
 jordan_cell_sizes (fuchsia)
 Doctest: fuchsia.jordan_cell_sizes ... ok, 0.001 sec
 matrix_c0 (fuchsia)
-Doctest: fuchsia.matrix_c0 ... ok, 0.036 sec
+Doctest: fuchsia.matrix_c0 ... ok, 0.034 sec
 matrix_c1 (fuchsia)
-Doctest: fuchsia.matrix_c1 ... ok, 0.263 sec
+Doctest: fuchsia.matrix_c1 ... ok, 0.260 sec
 matrix_is_nilpotent (fuchsia)
 Doctest: fuchsia.matrix_is_nilpotent ... ok, 0.005 sec
 matrix_residue (fuchsia)
-Doctest: fuchsia.matrix_residue ... ok, 0.017 sec
+Doctest: fuchsia.matrix_residue ... ok, 0.016 sec
 matrix_taylor0 (fuchsia)
-Doctest: fuchsia.matrix_taylor0 ... ok, 0.009 sec
+Doctest: fuchsia.matrix_taylor0 ... ok, 0.010 sec
 matrix_taylor1 (fuchsia)
 Doctest: fuchsia.matrix_taylor1 ... ok, 0.017 sec
 parse (fuchsia)
 Doctest: fuchsia.parse ... ok, 0.004 sec
 singularities (fuchsia)
-Doctest: fuchsia.singularities ... ok, 0.036 sec
-test_fuchsify_by_blocks_01 (test_fuchsify_by_blocks.Test) ... ok, 0.115 sec
-test_fuchsify_by_blocks_02 (test_fuchsify_by_blocks.Test) ... ok, 0.168 sec
-test_fuchsify_by_blocks_03 (test_fuchsify_by_blocks.Test) ... ok, 0.147 sec
-test_fuchsify_by_blocks_04 (test_fuchsify_by_blocks.Test) ... ok, 0.506 sec
-test_fuchsify_by_blocks_05 (test_fuchsify_by_blocks.Test) ... ok, 0.100 sec
-test_fuchsify_by_blocks_06 (test_fuchsify_by_blocks.Test) ... ok, 3.411 sec
+Doctest: fuchsia.singularities ... ok, 0.035 sec
+test_fuchsify_by_blocks_01 (test_fuchsify_by_blocks.Test) ... ok, 0.116 sec
+test_fuchsify_by_blocks_02 (test_fuchsify_by_blocks.Test) ... ok, 0.177 sec
+test_fuchsify_by_blocks_03 (test_fuchsify_by_blocks.Test) ... ok, 0.150 sec
+test_fuchsify_by_blocks_04 (test_fuchsify_by_blocks.Test) ... ok, 0.524 sec
+test_fuchsify_by_blocks_05 (test_fuchsify_by_blocks.Test) ... ok, 0.097 sec
+test_fuchsify_by_blocks_06 (test_fuchsify_by_blocks.Test) ... ok, 3.520 sec
 test_fuchsify_by_blocks_07 (test_fuchsify_by_blocks.Test) ... ok, 0.200 sec
-test_git_409 (test_normalize_by_blocks.Test) ... ok, 1.737 sec
-test_git_410 (test_normalize_by_blocks.Test) ... ok, 3.770 sec
+test_git_409 (test_normalize_by_blocks.Test) ... ok, 1.483 sec
+test_git_410 (test_normalize_by_blocks.Test) ... ok, 3.220 sec
 test_balance_1 (test_fuchsia.Test) ... ok, 0.006 sec
 test_balance_2 (test_fuchsia.Test) ... ok, 0.004 sec
-test_balance_transform_1 (test_fuchsia.Test) ... ok, 0.061 sec
-test_factorize_1 (test_fuchsia.Test) ... ok, 0.177 sec
-test_factorize_2 (test_fuchsia.Test) ... ok, 0.038 sec
-test_fuchsify_1 (test_fuchsia.Test) ... ok, 9.960 sec
-test_fuchsify_2 (test_fuchsia.Test) ... ok, 8.729 sec
+test_balance_transform_1 (test_fuchsia.Test) ... ok, 0.057 sec
+test_factorize_1 (test_fuchsia.Test) ... ok, 0.190 sec
+test_factorize_2 (test_fuchsia.Test) ... ok, 0.039 sec
+test_fuchsify_1 (test_fuchsia.Test) ... ok, 10.251 sec
+test_fuchsify_2 (test_fuchsia.Test) ... ok, 9.425 sec
 test_import_export_mathematica (test_fuchsia.Test) ... ok, 0.001 sec
 test_import_export_matrixmarket (test_fuchsia.Test) ... ok, 0.001 sec
 test_import_matrix_from_file_1 (test_fuchsia.Test) ... ok, 0.001 sec
-test_reduce_at_one_point_1 (test_fuchsia.Test) ... ok, 2.096 sec
-test_simplify_by_jordanification (test_fuchsia.Test) ... ok, 0.293 sec
+test_reduce_at_one_point_1 (test_fuchsia.Test) ... ok, 2.198 sec
+test_simplify_by_jordanification (test_fuchsia.Test) ... ok, 0.305 sec
 test_transform_1 (test_fuchsia.Test) ... ok, 0.004 sec
-test_transform_2 (test_fuchsia.Test) ... ok, 0.248 sec
-test_fuchsify_git409 (test_cli.Test) ... ok, 4.224 sec
-test_fuchsify_henn324 (test_cli.Test) ... ok, 2.054 sec
-test_help (test_cli.Test) ... ok, 0.939 sec
-test_is_normalized_1 (test_normalize.Test) ... ok, 0.107 sec
-test_normalize_1 (test_normalize.Test) ... ok, 10.598 sec
-test_normalize_2 (test_normalize.Test) ... ok, 11.014 sec
-test_normalize_3 (test_normalize.Test) ... ok, 0.165 sec
-test_normalize_4 (test_normalize.Test) ... ok, 0.148 sec
-test_normalize_5 (test_normalize.Test) ... ok, 1.376 sec
-test_block_triangular_form_1 (test_block_triangular.Test) ... ok, 0.003 sec
+test_transform_2 (test_fuchsia.Test) ... ok, 0.282 sec
+test_fuchsify_git409 (test_cli.Test) ... ok, 4.243 sec
+test_fuchsify_henn324 (test_cli.Test) ... ok, 2.049 sec
+test_help (test_cli.Test) ... ok, 0.954 sec
+test_is_normalized_1 (test_normalize.Test) ... ok, 0.111 sec
+test_normalize_1 (test_normalize.Test) ... ok, 8.500 sec
+test_normalize_2 (test_normalize.Test) ... ok, 9.554 sec
+test_normalize_3 (test_normalize.Test) ... ok, 0.175 sec
+test_normalize_4 (test_normalize.Test) ... ok, 0.168 sec
+test_normalize_5 (test_normalize.Test) ... ok, 0.950 sec
+test_block_triangular_form_1 (test_block_triangular.Test) ... ok, 0.004 sec
 test_block_triangular_form_2 (test_block_triangular.Test) ... ok, 0.003 sec
 test_block_triangular_form_3 (test_block_triangular.Test) ... ok, 0.003 sec
-test_block_triangular_form_4 (test_block_triangular.Test) ... ok, 0.013 sec
-test_git_409 (test_reduce.Test) ... ok, 6.501 sec
-test_henn_324 (test_reduce.Test) ... ok, 0.541 sec
-test_git_409 (test_canonical_form.Test) ... ok, 2.474 sec
-test_git_410 (test_canonical_form.Test) ... ok, 6.240 sec
-test_henn_324 (test_canonical_form.Test) ... ok, 0.315 sec
+test_block_triangular_form_4 (test_block_triangular.Test) ... ok, 0.011 sec
+test_git_409 (test_reduce.Test) ... ok, 7.208 sec
+test_henn_324 (test_reduce.Test) ... ok, 0.547 sec
+test_git_409 (test_canonical_form.Test) ... ok, 2.265 sec
+test_git_410 (test_canonical_form.Test) ... ok, 6.079 sec
+test_henn_324 (test_canonical_form.Test) ... ok, 0.323 sec
 
 ----------------------------------------------------------------------
-Ran 53 tests in 79.689s
+Ran 53 tests in 76.591s
 
 OK

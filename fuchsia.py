@@ -50,7 +50,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "16.7.5"
+__version__ = "16.7.8"
 
 __all__ = [
     "balance",
@@ -73,7 +73,7 @@ __all__ = [
 ]
 
 from   collections import defaultdict
-from   itertools import combinations
+from   itertools import permutations
 from   random import Random
 import logging
 
@@ -85,7 +85,7 @@ if True:
     ecl_eval("(ext:set-limit 'ext:heap-size 0)")
     log_handler = logging.StreamHandler()
     log_handler.setFormatter(logging.Formatter(
-        "\033[32m%(levelname)s [%(asctime)s]\033[0m\n%(message)s",
+        "\033[32m%(levelname)s [%(asctime)s]\033[0m %(message)s",
         "%Y-%m-%d %I:%M:%S"
     ))
     logger = logging.getLogger('fuchsia')
@@ -125,7 +125,7 @@ def fuchsia_simplify(obj, x=None):
     if USE_MAPLE:
         def maple_simplify(ex):
             if hasattr(ex, "variables") and ((x is None) or (x in ex.variables())):
-                res = maple.factor(maple.simplify(ex))
+                res = maple.factor(maple.radnormal(ex))
                 return parse(str(res))
             else:
                 return ex
@@ -141,14 +141,12 @@ def fuchsia_solve(eqs, var):
         s = maple.solve(eqs, var)
         solutions = s.parent().get(s._name).strip('[]').split('],[')
         solutions = [s.split(',') for s in solutions if s != '']
-        if solutions == []:
-            return []
         result = []
         for solution in solutions:
             r = []
             for s in solution:
                 try:
-                    expr = expand(simplify(parse(s)))
+                    expr = fuchsia_simplify(parse(s))
                     r.append(expr)
                 except SyntaxError as error:
                     print "ERROR:  \n%s\n  %s\n" % (s, error)
@@ -243,7 +241,7 @@ def singularities(m, x):
     >>> sorted(s.items())
     [(0, 0), (+Infinity, 2)]
     """
-    m = m.simplify_rational()
+    m = fuchsia_simplify(m)
     result = {}
     for expr in m.list():
         points_expr = singularities_expr(expr, x)
@@ -500,8 +498,9 @@ def block_triangular_form(m):
       * `B` is a list of tuples (ki, ni), such that M's i-th
         diagonal block is given by `M.submatrix(ki, ki, ni, ni)`.
     """
+    logger.info("--> block_triangular_form")
     if is_verbose():
-        logger.info("Matrix mask before transformation:\n%s\n" % matrix_mask_str(m))
+        logger.debug("matrix before transformation:\n%s\n" % matrix_mask_str(m))
 
     n = m.nrows()
     deps_1_1 = {}
@@ -570,8 +569,8 @@ def block_triangular_form(m):
             i += 1
     mt = transform(m, None, t)
     if is_verbose():
-        logger.info("Matrix mask after transformation:\n%s\n" % matrix_mask_str(mt))
-
+        logger.debug("matrix after transformation:\n%s\n" % matrix_mask_str(mt))
+    logger.info("<-- block_triangular_form")
     return mt, t, blocks
 
 def canonical_form(m, x, eps, seed=0):
@@ -628,6 +627,7 @@ def fuchsify(M, x, seed=0):
     Note that such transformations are not unique; you can obtain
     different ones by supplying different seeds.
     """
+    logger.info("--> fuchsify")
     assert M.is_square()
     rng = Random(seed)
     poincare_map = singularities(M, x)
@@ -647,6 +647,11 @@ def fuchsify(M, x, seed=0):
     combinedT = identity_matrix(M.base_ring(), M.nrows())
     reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
     reduction_points.sort()
+    if reduction_points == []:
+        logger.info("    already fuchsian")
+    else:
+        for pt in reduction_points: 
+            logger.info("    x = %s, rank = %d" % (pt, poincare_map[pt]))
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
@@ -684,6 +689,7 @@ def fuchsify(M, x, seed=0):
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
     combinedT = fuchsia_simplify(combinedT, x)
+    logger.info("<-- fuchsify")
     return M, combinedT
 
 def fuchsify_by_blocks(m, b, x, eps):
@@ -897,44 +903,6 @@ def is_normalized_by_blocks(m, b, x, eps):
             return False
     return True
 
-def normalize(m, x, eps, seed=0):
-    """Given a Fuchsian system of differential equations of the
-    form dF/dx=m*F, find a transformation that will shift all
-    the eigenvalues of m's residues into [-1/2, 1/2) range (in
-    the limit eps->0). Return the transformed matrix m and the
-    transformation. Raise FuchsiaError if such transformation
-    is not found.
-    """
-    logger.info("[normalize] START\n")
-    T = identity_matrix(m.base_ring(), m.nrows())
-    state = {"random": Random(seed)}
-    i = 0
-    while True:
-        i += 1
-        m = fuchsia_simplify(m, x)
-        logger.info("[normalize] STEP #%s\n" % i)
-        balances = find_balances(m, x, eps, state)
-        b = select_balance(balances, eps, state)
-        if b is None:
-            if state["is_normalized"]:
-                break
-            raise FuchsiaError("can not balance matrix")
-        logger.info("Use the balance:\n    %s\n" % b)
-
-        cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
-        if cond == 1:
-            P = cross_product(a0_evec, b0_evec) / scale
-            m = balance_transform(m, P, x1, x2, x)
-            T0 = balance(P, x1, x2, x)
-        else:
-            P = cross_product(b0_evec, a0_evec) / scale
-            m = balance_transform(m, P, x2, x1, x)
-            T0 = balance(P, x2, x1, x)
-
-        T = fuchsia_simplify(T*T0, x)
-    logger.info("[normalize] DONE\n")
-    return m, T
-
 def normalize_by_blocks(m, b, x, eps, seed=0):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
     find a transformation that will shift all eigenvalues of all residues of all its diagonal
@@ -943,57 +911,140 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
      are defined by the list `b` which corresponds to the equivalent value returned by the
     `block_triangular_form` routine.
     """
-    logger.info("normalize_by blocks [START]")
+    logger.info("--> normalize_by_blocks")
     n = m.nrows()
     t = identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
         mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         ti = identity_matrix(SR, ni)
+        logger.info("reducing block #%d (%d,%d)" % (i,ki,ni))
         if is_verbose():
-            msg = ("Reducing block #%d (%d,%d):\n%s\n" % (i,ki,ni, matrix_str(mi, 2)))
-            logger.info(msg)
+            logger.debug("\n%s" % matrix_str(mi, 2))
 
-        logger.info("normalize_by blocks -> fuchsify [START]")
         mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
         ti = ti*ti_fuchs
 
-        logger.info("normalize_by blocks -> normalize [START]")
         mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
         ti = ti*ti_norm
+        #export_matrix_to_file("pap_03_bak_1.m", mi_norm, fmt="m")
+        #export_matrix_to_file("pap_03_bak_2.m", ti, fmt="m")
+        #export_matrix_to_file("pap_03_bak_3.m", fuchsia_simplify(mi_norm), fmt="m")
 
-        logger.info("normalize_by blocks -> factorize [START]")
         mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
         ti = ti*ti_eps
 
         t[ki:ki+ni, ki:ki+ni] = ti
     mt = fuchsia_simplify(transform(m, x, t), x)
-    logger.info("normalize_by blocks [DONE]")
+    logger.info("<-- normalize_by_blocks")
     return mt, t
 
-def find_balances(m, x, eps, state={}):
-    if not state.has_key("pairs"):
-        pairs = list(combinations(singularities(m, x).keys(), 2))
-        state["pairs"] = []
-        for x1,x2 in pairs:
-            state["pairs"] += [(x1,x2),(x2,x1)]
-            # the order of pairs matters, hence we do not use `permutations` routine
-    pairs = state["pairs"]
-    pairs.sort(key = lambda pair: pair in state.get("processed_pairs", []))
-    state["is_normalized"] = True
-    state.setdefault("processed_pairs", [])
+def normalize(m, x, eps, seed=0):
+    """Given a Fuchsian system of differential equations of the
+    form dF/dx=m*F, find a transformation that will shift all
+    the eigenvalues of m's residues into [-1/2, 1/2) range (in
+    the limit eps->0). Return the transformed matrix m and the
+    transformation. Raise FuchsiaError if such transformation
+    is not found.
+    """
+    class State(object):
+        def __init__(self, m, x, eps, seed):
+            # random
+            self.random = Random(seed)
+            # points
+            self.points = singularities(m, x).keys()
+            # ev_cum
+            self.ev_cum = {}
+            for x0 in self.points:
+                pos, neg = 0, 0
+                a0 = matrix_residue(m, x, x0)
+                for ev in a0.eigenvalues():
+                    ev0 = limit_fixed(ev, eps, 0)
+                    if ev0 > 0:
+                        pos += ev0
+                    if ev0 < 0:
+                        neg += ev0
+                self.ev_cum[x0] = [pos,neg]
+            # x0
+            self.x0 = None
 
-    for x1, x2 in pairs:
-        logger.info("Looking for the balance between x = %s and x = %s" % (x1,x2))
-        a0, b0 = matrix_residue(m, x, x1), matrix_residue(m, x, x2)
+        def is_normalized(self):
+            for ev in self.ev_cum.itervalues():
+                if ev != [0,0]:
+                    return False
+            return True
+
+        def pairs(self):
+            points = [x0 for x0 in self.points if self.ev_cum[x0] != [0,0]]
+            if len(points) == 1:
+                self.select_x0(points[0])
+                points.append(self.x0)
+            return permutations(points, 2)
+
+        def select_x0(self, x1):
+            if self.x0 is not None:
+                return
+            for x0 in self.points:
+                if x0 != x1:
+                    self.x0 = x0
+                    return
+
+        def update_ev_cum(self, x2, x1):
+            ev_cum_x1, ev_cum_x2 = self.ev_cum[x1], self.ev_cum[x2]
+            if ev_cum_x1[0] > 0:
+                ev_cum_x1[0] -= 1
+            else:
+                ev_cum_x1[1] -= 1
+            if ev_cum_x2[1] < 0:
+                ev_cum_x2[1] += 1
+            else:
+                ev_cum_x2[0] += 1
+
+    logger.info("--> normalize")
+    state = State(m, x, eps, seed)
+
+    i = 0
+    T = identity_matrix(m.base_ring(), m.nrows())
+    while not state.is_normalized():
+        i += 1
+        m = fuchsia_simplify(m, x)
+        logger.info("    step %s" % i)
+        balances = find_balances(m, x, eps, state)
+        b = select_balance(balances, eps, state)
+        if b is None:
+            raise FuchsiaError("can not balance matrix")
+        logger.info("      balancing x = %s and x = %s" % (b[1],b[2]))
+        if is_verbose():
+            logger.debug("\n      use the balance:\n        %s\n" % b)
+
+        cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
+        if cond == 1:
+            P = cross_product(a0_evec, b0_evec) / scale
+            m = balance_transform(m, P, x1, x2, x)
+            T0 = balance(P, x1, x2, x)
+            state.update_ev_cum(x1, x2)
+        else:
+            P = cross_product(b0_evec, a0_evec) / scale
+            m = balance_transform(m, P, x2, x1, x)
+            T0 = balance(P, x2, x1, x)
+            state.update_ev_cum(x2, x1)
+
+        T = fuchsia_simplify(T*T0, x)
+    logger.info("<-- normalize")
+    return m, T
+
+def find_balances(m, x, eps, state={}):
+    residues = {}
+    for x1, x2 in state.pairs():
+        logger.debug("trying to balance x = %s and x = %s" % (x1,x2))
+        for xi in [x1,x2]:
+            if xi not in residues:
+                residues[xi] = matrix_residue(m, x, xi)
+        a0, b0 = residues[x1], residues[x2]
 
         a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
-        for ev, evec, emult in a0_evr:
-            if limit_fixed(ev, eps, 0) != 0:
-                state["is_normalized"] = False
-                break
 
         if is_verbose():
-            msg = "  Eigenvalues:\n"
+            msg = "\n  Eigenvalues:\n"
             msg += "    x = %s:\n" % x1
             a0_evals = [];
             for ev, evec, emult in a0_evr:
@@ -1004,7 +1055,7 @@ def find_balances(m, x, eps, state={}):
             for ev, evec, emult in b0_evl:
                 b0_evals += [ev]*emult
             msg += "        %s\n" % str(b0_evals)
-            logger.info(msg)
+            logger.debug(msg)
 
         balances_1 = find_balances_by_cond(a0_evr, b0_evl, lambda a0_eval, b0_eval: limit_fixed(a0_eval, eps, 0) < -0.5)
         for balance in balances_1:
@@ -1016,11 +1067,6 @@ def find_balances(m, x, eps, state={}):
         for balance in balances_2:
             balance = [2, x1, x2] + balance
             yield balance
-
-        if len(state["processed_pairs"]) == len(pairs):
-            state["processed_pairs"] = []
-        if (x1,x2) not in state["processed_pairs"]:
-            state["processed_pairs"].append((x1,x2))
 
 def find_balances_by_cond(a0_ev, b0_ev, cond):
     res = []
@@ -1065,7 +1111,7 @@ def select_balance(balances, eps, state={}):
     if min_balance is not None:
         return min_balance
 
-    x0 = state.get("x0")
+    x0 = state.x0
     if x0 is None:
         for b in bs:
             cond, x1, x2, ev1, ev2 = b[:5]
@@ -1076,10 +1122,10 @@ def select_balance(balances, eps, state={}):
                 x0 = x1
                 break
         logger.info("Select x0 = %s" % x0)
-        state["x0"] = x0
+        state.x0 = x0
 
     balances_x0 = [b for b in bs if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
-    b = state["random"].choice(balances_x0) if balances_x0 else None
+    b = state.random.choice(balances_x0) if balances_x0 else None
     return b
 
 def eigenvectors_left(m):
@@ -1114,9 +1160,12 @@ def factorize(M, x, epsilon, b=None, seed=0):
     from M. Return a transformed M (proportional to epsilon)
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
+    logger.info("--> factorize")
     n = M.nrows()
     M = fuchsia_simplify(M, x)
     if epsilon not in (M/epsilon).variables():
+        logger.info("    already canonical")
+        logger.info("<-- factorize")
         return M, identity_matrix(SR, n)
     rng = Random(seed)
     mu = gensym()
@@ -1134,10 +1183,15 @@ def factorize(M, x, epsilon, b=None, seed=0):
     eqs = []
     for point, prank in singularities(M, x).iteritems():
         assert prank == 0
+        logger.debug("    processing point x = %s" % point)
         R = matrix_c0(M, x, point, 0)
+        #R = fuchsia_simplify(R)
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
+        eq = fuchsia_simplify(eq)
         eqs.extend(eq.list())
-    for solution in fuchsia_solve(eqs, T_symbols):
+    logger.info("    found %d equations with %d unknowns" % (len(eqs), len(T_symbols)))
+    solutions = fuchsia_solve(eqs, T_symbols)
+    for solution in solutions:
         S = T.subs(solution)
         # Right now S likely has a number of free variables in
         # it; we can set them to arbibtrary values, as long as
@@ -1153,6 +1207,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
                 M = fuchsia_simplify(transform(M, x, sT), x)
                 # We're leaking a bunch of temprary variables here,
                 # which accumulate in SR.variables, but who cares?
+                logger.info("<-- factorize")
                 return M, sT
             except (ZeroDivisionError, ValueError):
                 rndrange += 1 + rndrange//16
