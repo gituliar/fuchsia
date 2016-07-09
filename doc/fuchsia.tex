@@ -186,7 +186,7 @@ The whole method is performed in these three steps:
 
 \begin{enumerate}
     \item Given a matrix $\M A(x,\eps)$, find an equivalent system $\M A'(x,\eps)$ and corresponding transformation $\M T(x,\eps)$, such that $\M A'(x,\eps)$ is Fuchsian. We call this step \textit{fuchsification}.
-    \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in $n+m\eps$ form, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all in the form $k\eps$. We call this step \textit{normalization}.
+    \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in $n+m\,\eps$ form, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all in the form $k\,\eps$. We call this step \textit{normalization}.
     \item Given a normalized matrix $\M A(x,\eps)$, find an equivalent canonical matrix $\M A'(x)$, i.e. such that $\M A'(x,\eps) = \eps \, \M S'(x)$. We call this step \textit{factorization}.
 \end{enumerate}
 
@@ -236,26 +236,28 @@ In \fuchsia, this process is implemented by \code{fuchsify} and \code{fuchsify\_
 Finally, let us mention that a similar problem of reducing Poincar\'e ranks and Moser orders of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
 Together with Pfl\"ugel they developed algorithms implementing their method~\cite{BP99} and available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
 
-% TODO: how does our method differ from with super-reduce?
+% TODO: how does our method differ from super-reduce?
 
 
 \subsubsection{Normalization}
 \label{sec:norm}
 
-By {\em normalization} we mean to find a rational transformation $\M T(x,\eps)$ which transforms a given Fuchsian matrix with eigenvalues of all its residues in the form $n + m \, \eps$, to the equivalent Fuchsian matrix with eigenvalues in the form $m \, \eps$, where $n$ is integer.
+To \textit{normalize} a Fuchsian system \eqref{eq:dj} with matrix residue eigenvalues of the form $n+m\,\eps$ (where $n$ is integer), is to find an equivalent Fuchsian system with residue eigenvalues of the form $m\,\eps$.
 
-As in the previous step a corresponding transformation can be found by constructing an appropriate balance~\eqref{eq:bal} as described in~\cite[p.~11]{Lee15}.
-Here another property of the balance transformation is used:
+Just like in the previous step, normalizing transformations are found by stepwise application of balance transformations~\eqref{eq:bal}.
+We refer the reader to~\cite[p.~11]{Lee15} for the description of how such balances are constructed, but we will note that this transformation is possible due to these two facts:
 \begin{itemize}
-    \item When appropriately constructed the balance $\mathcal{B}(\M P(\eps), x_1, x_2; x)$ decreases an eigenvalue of $\M A_{10}(\eps)$ by 1 and increases another eigenvalue of $\M A_{20}(\eps)$ by 1 without affecting Poincar\'e rank at the points $x=x_1$ and $x=x_2$.
+    \item Given a properly selected projector matrix $\M P(\eps)$, balance $\mathcal{B}(\M P(\eps), x_i, x_j; x)$ shifts one of the eigenvalues of $\M A_{i0}$ by $\pm1$, shifts one of the eigenvalues of $\M A_{j0}$ by $\mp1$, and doesn't change Poincar\'e ranks at any point.
+    \item Since the system is Fuchsian, the sum of all it's matrix residues is zero, and thus, the sum of all residue eigenvalues is zero as well.
 \end{itemize}
-Since the sum of eigenvalues of all residues of a given matrix is zero, by applying appropriately constructed balances, we find a transformation which gives $m = 0$.
+Combining these two facts, we perform normalization by shifting residue eigenvalues by $1$ at each step, until a state is reached where the integer parts of all the eigenvalues are zero.
 
-It may happen, that some $m$'s in the initial matrix are non-integer numbers which leads to fail of the algorithm based on balance transformations.
-In this case we suggest to look for some variable change which leads to the appropriate form of $m$.
-Unfortunately, we can not provide a general algorithm how to choose such substitution, for the moment we use a try-fail approach.
+In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines.
+See Section~\ref{sec:usage_py} for their usage.
 
-In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines, which are described in details in Section~\ref{sec:usage_py}.
+It may happen that after fuchsification we obtain a system the residue eigenvalues of which do not fit the $n+m\,\eps$ form neatly.
+In this case it is sometimes possible to rectify the problem by using some non-linear change of variables.
+Unfortunately we do not have an automated solution for such cases, and users are expected to find transformations appropriate for their system manually.
 
 
 \subsubsection{Factorization}
