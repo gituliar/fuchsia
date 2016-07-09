@@ -100,12 +100,12 @@ Asymptotical behavior of $\M A(x,\eps)$ around these poles can be described as:
     \M A(x \to x_k,\eps) =
     \begin{cases}
         (\M A_{k0}(\eps) + \M A_{k1}(\eps)\,(x - x_k) + \dots)/(x - x_k)^{1+p_k} & \text{if $x_k\neq\infty$}, \\
-        (\M A_{k0}(\eps) + \M A_{k1}(\eps)\,x^{-1} + \dots)\,x^{-1 + p_k} & \text{if $x_k=\infty$},
+        -(\M A_{k0}(\eps) + \M A_{k1}(\eps)\,x^{-1} + \dots)\,x^{-1 + p_k} & \text{if $x_k=\infty$},
     \end{cases}
 \end{equation}
 
 where $p_k$ is the \textit{Poincar\'e rank} of $\M A(x,\eps)$ at singular point $x=x_k$.
-If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian in $x=x_k$}.
+If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian in $x=x_k$}, and $\M A_{k0}$ \textit{matrix residue} of $\M A(x,\eps)$ at $x=x_k$.
 If all $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian}.
 
 Behavior of the system at $x=\infty$ is a bit of special case, but it is essential in the overall reduction process.
@@ -621,19 +621,19 @@ The set of singular points can include \code{Infinity}, if $\M M$ has a singular
 
 \functionitem{matrix\_c0}{\M M, x, x_0, p}
 Return the 0-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is \code{Infinity}, return the coefficient at the highest power of $x$.
+If $x_0$ is \code{Infinity}, return minus the coefficient at the highest power of $x$.
 In other words, return $\M A_{k0}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_c1}{\M M, x, x_0, p}
 Return the 1-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is \code{Infinity}, return the coefficient at the second-to-highest power of $x$.
+If $x_0$ is \code{Infinity}, return minus the coefficient at the second-to-highest power of $x$.
 In other words, return $\M A_{k1}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_residue}{\M M, x, x_0}
 Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
 Return matrix residue at infinity if $x_0$ is \code{Infinity}.
 
-The difference between this function and $\F{matrix\_residue}(\M M, x, x_0, 0)$ is the sign when $x_0$ is \code{Infinity}.
+This is the same as $\F{matrix\_c0}(\M M, x, x_0, 0)$.
 
 \functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"mtx"}}
 Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.

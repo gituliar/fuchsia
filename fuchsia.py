@@ -338,7 +338,7 @@ def matrix_taylor1(M, x, point, exp):
 def matrix_c0(M, x, point, p):
     """Return the 0-th coefficient of M's expansion at x=point,
     assuming Poincare rank of M at that point is p. If point is
-    +Infinity, return the coefficient at the highest power of x.
+    +Infinity, return minus the coefficient at the highest power of x.
 
     Examples:
     >>> x = var("x")
@@ -350,21 +350,21 @@ def matrix_c0(M, x, point, p):
     [0 0]
     [0 1]
     >>> matrix_c0(m, x, oo, 1)
-    [0 0]
-    [1 0]
+    [ 0  0]
+    [-1  0]
     >>> matrix_c0(m*x, x, oo, 2)
-    [0 0]
-    [1 0]
+    [ 0  0]
+    [-1  0]
     """
     if point == oo:
-        return matrix_taylor0(M.subs({x: 1/x}), x, 0, p-1)
+        return -matrix_taylor0(M.subs({x: 1/x}), x, 0, p-1)
     else:
         return matrix_taylor0(M, x, point, p+1)
 
 def matrix_c1(M, x, point, p):
     """Return the 1-st coefficient of M's expansion at x=point,
     assuming Poincare rank of M at that point is p. If point is
-    +Infinity, return the coefficient at the second-to-highest
+    +Infinity, return minus the coefficient at the second-to-highest
     power of x.
 
     Examples:
@@ -374,11 +374,11 @@ def matrix_c1(M, x, point, p):
     [1 0]
     [0 0]
     >>> matrix_c1(m, x, oo, 1)
-    [1 0]
-    [0 1]
+    [-1  0]
+    [ 0 -1]
     """
     if point == oo:
-        return matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
+        return -matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
     else:
         return matrix_taylor1(M, x, point, p+1)
 
@@ -403,12 +403,8 @@ def matrix_residue(M, x, x0):
         return M._cache[key]
 
     m0 = matrix_c0(M, x, x0, 0)
-    if x0 == oo:
-        res = -m0
-    else:
-        res = m0
-    M._cache[key] = res
-    return res
+    M._cache[key] = m0
+    return m0
 
 def matrix_is_nilpotent(M):
     """Return True if M is always nilpotent, False otherwise.
@@ -723,7 +719,7 @@ def fuchsify_by_blocks(m, b, x, eps):
 
                     t0 = identity_matrix(SR, n)
                     t0[ki:ki+ni, kj:kj+nj] = \
-                            d/(x-x0)**p if not (x0 == oo) else -d*(x**p)
+                            d/(x-x0)**p if not (x0 == oo) else d*(x**p)
                     m = fuchsia_simplify(transform(m, x, t0), x)
 
                     t = fuchsia_simplify(t*t0, x)
