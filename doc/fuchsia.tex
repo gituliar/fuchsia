@@ -351,7 +351,7 @@ To run \fuchsia you need \sage version 7.0 or higher to be installed on your com
 You can find installation instructions for \sage over at it's website, \url{http://www.sagemath.org}.
 \footnote{
     Some \linux distributions have \sage available in their package repositories; we do not recommend using those.
-    A number of \maxima releases contain bugs which \fuchsia is sensitive to, and so far the official \sage builds have avoided those releases (unlike a number of \linux distributions).
+    A number of \maxima releases contain bugs which \fuchsia is sensitive to, and so far the official \sage builds have avoided those releases (unlike some \linux distributions).
 }
 
 \sage is a free and open-source Computer Algebra System licensed under GPL.
@@ -374,19 +374,19 @@ If you are interested in the latest development version then visit \url{https://
 
 \subsection{Usage from the command line}
 
-An easy way to use \fuchsia is to run \code{fuchsia.py} shell script, which has the following invocation signature:
+An easy way to use \fuchsia is to run \code{fuchsia} shell script,\footnote{If you used \code{sage -pip} to install \fuchsia, you'll find this script at \code{<path~to~SageMath>/local/bin/fuchsia}.} which has the following invocation signature:
 
 \begin{Verbatim}
-    \prompt{$}{fuchsia.py <action> <options>}
+    \prompt{$}{fuchsia <action> <options>}
 \end{Verbatim}
 
 where
 \begin{itemize}
   \item \code{<action>} is one of the algorithms described in the previous section, i.e., \code{fuchsify}, \code{normalize}, \code{factorize}, or auxiliary action \code{transform}, which applies a user-defined transformation to the given matrix.
-  \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia.py -h} command.
+  \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia -h} command.
 \end{itemize}
 
-In the following we provide a complete help information printed by \code{fuchsia.py -h}:
+In the following we provide a complete help information printed by \code{fuchsia -h}:
 \begin{Verbatim}
 Fuchsia v16.6.8
 Authors: Oleksandr Gituliar, Vitaly Magerya
