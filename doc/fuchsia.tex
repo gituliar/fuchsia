@@ -262,23 +262,34 @@ Unfortunately we do not have an automated solution for such cases, and users are
 
 \subsubsection{Factorization}
 \label{sec:fact}
-By {\em factorization} we mean to find a rational transformation $\M T(\eps)$ which transforms a given Fuchsian and normalized matrix to the canonical form.
-Let us assume that $\M T(\eps)$ is such a matrix, then an equivalent matrix after transformation, according to eq.~\eqref{eq:ta}, is given by
+After normalization we obtained matrix $\M A(x,\eps)$ with all residue eigenvalues having form $m\,\eps$.
+The final step is to \textit{factorize} it by finding an equivalent matrix which is itself proportional to $\eps$, so $\M A'(x,\eps)=\eps\,\M S(x)$.
+
+A transformation constant in $x$ is sufficient for this.
+Let $\M T(\eps)$ be such a transformation, then according to \eqref{eq:ta}, we have:
 \begin{equation}
-  \M A'(x,\eps) = \eps\, \sum_i \frac{\M A'_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_i(\eps)}{x-x_i} \M T(\eps),
+  \M A'(x,\eps) \equiv \eps\, \sum_i \frac{\M S_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_{i0}(\eps)}{x-x_i} \M T(\eps),
 \end{equation}
 or explicitly
 \begin{equation}
-  \M A'_i = \M T^{-1}(\eps) \frac{\M A_i(\eps)}{\eps} \M T(\eps), \quad \text{for} \quad i=1..k.
+\label{eq:seps}
+  \M S_i = \M T^{-1}(\eps) \frac{\M A_{i0}(\eps)}{\eps} \M T(\eps).
 \end{equation}
-Since $\M A'_i$ is constant for any $\eps$, in order to find components of $n\times n$ matrix $\M T(\eps)$, we write a system of linear equations for some fixed value of $\mu$ at an every singular point $x=x_i$, i.e.,
+Since $\M S_i$ in \eqref{eq:seps} is the same no matter what values $\eps$ takes, we can say that:
 \begin{equation}
-  \frac{\M A_i(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_i(\mu)}{\mu},
+  \M S_i = \M T^{-1}(\eps) \frac{\M A_{i0}(\eps)}{\eps} \M T(\eps) =
+    \M T^{-1}(\mu) \frac{\M A_{i0}(\mu)}{\eps} \M T(\mu),
 \end{equation}
-where we now treat components of $\M T(\eps,\mu) = \M T(\eps) \; \M T^{-1}(\mu)$ as unknown variables.
-The initial transformation we are looking for is then given by $\M T(\eps) = \M T(\eps,\mu_0)$ for some arbitrary chosen number $\mu = \mu_0$, provided that $\M T(\eps, \mu_0)$ is not singular.
+from where we obtain a system of linear equations for $\M T(\eps,\mu) \equiv \M T(\eps) \, \M T^{-1}(\mu)$:
+\begin{equation}
+  \frac{\M A_{i0}(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_{i0}(\mu)}{\mu}, (\forall i).
+\end{equation}
+Solving this system for $\M T(\eps,\mu)$ we can reconstruct the initial transformation as $\M T(\eps) = \M T(\eps,\mu_0)$, where $\mu_0$ can be chosen arbitrary as long as $\M T(\eps)$ will come out invertible.
 
-In \fuchsia this step is implemented as \code{factorize} routine, see Section~\ref{sec:usage_py}.
+In general, the solution for $\M T(\eps,\mu)$ can have multiple free variables aside from just $\mu$.
+We choose to set all of them to random small integers, preferably zeros, which keeps the resulting matrix $\M S(\eps)$ simple.
+
+In \fuchsia factorization step is implemented as \code{factorize} routine (again, see Section~\ref{sec:usage_py} for it's usage).
 
 \subsubsection{Block-triangular form}
 \label{sec:blockreduce}
