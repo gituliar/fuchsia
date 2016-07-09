@@ -94,7 +94,7 @@ $\eps$ is an infinitesimally small parameter (e.g., a dimensional regulator in $
 $\M A(x,\eps)$ is an $n \times n$ matrix, rational in both $x$ and $\eps$.
 
 In general case $\M A(x,\eps)$ may have a finite number of poles in $x$ at $x\in\{x_k\}$, including a pole at infinity.
-Asymptotical behavior of $\M A(x,\eps)$ around these poles can be described as:
+Asymptotic behavior of $\M A(x,\eps)$ around these poles can be described as:
 \begin{equation}
 \label{eq:axeps}
     \M A(x \to x_k,\eps) =
@@ -339,7 +339,7 @@ Finally, in order to factorize a whole matrix we proceed as described in Section
 To run \fuchsia you need \sage version 7.0 or higher to be installed on your computer.
 You can find installation instructions for \sage over at it's website, \url{http://www.sagemath.org}.
 \footnote{
-    Some \linux distributions have \sage available in their package repositories; we do not recomment using those.
+    Some \linux distributions have \sage available in their package repositories; we do not recommend using those.
     A number of \maxima releases contain bugs which \fuchsia is sensitive to, and so far the official \sage builds have avoided those releases (unlike a number of \linux distributions).
 }
 
@@ -462,7 +462,7 @@ First, let's see where the singularities of this matrix lie:
     {-1: 0, 0: 2, 1: 0, +Infinity: 1}
 \end{Verbatim}
 
-So, 4 singularites in total, with Poincar\'e rank being 2 at $\code{x}=0$, 1 at $\code{x}=\infty$ and 0 everywhere else.
+So, 4 singularities in total, with Poincar\'e rank being 2 at $\code{x}=0$, 1 at $\code{x}=\infty$ and 0 everywhere else.
 To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to \textit{fuchsify} this matrix like so:
 
 \begin{Verbatim}[commandchars=\\!|]
@@ -539,7 +539,7 @@ To make sure we got everything right, we can double-check the full transformatio
 \end{Verbatim}
 
 Note that we've used construct \code{(A - B).is\_zero()} to compare matrices instead of the more obvious \code{bool(A == B)}.
-This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structually.
+This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structurally.
 
 Of course, you don't need to walk through all these steps yourself every time.
 Normally, you just need to call this one function to do all the reduction work:
@@ -570,7 +570,7 @@ Fully reduce a system of equations defined by matrix $\M M$, independent variabl
 Return a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
 Raise $FuchsiaError$ if the system is irreducible.
 
-Reduction is performed by first coverting $\M M$ to block-triangular form, then reducing the diagonal blocks via $\F{fuchsify}$, $\F{normalize}$ and $\F{factorize}$, reducing off-diagonal blocks as described in Section~\ref{sec:blockreduce}, and finally factorizing $epsilon$ via $\F{factorize}$.
+Reduction is performed by first converting $\M M$ to block-triangular form, then reducing the diagonal blocks via $\F{fuchsify}$, $\F{normalize}$ and $\F{factorize}$, reducing off-diagonal blocks as described in Section~\ref{sec:blockreduce}, and finally factorizing $epsilon$ via $\F{factorize}$.
 
 \functionitem{fuchsify}{\M M, x, seed=0}
 Reduce a system defined by matrix $\M M$ and independent variable $x$ to Fuchsian form.
@@ -664,7 +664,7 @@ In this paper we have presented \fuchsia, a program for reducing differential eq
 To find the corresponding analytical transformation \fuchsia uses a method proposed by Roman Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
 
 In additional, an optimization for block-triangular (or sparse) matrices is also implemented, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 real and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
-In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynoms with complex coefficients in \maximasage system, which we hope to improve in the next version of the program.
+In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex coefficients in \maximasage system, which we hope to improve in the next version of the program.
 Another promising direction for improvements could be support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
 
 \section*{Acknowledgment}
