@@ -30,11 +30,11 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-We present \fuchsia: a tool and a library implementing Lee's algorithm \cite{Lee15} which, given an ODE system with rational function coefficients $\partial_x \V J = \M A(x,\eps)\,\V J$, constructs an equivalent system of the form $\partial_x \V J' = \eps\,\M S(x)\,\V J'$ and corresponding basis transformation $\V J = \M T(x,\eps)\,\V J'$.
-After and if such a reduction is successfully done the system can be trivially solved, which makes a reduction step crucial to obtain the solution.
+We present \fuchsia\xspace --- implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that a given system turns into the epsilon form $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$.
+Systems in such a form can be trivially solved, which makes construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial equations.
 
-In principle, \fuchsia can deal with any regular systems, however it's primary task is to reduce differential equations for master integrals which arise from Feynman diagrams.
-It ensures that solutions contain regular singularities only due to the analyticity of S-matrix.
+In principle, \fuchsia can deal with any regular systems, however its primary task is to reduce differential equations for Feynman master integrals.
+It ensures that solutions contain only regular singularities due to the properties of Feynman integrals.
 
 We discuss limitations and possible extensions of the proposed implementation.
 \end{abstract}
