@@ -563,6 +563,7 @@ def block_triangular_form(m):
         for j in list(block):
             t[j,i] = 1
             i += 1
+    logger.info("    found %d blocks" % len(blocks))
     mt = transform(m, None, t)
     if is_verbose():
         logger.debug("matrix after transformation:\n%s\n" % matrix_mask_str(mt))
@@ -570,14 +571,13 @@ def block_triangular_form(m):
     return mt, t, blocks
 
 def canonical_form(m, x, eps, seed=0):
+    logger.info("--> canonical_form")
     m, t1, b = block_triangular_form(m)
-    logger.info("Start normalization...")
     m, t2 = normalize_by_blocks(m, b, x, eps, seed)
-    logger.info("Start fuchsification...")
     m, t3 = fuchsify_by_blocks(m, b, x, eps)
-    logger.info("Start factorization...")
     m, t4 = factorize(m, x, eps, b=b, seed=seed)
     t = t1*t2*t3*t4
+    logger.info("<-- canonical_form")
     return m, t
 
 def matrix_mask(m):
@@ -689,6 +689,7 @@ def fuchsify(M, x, seed=0):
     return M, combinedT
 
 def fuchsify_by_blocks(m, b, x, eps):
+    logger.info("--> fuchsify_by_blocks")
     n = m.nrows()
     m0, t = m, identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
@@ -724,6 +725,7 @@ def fuchsify_by_blocks(m, b, x, eps):
 
                     t = fuchsia_simplify(t*t0, x)
                     pts[x0] -= 1
+    logger.info("<-- fuchsify_by_blocks")
     return m, t
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
@@ -913,7 +915,7 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
     for i, (ki, ni) in enumerate(b):
         mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         ti = identity_matrix(SR, ni)
-        logger.info("reducing block #%d (%d,%d)" % (i,ki,ni))
+        logger.info("    reducing block #%d (%d,%d)" % (i,ki,ni))
         if is_verbose():
             logger.debug("\n%s" % matrix_str(mi, 2))
 
@@ -922,9 +924,6 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
 
         mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
         ti = ti*ti_norm
-        #export_matrix_to_file("pap_03_bak_1.m", mi_norm, fmt="m")
-        #export_matrix_to_file("pap_03_bak_2.m", ti, fmt="m")
-        #export_matrix_to_file("pap_03_bak_3.m", fuchsia_simplify(mi_norm), fmt="m")
 
         mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
         ti = ti*ti_eps
@@ -997,9 +996,10 @@ def normalize(m, x, eps, seed=0):
 
     logger.info("--> normalize")
     state = State(m, x, eps, seed)
-
-    i = 0
     T = identity_matrix(m.base_ring(), m.nrows())
+    if state.is_normalized():
+        logger.info("    already normalized")
+    i = 0
     while not state.is_normalized():
         i += 1
         m = fuchsia_simplify(m, x)
@@ -1117,7 +1117,7 @@ def select_balance(balances, eps, state={}):
             if cond == 2:
                 x0 = x1
                 break
-        logger.info("Select x0 = %s" % x0)
+        logger.info("      select x0 = %s" % x0)
         state.x0 = x0
 
     balances_x0 = [b for b in bs if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
@@ -1302,7 +1302,7 @@ def simplify_by_factorization(M, x):
             dT = identity_matrix(M.base_ring(), n)
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
-    logger.info(
+    logger.debug(
             "stripping common factors with this transform:\n"
             "diagonal_matrix([\n  %s\n])",
             ",\n  ".join(str(e) for e in T.diagonal()))
@@ -1546,4 +1546,9 @@ def main():
         exit(1)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as error:
+        if is_verbose():
+            logger.debug("\n%s" % error)
+        print error
