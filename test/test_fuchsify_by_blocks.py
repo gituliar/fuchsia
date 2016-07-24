@@ -2,13 +2,13 @@ import os.path
 import unittest
 
 from   sage.all import SR, matrix
-from   fuchsia import (is_fuchsian, fuchsify_by_blocks, transform, _parser)
+from   fuchsia import (is_fuchsian, fuchsify_off_diagonal_blocks, transform, _parser)
 
 class Test(unittest.TestCase):
     def assert_fuchsify_by_blocks_works(test, m,b,x,eps):
         test.assertFalse(is_fuchsian(m, x))
 
-        mt, t = fuchsify_by_blocks(m, b, x, eps)
+        mt, t = fuchsify_off_diagonal_blocks(m, x, eps, b=b)
         test.assertTrue((mt-transform(m, x, t)).simplify_rational().is_zero())
         test.assertTrue(is_fuchsian(mt, x))
 

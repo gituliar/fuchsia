@@ -3,7 +3,7 @@ import unittest
 
 from   sage.all import SR
 from   fuchsia import (block_triangular_form, import_matrix_from_file, is_normalized,
-           is_normalized_by_blocks, normalize_by_blocks, transform, simplify_by_factorization,
+           are_diagonal_blocks_reduced, reduce_diagonal_blocks, transform, simplify_by_factorization,
            singularities)
 
 class Test(unittest.TestCase):
@@ -19,10 +19,10 @@ class Test(unittest.TestCase):
         test.assertNotEqual(m_pranks, [0]*len(m_pranks))
 
         m, t, b = block_triangular_form(m)
-        mt, tt = normalize_by_blocks(m, b, x, eps)
+        mt, tt = reduce_diagonal_blocks(m, x, eps, b=b)
         t = t*tt
         test.assertTrue((mt-transform(m, x, t)).simplify_rational().is_zero())
-        test.assertTrue(is_normalized_by_blocks(mt, b, x, eps))
+        test.assertTrue(are_diagonal_blocks_reduced(mt, b, x, eps))
 
     def test_git_409(test):
         test.assertNormalizeBlocksWorks(os.path.join(os.path.dirname(__file__),

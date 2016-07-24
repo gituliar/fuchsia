@@ -231,7 +231,7 @@ With this in mind, to reduce a system to Fuchsian form we need to combine the re
     \item Apply $\M T(x,\eps)$ and repeat from Step 1.
 \end{enumerate}
 
-In \fuchsia, this process is implemented by \code{fuchsify} and \code{fuchsify\_by\_blocks} routines; see Section~\ref{sec:usage_py} for their usage.
+In \fuchsia, this process is implemented by function \code{fuchsify}; see Section~\ref{sec:usage_py} for it's usage.
 
 Finally, let us mention that a similar problem of reducing Poincar\'e ranks and Moser orders of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
 Together with Pfl\"ugel they developed algorithms implementing their method~\cite{BP99} and available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
@@ -252,8 +252,8 @@ We refer the reader to~\cite[p.~11]{Lee15} for the description of how such balan
 \end{itemize}
 Combining these two facts, we perform normalization by shifting residue eigenvalues by $1$ at each step, until a state is reached where the integer parts of all the eigenvalues are zero.
 
-In \fuchsia, normalization step is implemented by \code{normalize} and \code{fuchsify\_by\_blocks} routines.
-See Section~\ref{sec:usage_py} for their usage.
+In \fuchsia, normalization step is implemented by function \code{normalize}.
+See Section~\ref{sec:usage_py} for it's usage.
 
 It may happen that after fuchsification we obtain a system the residue eigenvalues of which do not fit the $n+m\,\eps$ form neatly.
 In this case it is sometimes possible to rectify the problem by using some non-linear change of variables.
@@ -352,7 +352,7 @@ Moreover, this transformation only affects $\M A^{(ai)}$ for $i \le b$ and $\M A
 
 Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing transformation to epsilon form.
 
-In \fuchsia the process of shuffling a matrix to it's shortest lower block-diagonal form is performed by \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by \code{normalize\_by\_blocks}; fuchsification of the remaining off-diagonal blocks is done by \code{fuchsify\_by\_blocks}.
+In \fuchsia the process of shuffling a matrix to it's shortest lower block-diagonal form is performed by \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by \code{reduce\_diagonal\_blocks}; fuchsification of the remaining off-diagonal blocks is done by \code{fuchsify\_off\_diagonal\_blocks}.
 
 
 \section{Using \fuchsia}
@@ -613,6 +613,24 @@ Transform a normalized system defined by matrix $\M M$, independent variable $x$
 transformed matrix $\M M'$ is proportional to $epsilon$.
 Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
 If such transformation can not be found, raise $FuchsiaError$.
+
+\functionitem{block\_triangular\_form}{\M M}
+Transform matrix $\M M$ into a lower block-triangular form.
+
+Return three values: transformed matrix $\M M'$, transformation matrix $\M T$, and a list of tuples $(m_i, n_i)$, where $n_i$ is the size of $i$-th diagonal block, and $m_i = \sum_{j=1}^{i-1} n_j$.
+The tuple list represents block structure of $\M M'$; it is used by the next two functions, where it is passed as argument $B$.
+
+\functionitem{reduce\_diagonal\_blocks}{\M M, x, epsilon, B=None, seed=0}
+Find a transformation that reduces diagonal blocks of $\M M$ into epsilon form.
+If $B$ is not provided, transform $\M M$ into lower triangual form before reduction, otherwise assume $\M M$ blocks are described by $B$.
+
+Return two values: transformed matrix $\M M$ and transformation matrix $\M T$.
+
+\functionitem{fuchsify\_off\_diagonal\_blocks}{\M M, x, epsilon, r=None}
+Given a matrix $M$ with diagonal blocks in epsilon form, transform off-diagonal blocks in to Fuchsian form.
+If $B$ is not provided, transform $\M M$ into lower triangual form before reduction, otherwise assume $\M M$ blocks are described by $B$.
+
+Return two values: transformed matrix $\M M$ and transformation matrix $\M T$.
 
 \functionitem{simplify\_by\_jordanification}{\M M, x}
 Try to simplify a system defined by matrix $\M M$ and independent variable $x$ by constant transformations that transform leading expansion coefficients of $\M M$ into their Jordan forms.

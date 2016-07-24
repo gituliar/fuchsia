@@ -55,16 +55,19 @@ __version__ = "16.7.8"
 __all__ = [
     "balance",
     "balance_transform",
+    "block_triangular_form",
     "epsilon_form",
     "export_matrix_to_file",
     "factorize",
     "fuchsify",
+    "fuchsify_off_diagonal_blocks",
     "import_matrix_from_file",
     "matrix_c0",
     "matrix_c1",
     "matrix_complexity",
     "matrix_residue",
     "normalize",
+    "reduce_diagonal_blocks",
     "setup_fuchsia",
     "simplify_by_factorization",
     "simplify_by_jordanification",
@@ -573,8 +576,8 @@ def block_triangular_form(m):
 def epsilon_form(m, x, eps, seed=0):
     logger.info("--> epsilon_form")
     m, t1, b = block_triangular_form(m)
-    m, t2 = normalize_by_blocks(m, b, x, eps, seed)
-    m, t3 = fuchsify_by_blocks(m, b, x, eps)
+    m, t2 = reduce_diagonal_blocks(m, x, eps, b=b, seed=seed)
+    m, t3 = fuchsify_off_diagonal_blocks(m, x, eps, b=b)
     m, t4 = factorize(m, x, eps, b=b, seed=seed)
     t = t1*t2*t3*t4
     logger.info("<-- epsilon_form")
@@ -688,10 +691,13 @@ def fuchsify(M, x, seed=0):
     logger.info("<-- fuchsify")
     return M, combinedT
 
-def fuchsify_by_blocks(m, b, x, eps):
-    logger.info("--> fuchsify_by_blocks")
+def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
+    logger.info("--> fuchsify_off_diagonal_blocks")
     n = m.nrows()
-    m0, t = m, identity_matrix(SR, n)
+    if b is None:
+        m, t, b = block_triangular_form(m)
+    else:
+        t = identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
         for j, (kj, nj) in enumerate(reversed(b[:i])):
             pts = singularities(m.submatrix(ki, kj, ni, nj), x)
@@ -725,7 +731,7 @@ def fuchsify_by_blocks(m, b, x, eps):
 
                     t = fuchsia_simplify(t*t0, x)
                     pts[x0] -= 1
-    logger.info("<-- fuchsify_by_blocks")
+    logger.info("<-- fuchsify_off_diagonal_blocks")
     return m, t
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
@@ -884,7 +890,7 @@ def is_normalized(M, x, eps):
                 return False
     return True
 
-def is_normalized_by_blocks(m, b, x, eps):
+def are_diagonal_blocks_reduced(m, b, x, eps):
     """Return True if diagonal blocks of `m` are normalized, that is all the eigenvalues of theirs
     residues in `x` lie in the range [-1/2, 1/2) in eps->0 limit; return False otherwise. Diagonal
     blocks are defined by the list `b` which corresponds to the equivalent value returned by the
@@ -892,7 +898,7 @@ def is_normalized_by_blocks(m, b, x, eps):
 
     Examples:
     >>> x, e = var("x epsilon")
-    >>> is_normalized_by_blocks(matrix([[(1+e)/3/x, 0], [0, e/x]]), [(0,1),(1,1)], x, e)
+    >>> are_diagonal_blocks_reduced(matrix([[(1+e)/3/x, 0], [0, e/x]]), [(0,1),(1,1)], x, e)
     True
     """
     for ki, ni in b:
@@ -901,7 +907,7 @@ def is_normalized_by_blocks(m, b, x, eps):
             return False
     return True
 
-def normalize_by_blocks(m, b, x, eps, seed=0):
+def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
     find a transformation that will shift all eigenvalues of all residues of all its diagonal
     blocks into the range [-1/2, 1/2) in eps->0 limit. Return the transformed matrix m and the
@@ -909,9 +915,12 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
      are defined by the list `b` which corresponds to the equivalent value returned by the
     `block_triangular_form` routine.
     """
-    logger.info("--> normalize_by_blocks")
+    logger.info("--> reduce_diagonal_blocks")
     n = m.nrows()
-    t = identity_matrix(SR, n)
+    if b is None:
+        m, t, b = block_triangular_form(m)
+    else:
+        t = identity_matrix(SR, n)
     for i, (ki, ni) in enumerate(b):
         mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         ti = identity_matrix(SR, ni)
@@ -930,7 +939,7 @@ def normalize_by_blocks(m, b, x, eps, seed=0):
 
         t[ki:ki+ni, ki:ki+ni] = ti
     mt = fuchsia_simplify(transform(m, x, t), x)
-    logger.info("<-- normalize_by_blocks")
+    logger.info("<-- reduce_diagonal_blocks")
     return mt, t
 
 def normalize(m, x, eps, seed=0):
@@ -1160,7 +1169,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
     n = M.nrows()
     M = fuchsia_simplify(M, x)
     if epsilon not in (M/epsilon).variables():
-        logger.info("    already canonical")
+        logger.info("    already in epsilon form")
         logger.info("<-- factorize")
         return M, identity_matrix(SR, n)
     rng = Random(seed)
