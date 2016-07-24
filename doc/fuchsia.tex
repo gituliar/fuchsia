@@ -30,7 +30,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-We present \fuchsia\xspace --- implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that a given system turns into the epsilon form $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$.
+We present \fuchsia\xspace --- implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
 Systems in such a form can be trivially solved, which makes construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial equations.
 
 In principle, \fuchsia can deal with any regular systems, however its primary task is to reduce differential equations for Feynman master integrals.
@@ -56,12 +56,12 @@ Recent progress in computational techniques made possible to automate calculatio
 Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and the method of differential equations~\cite{Kot91a,Kot91b,Kot91c}; for a detailed overview of these and other methods see~\cite{Smi06}.
 
 In this paper discuss the method of differential equations.
-In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when a canonical form of this system is known~\cite{Henn13}.
-We consider a general algorithm to find a canonical form of a given system of differential equations in one variable developed by R.N.Lee~\cite{Lee15}.
+In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when an epsilon form of this system is known~\cite{Henn13}.
+We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by R.N.Lee~\cite{Lee15}.
 This method allows (1) to find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59} and then (2) to normalize eigenvalues of the Fuchsian system in all singular points.
 If these two steps are successfully completed%
 \footnote{In principle, the first step can always be done because Feynman integrals contain only logarithmic singularities. For the discussion of potential complications in the second step see Section~\ref{sec:2}.}
-then a transformation which puts the initial system to canonical form may be easily find.
+then a transformation which puts the initial system into epsilon form may be easily find.
 In addition to that this method is focused on systems for Feynman integrals, it also may be successfully used for different problems provided that requirement on particular properties of the initial system are satisfied.
 
 Unfortunately, no implementation of the Lee method was made publicly available so far.
@@ -175,19 +175,19 @@ With this in mind we can classify a point $x=x_k$ of $\M A(x,\eps)$ as:
 The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregular singularities at any value of $x$ including $\infty$.
 
 
-\subsection{Reduction to canonical form}
+\subsection{Reduction to epsilon form}
 
 In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
 Now we are ready to review reduction method proposed by Roman Lee in~\cite{Lee15}.
-With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to the equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and {\em canonical}~\cite{Henn13}, i.e., $\M M(x,\eps) = \eps\, \M S(x)$.
-After the canonical form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
+With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to an equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and has \textit{epsilon form} (also called {\em canonical} in \cite{Henn13}), i.e., $\M M(x,\eps) = \eps\, \M S(x)$.
+After epsilon form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
 
 The whole method is performed in these three steps:
 
 \begin{enumerate}
     \item Given a matrix $\M A(x,\eps)$, find an equivalent system $\M A'(x,\eps)$ and corresponding transformation $\M T(x,\eps)$, such that $\M A'(x,\eps)$ is Fuchsian. We call this step \textit{fuchsification}.
     \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in $n+m\,\eps$ form, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all in the form $k\,\eps$. We call this step \textit{normalization}.
-    \item Given a normalized matrix $\M A(x,\eps)$, find an equivalent canonical matrix $\M A'(x)$, i.e. such that $\M A'(x,\eps) = \eps \, \M S'(x)$. We call this step \textit{factorization}.
+    \item Given a normalized matrix $\M A(x,\eps)$, find an equivalent matrix $\M A'(x)$ in epsilon form, i.e. such that $\M A'(x,\eps) = \eps \, \M S'(x)$. We call this step \textit{factorization}.
 \end{enumerate}
 
 
@@ -315,7 +315,7 @@ Let's consider a block-triangular matrix of this form:
 \end{equation}
 where $\M A^{(ab)}(x,\eps)$ is a sub-matrix of size $n_a \times n_b$.
 
-We start by reducing {\bf diagonal blocks} of this matrix, $\M A^{(ab)}(x,\eps)$, to canonical form.
+We start by reducing {\bf diagonal blocks} of this matrix, $\M A^{(ab)}(x,\eps)$, to epsilon form.
 This can be done by treating each diagonal block as an independent matrix, and proceeding as described in the previous sections.
 Since characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
 \begin{equation}
@@ -350,7 +350,7 @@ This transformation changes $\M A^{(ab)}_{k0}(\eps)$ into
 If both $\M A^{(aa)}_{k0}(\eps)$ and $\M A^{(bb)}_{k0}(\eps)$ have been factorized then it is always possible to solve the right-hand side of this equation for $\M D$, thus reducing Poincar\'e rank of $\M A'^{(ab)}$ by one.
 Moreover, this transformation only affects $\M A^{(ai)}$ for $i \le b$ and $\M A^{(ib)}$ for $i > a$, therefore if we'll sequentially apply transformation \eqref{eq:offdiagt} for each off-diagonal block, starting from the first row to the last, and from the last column to the first, we'll obtain fully Fuchsian (and still normalized) matrix.
 
-Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing transformation to canonical form.
+Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing transformation to epsilon form.
 
 In \fuchsia the process of shuffling a matrix to it's shortest lower block-diagonal form is performed by \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by \code{normalize\_by\_blocks}; fuchsification of the remaining off-diagonal blocks is done by \code{fuchsify\_by\_blocks}.
 
@@ -410,7 +410,7 @@ Usage:
 
 Commands:
     reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
-        find a canonical form of the given matrix
+        find an epsilon form of the given matrix
 
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
         find a transformation that will transform a given matrix
@@ -569,7 +569,7 @@ Of course, you don't need to walk through all these steps yourself every time.
 Normally, you just need to call this one function to do all the reduction work:
 
 \begin{Verbatim}
-    \prompt{sage:}{MM, TT = canonical_form(M, x, eps)}
+    \prompt{sage:}{MM, TT = epsilon_form(M, x, eps)}
     \prompt{sage:}{MM}
     [                          -eps/x      0              0]
     [                 1/4*eps/(x - 1)  eps/x              0]
@@ -589,7 +589,7 @@ By supplying different seeds, you will obtain different results as well.
 
 \begin{description}[style=nextline]
 
-\functionitem{canonical\_form}{\M M, x, epsilon, seed=0}
+\functionitem{epsilon\_form}{\M M, x, epsilon, seed=0}
 Fully reduce a system of equations defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
 Return a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
 Raise $FuchsiaError$ if the system is irreducible.
@@ -683,7 +683,7 @@ It signifies inability to perform requested reduction.
 \section{Summary}
 \label{sec:4}
 
-In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to canonical form.
+In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to epsilon form.
 \fuchsia is free and open-source: it is build in \python using \maximasage computer algebra system which are available free of charge.
 To find the corresponding analytical transformation \fuchsia uses a method proposed by Roman Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
 

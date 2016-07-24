@@ -2,7 +2,7 @@ import os.path
 import unittest
 
 from   sage.all import SR
-from   fuchsia import (canonical_form, import_matrix_from_file, is_fuchsian, is_normalized,
+from   fuchsia import (epsilon_form, import_matrix_from_file, is_fuchsian, is_normalized,
            transform, singularities)
 
 class Test(unittest.TestCase):
@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
             m_pranks = singularities(m, x).values()
             test.assertNotEqual(m_pranks, [0]*len(m_pranks))
 
-        mt, t = canonical_form(m, x, eps)
+        mt, t = epsilon_form(m, x, eps)
         test.assertTrue((mt-transform(m, x, t)).simplify_rational().is_zero())
         test.assertTrue(is_fuchsian(mt, x))
         test.assertTrue(is_normalized(mt, x, eps))

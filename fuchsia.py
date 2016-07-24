@@ -6,7 +6,7 @@ Usage:
 
 Commands:
     reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
-        find a canonical form of the given matrix
+        find a epsilon form of the given matrix
 
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
         find a transformation that will transform a given matrix
@@ -55,7 +55,7 @@ __version__ = "16.7.8"
 __all__ = [
     "balance",
     "balance_transform",
-    "canonical_form",
+    "epsilon_form",
     "export_matrix_to_file",
     "factorize",
     "fuchsify",
@@ -570,14 +570,14 @@ def block_triangular_form(m):
     logger.info("<-- block_triangular_form")
     return mt, t, blocks
 
-def canonical_form(m, x, eps, seed=0):
-    logger.info("--> canonical_form")
+def epsilon_form(m, x, eps, seed=0):
+    logger.info("--> epsilon_form")
     m, t1, b = block_triangular_form(m)
     m, t2 = normalize_by_blocks(m, b, x, eps, seed)
     m, t3 = fuchsify_by_blocks(m, b, x, eps)
     m, t4 = factorize(m, x, eps, b=b, seed=seed)
     t = t1*t2*t3*t4
-    logger.info("<-- canonical_form")
+    logger.info("<-- epsilon_form")
     return m, t
 
 def matrix_mask(m):
@@ -1508,7 +1508,7 @@ def main():
                 M, T, B = block_triangular_form(M)
             elif len(args) == 2 and args[0] == 'reduce':
                 m = import_matrix_from_file(args[1])
-                M, T = canonical_form(m, x, epsilon)
+                M, T = epsilon_form(m, x, epsilon)
             elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 t = import_matrix_from_file(args[2])
