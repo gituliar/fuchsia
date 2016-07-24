@@ -282,7 +282,7 @@ Since $\M S_i$ in \eqref{eq:seps} is the same no matter what values $\eps$ takes
 \end{equation}
 from where we obtain a system of linear equations for $\M T(\eps,\mu) \equiv \M T(\eps) \, \M T^{-1}(\mu)$:
 \begin{equation}
-  \frac{\M A_{i0}(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_{i0}(\mu)}{\mu}, (\forall i).
+  \frac{\M A_{i0}(\eps)}{\eps} \M T(\eps,\mu) = \M T(\eps,\mu) \frac{\M A_{i0}(\mu)}{\mu}, \text{for all $i$.}
 \end{equation}
 Solving this system for $\M T(\eps,\mu)$ we can reconstruct the initial transformation as $\M T(\eps) = \M T(\eps,\mu_0)$, where $\mu_0$ can be chosen arbitrary as long as $\M T(\eps)$ will come out invertible.
 
@@ -294,52 +294,65 @@ In \fuchsia factorization step is implemented as \code{factorize} routine (again
 \subsubsection{Block-triangular form}
 \label{sec:blockreduce}
 
-It is usually happens that a matrix which defines an ODEs is sparse, i.e., has many zeros.
-We can use that fact to shuffle the matrix to a block-triangular form.
-This can drastically improve fuchsification and normalization steps described in previous sections.
-(You will find \code{block\_triangular\_form} routine in \fuchsia which finds a block-triangular form of a given matrix.)
-Below we describe an algorithm to fuchsify and normalize a given matrix taking into account its block-triangular form; for more details see~\cite[Section~7]{Lee15}, similar ideas were also discussed in \cite{Git15}.
+It often happens that a matrix which defines an ODEs is sparse, i.e. has many zeros, and can be shuffled into block-triangular form with small blocks.
+It's possible to exploit this fact to considerably speed up fuchsification and normalization.
 
-Let us consider a block-triangular matrix of the form
+Let's consider a block-triangular matrix of this form:
 \begin{equation}
 \label{eq:bdiag}
 \M A(x,\eps)=
 \left(
 \begin{matrix}
-  \M A_{11} & 0      & 0 & 0 & 0
+  \M A^{(11)} & 0 & 0 & 0
 \\
-  \M A_{21} & \M A_{22} & 0 & 0 & 0
+  \M A^{(21)} & \M A^{(22)} & 0 & 0
 \\
-  \M A_{31} & \M A_{32} & \M A_{33} & 0 & 0
+  \vdots & \cdots & \ddots & 0
 \\
-  \vdots & \cdots & \cdots & \ddots & 0
-\\
-  \M A_{k1} & \M A_{k2} & \M A_{k3} & \cdots & \M A_{kk}
+  \M A^{(m1)} & \M A^{(m2)} & \cdots & \M A^{(mm)}
 \end{matrix}
-\right)
-.
+\right),
 \end{equation}
+where $\M A^{(ab)}(x,\eps)$ is a sub-matrix of size $n_a \times n_b$.
 
-We start by reducing {\bf diagonal blocks} given by $n_i \times n_i$ matrices $\M A_{ii}(x,\eps)$ to canonical form as described in the previous sections, i.e., by fuchsification, normalization, and factorization.
-Since a characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
+We start by reducing {\bf diagonal blocks} of this matrix, $\M A^{(ab)}(x,\eps)$, to canonical form.
+This can be done by treating each diagonal block as an independent matrix, and proceeding as described in the previous sections.
+Since characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
 \begin{equation}
-  \det(\M A(x,\eps)-\lambda \M I) = \det(\M A_{11}(x,\eps) - \lambda\M I) \ldots  \det(\M A_{kk}(x,\eps) - \lambda \M I)
-  ,
+  \det(\M A(x,\eps)-\lambda \M I) =
+    \det(\M A^{(11)}(x,\eps) - \lambda\M I) \cdot \ldots \cdot
+    \det(\M A^{(mm)}(x,\eps) - \lambda \M I),
 \end{equation}
-after we put each diagonal block to the canonical form the whole matrix became normalized.
+once we've normalized diagonal blocks, the whole matrix becomes normalized as well (but not necessarily Fuchsian yet).
 
-Next, we fuchsify {\bf non-diagonal blocks} given by rectangular matrices $\M A_{ij}(x,\eps)$, $i \ne j$.
-The idea is to find a new basis for $i$-th block in the form
+Next, we fuchsify {\bf off-diagonal blocks} given by rectangular matrices $\M A^{(ab)}(x,\eps)$, $a > b$.
+To do this, let's look at the parts of \eqref{eq:dj} related to such a block:
 \begin{equation}
-  \V J'_i = \V J'_i + \M T_{ij} \V J,
+  \begin{cases}
+  \partial_x \V J^{(a)} =
+    \M A^{(aa)}\,\V J^{(a)} +
+    \M A^{(ab)}\,\V J^{(b)} + ...\\
+  \partial_x \V J^{(b)} =
+    \M A^{(bb)}\,\V J^{(b)} + ...
+  \end{cases}
 \end{equation}
-where $\M T_{ij}$ is $n_i \times n_j$ matrix with constant coefficients, for details how to find it see \cite[Section 7]{Lee15}.
-Our strategy is to loop over $i$ from 2 to $k$ and for every value of $i$ loop over $j$ from $i-1$ to 1.
-That allows to preserve normalization and Fuchsian form of already reduced blocks.
+If $\M A^{(ab)}(x,\eps)$ has a singularity of Poincar\'e rank $r>0$ at $x=x_k$, then to reduce $r$ we can apply this basis transformation:
+\begin{equation}
+  \label{eq:offdiagt}
+  \V J^{(a)} = \V J'^{(a)} + \Delta^{-r} \M D \V J^{(b)},
+\end{equation}
+where $\M D$ is some constant matrix, and $\Delta=x-x_k$ if $x_k\ne\infty$, or $\Delta=1/x$ if $x_k=\infty$.
+This transformation changes $\M A^{(ab)}_{k0}(\eps)$ into
+\begin{equation}
+  \M A'^{(ab)}_{k0}(\eps) = \M A^{(ab)}_{k0}(\eps) + r\M D + \M A^{(aa)}_{k0}(\eps) \M D - \M D \M A^{(bb)}_{k0}(\eps)
+\end{equation}
 
-In \fuchsia the steps described so far are implemented by \code{fuchsify\_by\_blocks} function.
+If both $\M A^{(aa)}_{k0}(\eps)$ and $\M A^{(bb)}_{k0}(\eps)$ have been factorized then it is always possible to solve the right-hand side of this equation for $\M D$, thus reducing Poincar\'e rank of $\M A'^{(ab)}$ by one.
+Moreover, this transformation only affects $\M A^{(ai)}$ for $i \le b$ and $\M A^{(ib)}$ for $i > a$, therefore if we'll sequentially apply transformation \eqref{eq:offdiagt} for each off-diagonal block, starting from the first row to the last, and from the last column to the first, we'll obtain fully Fuchsian (and still normalized) matrix.
 
-Finally, in order to factorize a whole matrix we proceed as described in Section~\ref{sec:fact}.
+Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing transformation to canonical form.
+
+In \fuchsia the process of shuffling a matrix to it's shortest lower block-diagonal form is performed by \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by \code{normalize\_by\_blocks}; fuchsification of the remaining off-diagonal blocks is done by \code{fuchsify\_by\_blocks}.
 
 
 \section{Using \fuchsia}
