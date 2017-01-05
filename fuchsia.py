@@ -50,7 +50,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "16.7.25"
+__version__ = "16.11.14"
 
 __all__ = [
     "balance",
@@ -62,6 +62,7 @@ __all__ = [
     "fuchsify",
     "fuchsify_off_diagonal_blocks",
     "import_matrix_from_file",
+    "is_fuchsian",
     "matrix_c0",
     "matrix_c1",
     "matrix_complexity",
@@ -84,17 +85,47 @@ from   sage.all import *
 from   sage.misc.parser import Parser
 from   sage.libs.ecl import ecl_eval
 
+class FuchsiaLogger(object):
+    def __init__(self):
+        log_handler = logging.StreamHandler()
+        log_handler.setFormatter(logging.Formatter(
+            "\033[32m[%(asctime)s] %(levelname)5s\033[0m %(message)s",
+            "%Y-%m-%d %I:%M:%S"
+        ))
+        logger = logging.getLogger('fuchsia')
+        logger.addHandler(log_handler)
+        logger.setLevel(logging.WARNING)
+
+        self.error = logger.error
+        self.isEnabledFor = logger.isEnabledFor
+        self.logger = logger
+        self.setLevel = logger.setLevel
+
+        self.depth = 0
+
+    def indent(self):
+        return "   " * self.depth
+
+    def is_verbose(self):
+        return self.isEnabledFor(logging.INFO)
+
+    def enter(self, name):
+        self.info("-> %s" % name)
+        self.depth += 1
+
+    def exit(self, name):
+        self.depth -= 1
+        self.info("<- %s" % name)
+
+    def debug(self, msg):
+        self.logger.debug(self.indent() + msg)
+
+    def info(self, msg):
+        self.logger.info(self.indent() + msg)
+
 if True:
     ecl_eval("(ext:set-limit 'ext:heap-size 0)")
-    log_handler = logging.StreamHandler()
-    log_handler.setFormatter(logging.Formatter(
-        "\033[32m%(levelname)s [%(asctime)s]\033[0m %(message)s",
-        "%Y-%m-%d %I:%M:%S"
-    ))
-    logger = logging.getLogger('fuchsia')
-    logger.addHandler(log_handler)
-    logger.setLevel(logging.WARNING)
-
+    logger = FuchsiaLogger()
     USE_MAPLE = False
 
 def setup_fuchsia(verbosity=0, use_maple=False):
@@ -108,9 +139,6 @@ def setup_fuchsia(verbosity=0, use_maple=False):
 
 class FuchsiaError(Exception):
     pass
-
-def is_verbose():
-    return logger.isEnabledFor(logging.INFO)
 
 def cross_product(v1, v2):
     m1, m2 = matrix(v1), matrix(v2)
@@ -497,8 +525,8 @@ def block_triangular_form(m):
       * `B` is a list of tuples (ki, ni), such that M's i-th
         diagonal block is given by `M.submatrix(ki, ki, ni, ni)`.
     """
-    logger.info("--> block_triangular_form")
-    if is_verbose():
+    logger.enter("block_triangular_form")
+    if logger.is_verbose():
         logger.debug("matrix before transformation:\n%s\n" % matrix_mask_str(m))
 
     n = m.nrows()
@@ -566,21 +594,21 @@ def block_triangular_form(m):
         for j in list(block):
             t[j,i] = 1
             i += 1
-    logger.info("    found %d blocks" % len(blocks))
+    logger.info("found %d blocks" % len(blocks))
     mt = transform(m, None, t)
-    if is_verbose():
+    if logger.is_verbose():
         logger.debug("matrix after transformation:\n%s\n" % matrix_mask_str(mt))
-    logger.info("<-- block_triangular_form")
+    logger.exit("block_triangular_form")
     return mt, t, blocks
 
 def epsilon_form(m, x, eps, seed=0):
-    logger.info("--> epsilon_form")
+    logger.enter("epsilon_form")
     m, t1, b = block_triangular_form(m)
     m, t2 = reduce_diagonal_blocks(m, x, eps, b=b, seed=seed)
     m, t3 = fuchsify_off_diagonal_blocks(m, x, eps, b=b)
     m, t4 = factorize(m, x, eps, b=b, seed=seed)
     t = t1*t2*t3*t4
-    logger.info("<-- epsilon_form")
+    logger.exit("epsilon_form")
     return m, t
 
 def matrix_mask(m):
@@ -626,7 +654,7 @@ def fuchsify(M, x, seed=0):
     Note that such transformations are not unique; you can obtain
     different ones by supplying different seeds.
     """
-    logger.info("--> fuchsify")
+    logger.enter("fuchsify")
     assert M.is_square()
     rng = Random(seed)
     poincare_map = singularities(M, x)
@@ -647,10 +675,10 @@ def fuchsify(M, x, seed=0):
     reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
     reduction_points.sort()
     if reduction_points == []:
-        logger.info("    already fuchsian")
+        logger.info("already fuchsian")
     else:
         for pt in reduction_points: 
-            logger.info("    x = %s, rank = %d" % (pt, poincare_map[pt]))
+            logger.info("rank = %d, x = %s" % (poincare_map[pt], pt))
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
         point = reduction_points[pointidx]
@@ -666,8 +694,7 @@ def fuchsify(M, x, seed=0):
                 U, V = alg1x(A0, A1, x)
             except FuchsiaError as e:
                 logger.debug("Managed to fuchsify matrix to this state:\n"
-                        "%s\nfurther reduction is pointless:\n%s",
-                        M, e)
+                        "%s\nfurther reduction is pointless:\n%s" % (M, e))
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
                 point2, P, M = min(iter_reductions(point, U), \
@@ -677,22 +704,19 @@ def fuchsify(M, x, seed=0):
                 P = fuchsia_simplify(U*V, x)
                 M = balance_transform(M, P, point, point2, x)
                 M = fuchsia_simplify(M, x)
-                logger.info(
-                        "Will introduce an apparent singularity at %s.",
-                        point2)
+                logger.info("Will introduce an apparent singularity at %s." % point2)
             logger.debug(
-                    "Applying balance between %s and %s with projector:\n%s",
-                    point, point2, P)
+                "Applying balance between %s and %s with projector:\n%s" % (point, point2, P))
             combinedT = combinedT * balance(P, point, point2, x)
             if point2 not in poincare_map:
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
     combinedT = fuchsia_simplify(combinedT, x)
-    logger.info("<-- fuchsify")
+    logger.exit("fuchsify")
     return M, combinedT
 
 def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
-    logger.info("--> fuchsify_off_diagonal_blocks")
+    logger.enter("fuchsify_off_diagonal_blocks")
     n = m.nrows()
     if b is None:
         m, t, b = block_triangular_form(m)
@@ -711,9 +735,8 @@ def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
                         continue
                     if not printed:
                         printed = True
-                        msg = "Fuchsifying block (%d, %d) (%d, %d)\n  Singular points = %s" \
-                            % (kj, nj, ki, ni, pts)
-                        logger.info(msg)
+                        logger.info("Fuchsifying block (%d, %d) (%d, %d)" % (ki, ni, kj, nj))
+                        logger.debug("  singular points = %s" % (pts,))
                     a0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
                     b0 = matrix_c0(bj, x, x0, p)
                     c0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
@@ -731,7 +754,7 @@ def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
 
                     t = fuchsia_simplify(t*t0, x)
                     pts[x0] -= 1
-    logger.info("<-- fuchsify_off_diagonal_blocks")
+    logger.exit("fuchsify_off_diagonal_blocks")
     return m, t
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
@@ -915,7 +938,7 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
      are defined by the list `b` which corresponds to the equivalent value returned by the
     `block_triangular_form` routine.
     """
-    logger.info("--> reduce_diagonal_blocks")
+    logger.enter("reduce_diagonal_blocks")
     n = m.nrows()
     if b is None:
         m, t, b = block_triangular_form(m)
@@ -924,8 +947,8 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
     for i, (ki, ni) in enumerate(b):
         mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
         ti = identity_matrix(SR, ni)
-        logger.info("    reducing block #%d (%d,%d)" % (i,ki,ni))
-        if is_verbose():
+        logger.info("reducing block #%d (%d,%d)" % (i,ki,ni))
+        if logger.is_verbose():
             logger.debug("\n%s" % matrix_str(mi, 2))
 
         mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
@@ -939,7 +962,7 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
 
         t[ki:ki+ni, ki:ki+ni] = ti
     mt = fuchsia_simplify(transform(m, x, t), x)
-    logger.info("<-- reduce_diagonal_blocks")
+    logger.exit("reduce_diagonal_blocks")
     return mt, t
 
 def normalize(m, x, eps, seed=0):
@@ -1003,22 +1026,22 @@ def normalize(m, x, eps, seed=0):
             else:
                 ev_cum_x2[0] += 1
 
-    logger.info("--> normalize")
+    logger.enter("normalize")
     state = State(m, x, eps, seed)
     T = identity_matrix(m.base_ring(), m.nrows())
     if state.is_normalized():
-        logger.info("    already normalized")
+        logger.info("already normalized")
     i = 0
     while not state.is_normalized():
         i += 1
         m = fuchsia_simplify(m, x)
-        logger.info("    step %s" % i)
+        logger.info("step %s" % i)
         balances = find_balances(m, x, eps, state)
         b = select_balance(balances, eps, state)
         if b is None:
             raise FuchsiaError("can not balance matrix")
-        logger.info("      balancing x = %s and x = %s" % (b[1],b[2]))
-        if is_verbose():
+        logger.info("  balancing x = %s and x = %s" % (b[1],b[2]))
+        if logger.is_verbose():
             logger.debug("\n      use the balance:\n        %s\n" % b)
 
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
@@ -1034,7 +1057,7 @@ def normalize(m, x, eps, seed=0):
             state.update_ev_cum(x2, x1)
 
         T = fuchsia_simplify(T*T0, x)
-    logger.info("<-- normalize")
+    logger.exit("normalize")
     return m, T
 
 def find_balances(m, x, eps, state={}):
@@ -1048,7 +1071,7 @@ def find_balances(m, x, eps, state={}):
 
         a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
 
-        if is_verbose():
+        if logger.is_verbose():
             msg = "\n  Eigenvalues:\n"
             msg += "    x = %s:\n" % x1
             a0_evals = [];
@@ -1126,7 +1149,7 @@ def select_balance(balances, eps, state={}):
             if cond == 2:
                 x0 = x1
                 break
-        logger.info("      select x0 = %s" % x0)
+        logger.info("  select x0 = %s" % x0)
         state.x0 = x0
 
     balances_x0 = [b for b in bs if (b[0] == 1 and b[2] == x0) or (b[0] == 2 and b[1] == x0)]
@@ -1165,12 +1188,13 @@ def factorize(M, x, epsilon, b=None, seed=0):
     from M. Return a transformed M (proportional to epsilon)
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
-    logger.info("--> factorize")
+    logger.info("-> factorize")
+    logger.info("M =\n%s" % partial_fraction(M,x))
     n = M.nrows()
     M = fuchsia_simplify(M, x)
     if epsilon not in (M/epsilon).variables():
-        logger.info("    already in epsilon form")
-        logger.info("<-- factorize")
+        logger.info("   already in epsilon form")
+        logger.info("<- factorize")
         return M, identity_matrix(SR, n)
     rng = Random(seed)
     mu = gensym()
@@ -1190,12 +1214,13 @@ def factorize(M, x, epsilon, b=None, seed=0):
         assert prank == 0
         logger.debug("    processing point x = %s" % point)
         R = matrix_c0(M, x, point, 0)
-        #R = fuchsia_simplify(R)
+        R = fuchsia_simplify(R)
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
         eq = fuchsia_simplify(eq)
         eqs.extend(eq.list())
     logger.info("    found %d equations with %d unknowns" % (len(eqs), len(T_symbols)))
     solutions = fuchsia_solve(eqs, T_symbols)
+    logger.info("SOLUTIONS = %s" % solutions)
     for solution in solutions:
         S = T.subs(solution)
         # Right now S likely has a number of free variables in
@@ -1212,7 +1237,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
                 M = fuchsia_simplify(transform(M, x, sT), x)
                 # We're leaking a bunch of temprary variables here,
                 # which accumulate in SR.variables, but who cares?
-                logger.info("<-- factorize")
+                logger.info("<- factorize")
                 return M, sT
             except (ZeroDivisionError, ValueError):
                 rndrange += 1 + rndrange//16
@@ -1312,9 +1337,7 @@ def simplify_by_factorization(M, x):
             dT[i,i] = T[i,i] = factor
             M = transform(M, x, dT)
     logger.debug(
-            "stripping common factors with this transform:\n"
-            "diagonal_matrix([\n  %s\n])",
-            ",\n  ".join(str(e) for e in T.diagonal()))
+            "stripping common factors with this transform:\ndiagonal_matrix([\n  %s\n])" % ",\n  ".join(str(e) for e in T.diagonal()))
     return fuchsia_simplify(M, x), T
 
 #==============================================================================
@@ -1472,7 +1495,7 @@ def main():
         mpath = tpath = profpath = fmt = None
         M = T = None
         x, epsilon = SR.var("x eps")
-        fmt = "mtx"
+        fmt = "m"
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:],
                 "hvl:f:P:x:e:m:t:", ["help", "use-maple"])
@@ -1525,7 +1548,7 @@ def main():
             elif len(args) == 3 and args[0] == 'changevar':
                 M = import_matrix_from_file(args[1])
                 fy = parse(args[2])
-                extravars = set(fy.variables()) - set([epsilon])
+                extravars = set(fy.variables()) - set(M.variables())
                 if len(extravars) != 1:
                     raise getopt.GetoptError(
                             "need to have one free variable in '%s'" % args[2])
@@ -1558,6 +1581,6 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as error:
-        if is_verbose():
+        if logger.is_verbose():
             logger.debug("\n%s" % error)
         print error
