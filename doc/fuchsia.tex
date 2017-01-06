@@ -30,13 +30,11 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-We present \fuchsia\xspace --- implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
-Systems in such a form can be trivially solved, which makes construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial equations.
+We present \fuchsia\xspace --- an implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
+Systems in such a form can be trivially solved, which makes the construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial equations.
 
 In principle, \fuchsia can deal with any regular systems, however its primary task is to reduce differential equations for Feynman master integrals.
 It ensures that solutions contain only regular singularities due to the properties of Feynman integrals.
-
-We discuss limitations and possible extensions of the proposed implementation.
 \end{abstract}
 \newpage
 
@@ -47,39 +45,38 @@ We discuss limitations and possible extensions of the proposed implementation.
 
 \section{Introduction}
 
-More than 60 years has passed since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
-Since then Feynman integrals calculus has grown to a separate branch of the mathematical physics with a big community of scientists making research in this exciting field.
+More than 60 years have passed since Richard Feynman proposed a diagrammatic approach for calculating perturbative processes in quantum field theories.
+Since then Feynman integrals calculus has grown to a separate branch of mathematical physics with a big community of scientists conducting research in this exciting field.
 With no doubt we can say that none of the recent discoveries in the high-energy particle physics could happen without precise theoretical calculations, which are based on the Feynman integrals calculation techniques. 
-It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and further improvement are very important task.
+It is also clear that such techniques will play a key role for discoveries at the present and future high-energy colliders, hence their development and further improvement are a very important task.
 
-Recent progress in computational techniques made possible to automate calculation of Feynman integrals; problems which seemed impossible 10 years ago now are successfully solved with state-of-the-art computer algorithms.
-Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and the method of differential equations~\cite{Kot91a,Kot91b,Kot91c}; for a detailed overview of these and other methods see~\cite{Smi06}.
+Recent progress in computational techniques has made it possible to automate the calculation of Feynman integrals; problems which seemed impossible 10 years ago now are successfully solved with state-of-the-art computer algorithms.
+Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and the method of differential equations (DE)~\cite{Kot91a,Kot91b,Kot91c}; for a detailed overview of these and other methods see~\cite{Smi06}.
 
-In this paper discuss the method of differential equations.
+In this paper we discuss the method of differential equations.
 In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when an epsilon form of this system is known~\cite{Henn13}.
-We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by R.N.Lee~\cite{Lee15}.
-This method allows (1) to find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59} and then (2) to normalize eigenvalues of the Fuchsian system in all singular points.
+We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}.
+This method allows
+\begin{enumerate}
+  \item to find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59}; and then
+  \item to normalize eigenvalues of the Fuchsian system in all singular points.
+\end{enumerate}
 If these two steps are successfully completed%
 \footnote{In principle, the first step can always be done because Feynman integrals contain only logarithmic singularities. For the discussion of potential complications in the second step see Section~\ref{sec:2}.}
-then a transformation which puts the initial system into epsilon form may be easily find.
-In addition to that this method is focused on systems for Feynman integrals, it also may be successfully used for different problems provided that requirement on particular properties of the initial system are satisfied.
+then a transformation which puts the initial system into the epsilon form may be easily found.
+Although this method is focused on systems for Feynman integrals, it also may be successfully used for different problems provided that the requirements on particular properties of the initial system are satisfied.
 
 Unfortunately, no implementation of the Lee method was made publicly available so far.
-We close this gap and introduce \fuchsia \ --- complete implementation of the method~\cite{Lee15} in the computer algebra system \sage.
+We close this gap and introduce \fuchsia \ --- a complete implementation of the method~\cite{Lee15} in the computer algebra system \sage.
 Combined together with Laporta algorithm \cite{Lap00} and its implementations~\cite{Smi08,MS12,Lee12,Lee13,SS13,Smi14}, these tools form a powerful tandem for evaluating Feynman integrals.
 
 This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method and related algorithms implemented in \fuchsia.
-In Section \ref{sec:3} we describe how to install \fuchsia and use it from different environments, depending on your goal and programming experience.
+In Section \ref{sec:3} we describe how to install \fuchsia and to use it from different environments, depending on your goal and programming experience.
 In Section \ref{sec:4} we discuss limitations and possible extensions of the current implemented and the method in general.
 
 
-%{\it Analyticity of S-matrix and Fuchsian systems of DE. Reduction to Fuchsian form as an independent problem (Moser~\cite{Mos59},Barkatou~\cite{BP09}, \texttt{super\_reduce} in Maple), but mistreating $\infty$.}
-
-%{\it Integration-by-parts reduction, canonical form (Henn) \cite{Henn13}, Lee algorithm.}
-
 \section{Overview of the Lee method}
 \label{sec:2}
-
 
 \subsection{Notation and definitions}
 
@@ -93,8 +90,8 @@ $x$ is a free variable;
 $\eps$ is an infinitesimally small parameter (e.g., a dimensional regulator in $d=4-2\eps$ dimensions);
 $\M A(x,\eps)$ is an $n \times n$ matrix, rational in both $x$ and $\eps$.
 
-In general case $\M A(x,\eps)$ may have a finite number of poles in $x$ at $x\in\{x_k\}$, including a pole at infinity.
-Asymptotic behavior of $\M A(x,\eps)$ around these poles can be described as:
+In the general case $\M A(x,\eps)$ may have a finite number of poles in $x$ at $x\in\{x_k\}$, including a pole at infinity.
+The asymptotic behavior of $\M A(x,\eps)$ around these poles can be described as:
 \begin{equation}
 \label{eq:axeps}
     \M A(x \to x_k,\eps) =
@@ -104,16 +101,16 @@ Asymptotic behavior of $\M A(x,\eps)$ around these poles can be described as:
     \end{cases}
 \end{equation}
 
-where $p_k$ is the \textit{Poincar\'e rank} of $\M A(x,\eps)$ at singular point $x=x_k$.
+where $p_k$ is the \textit{Poincar\'e rank} of $\M A(x,\eps)$ at the singular point $x=x_k$.
 If $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian in $x=x_k$}, and $\M A_{k0}$ \textit{matrix residue} of $\M A(x,\eps)$ at $x=x_k$.
 If all $p_k=0$, we call $\M A(x,\eps)$ \textit{Fuchsian}.
 
-Behavior of the system at $x=\infty$ is a bit of special case, but it is essential in the overall reduction process.
-One must always keep in mind the $\infty$ point, and treat it on the same footing as other singular points.
+The behavior of the system at $x=\infty$ is a bit of a special case, but it is essential in the overall reduction process.
+One must always keep in mind the $x=\infty$ point, and treat it on the same footing as other singular points.
 
 \paragraph{Equivalent systems.}
 We are interested in transforming system~\eqref{eq:dj} into a simpler form.
-For this purpose let's consider a change of basis from $\V J$ into $\V J'$ using linear transformation $\M T(x,\eps)$:
+For this purpose let us consider a change of basis from $\V J$ into $\V J'$ using the linear transformation $\M T(x,\eps)$:
 \begin{equation}
   \V J = \M T(x,\eps)\, \V J'.
 \end{equation}
@@ -128,10 +125,11 @@ with the new matrix being
   \M A'(x,\eps) = \M T^{-1} \left( \M A \M T - \partial_x \M T \right).
 \end{equation}
 
-Generally speaking, transformations $\M T(x,\eps)$ may have arbitrary form, however in the scope of this paper we'll require transformation matrices to be rational in both $x$ and $\eps$.
-This restriction guarantees that the equivalent matrix $\M A'(x,\eps)$ and hence all equivalent systems are in the rational form, thus making expansion~\eqref{eq:axeps} possible.
+Generally speaking, the transformations $\M T(x,\eps)$ may have an arbitrary form.
+However in the scope of this paper we will require the transformation matrices to be rational in both $x$ and $\eps$.
+This restriction guarantees that the equivalent matrix $\M A'(x,\eps)$ and hence all equivalent systems are in rational form, thus making the expansion~\eqref{eq:axeps} possible.
 
-In particular, we'll be using transformation constructed by stepwise application of a \textit{$\M P$-balance between $x=x_1$ and $x=x_2$}, defined like so:
+In particular, we will be using the transformation constructed by stepwise application of a \textit{$\M P$-balance between $x=x_1$ and $x=x_2$}, defined as:
 \begin{equation}
 \label{eq:bal}
     \mathcal{B}(\M P(\eps), x_1, x_2; x) = \M I - \M P(\eps) + c \frac{x-x_1}{x-x_2} \M P(\eps),
@@ -155,15 +153,15 @@ Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\e
 as the {\em Moser order} of $\M A(x,\eps)$ at point $x=x_k$.
 
 Equivalent systems do not necessarily have identical Moser orders.
-In fact \cite{Mos59} introduces an algorithm that constructs a transformation decreasing $rank(\M A_{k0})$ by at least one (thus reducing $m_k(\M A)$),\footnote{Note that if $rank(\M A_{k0})$ reaches zero, this means that $\M A_{k0}$ is now zero itself, and thus Poincar\'e rank $p_k$ was decreased by at least one.} or certifies that no further order reduction can be achieved.
+In fact \cite{Mos59} introduces an algorithm that constructs a transformation decreasing $rank(\M A_{k0})$ by at least one (thus reducing $m_k(\M A)$),\footnote{Note, that if $rank(\M A_{k0})$ reaches zero, this means that $\M A_{k0}$ is now zero itself, and thus the Poincar\'e rank $p_k$ was decreased by at least one.} or certifies that no further order reduction can be achieved.
 
-Let's then denote the {\em minimal order} of $\M A(x,\eps)$ at $x=x_k$ as:
+Let us then denote the {\em minimal order} of $\M A(x,\eps)$ at $x=x_k$ as:
 \begin{equation}
 \label{eq:muk}
   \mu_k(\M A) = \min m_k(\M A'), \text{ for } \forall \; \M T.
 \end{equation}
 
-If $\mu_k(\M A) < m_k(\M A)$ we say that matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
+If $\mu_k(\M A) < m_k(\M A)$ we say that the matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
 
 With this in mind we can classify a point $x=x_k$ of $\M A(x,\eps)$ as:
 \begin{itemize}
@@ -177,16 +175,16 @@ The matrix $\M A(x,\eps)$ is called {\em Fuchsian} if it does not contain irregu
 
 \subsection{Reduction to epsilon form}
 
-In the previous section we have introduced notation and key definitions related to the Fuchsian theory of ODEs.
-Now we are ready to review reduction method proposed by Roman Lee in~\cite{Lee15}.
-With its help we can construct a rational transformation $\M T(x,\eps)$ which transforms a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to an equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and has \textit{epsilon form} (also called {\em canonical} in \cite{Henn13}), i.e., $\M M(x,\eps) = \eps\, \M S(x)$.
-After epsilon form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
+In the previous section we have introduced the notation and key definitions related to the Fuchsian theory of ODEs.
+Now we are ready to review the reduction method proposed by Lee in~\cite{Lee15}.
+With its help we can construct a rational transformation $\M T(x,\eps)$ which converts a system of ordinary differential equations with rational coefficients given by the matrix $\M A(x,\eps)$ to an equivalent system given by the matrix $\M M(x,\eps)$ which is Fuchsian and has an \textit{epsilon form} (also called {\em canonical} in \cite{Henn13}), i.e., $\M M(x,\eps) = \eps\, \M S(x)$.
+When the epsilon form $\M M(x,\eps)$ of the initial system $\M A(x,\eps)$ is found we can easily solve it as a Laurent series in $\eps$ and restore solutions for the initial system $\M A(x,\eps)$ --- which is our ultimate goal --- by solving a linear system of equations.
 
-The whole method is performed in these three steps:
+The whole method is performed in the following three steps:
 
 \begin{enumerate}
-    \item Given a matrix $\M A(x,\eps)$, find an equivalent system $\M A'(x,\eps)$ and corresponding transformation $\M T(x,\eps)$, such that $\M A'(x,\eps)$ is Fuchsian. We call this step \textit{fuchsification}.
-    \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues in $n+m\,\eps$ form, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all in the form $k\,\eps$. We call this step \textit{normalization}.
+    \item Given a matrix $\M A(x,\eps)$, find an equivalent system $\M A'(x,\eps)$ and a corresponding transformation $\M T(x,\eps)$, such that $\M A'(x,\eps)$ is Fuchsian. We call this step \textit{fuchsification}.
+    \item Given a Fuchsian matrix $\M A(x,\eps)$ with eigenvalues of all its residues of the form $n+m\,\eps$, where $n$ is integer, find an equivalent system (along with the transformation) which is still Fuchsian, but with residue eigenvalues being all of the form $k\,\eps$. We call this step \textit{normalization}.
     \item Given a normalized matrix $\M A(x,\eps)$, find an equivalent matrix $\M A'(x)$ in epsilon form, i.e. such that $\M A'(x,\eps) = \eps \, \M S'(x)$. We call this step \textit{factorization}.
 \end{enumerate}
 
@@ -194,35 +192,35 @@ The whole method is performed in these three steps:
 \subsubsection{Fuchsification}
 \label{sec:fuchs}
 
-To \textit{fuchsify} a system~\eqref{eq:dj} is to find an equivalent Fuchsian system.
+To \textit{fuchsify} a system~\eqref{eq:dj} means to find an equivalent Fuchsian system.
 This, of course, is only possible if $\M A(x,\eps)$ has no irregular singularities, or in other words $\mu_k(\M A)\le1$ for all $k$.\footnote{
     We expect this to be often the case in practice, in particular for ODEs corresponding to Feynman integrals which are known to have only logarithmic singularities, hence be solutions of some Fuchsian ODEs.
 }
 
-In the case of a single ODE of order~$n$, the minimal Moser order can be computed explicitly from the power analysis of its coefficients (see generalization of the Fuchs' theorem in~\cite{Mos59}).
+In the case of a single ODE of order~$n$, the minimal Moser order can be computed explicitly from power counting analysis of its coefficients (see the generalization of Fuchs' theorem in~\cite{Mos59}).
 This is not possible for ODE systems like~\eqref{eq:dj}.
-Instead we have a criterion of Moser-reducibility in the form of:
+Instead, we have a criterion for Moser-reducibility of the form:
 
 \textbf{Theorem 1.}
-{\em If $m_k(\M A) > 1$ the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
+{\em If $m_k(\M A) > 1$ then the system \eqref{eq:dj} is Moser-reducible at $x=x_k$ if and only if the polynomial}
 \begin{equation}
 \label{eq:red_cond}
     \Delta^{r_k} \det\left(\frac{\M A_{k0}}{\Delta} + \M A_{k1} - \lambda \,\M I\right),
 \end{equation}
 {\em vanishes identically in $\lambda$ at $x=x_k$, where $r_k=\rank(\M A_{k0})$ and $\Delta=x-x_k$ if $x_k\ne\infty$, or $\Delta=1/x$ if $x_k=\infty$.}
 
-If this condition fails then $x=x_k$ is an irregular singularity.
+When this condition fails the singularity in $x=x_k$ is {\em irregular}.
 
-In addition to this criterion we have a method to construct a transformation that lowers Moser order at $x_i$, if the system is at all Moser-reducible at that point (possibly at the expense of increasing Poincar\'e rank $p_j$ at one other point, $x_j$, by one).
+In addition to this criterion we have a method for constructing a transformation that lowers the Moser order at $x_i$, provided that the system is Moser-reducible at that point (possibly at the expense of increasing the Poincar\'e rank $p_j$ at another point $x=x_j$ by one).
 This is done by selecting a projector matrix $\M P$ equal to a sum of products of a particular subset of (generalized) eigenvectors of $\M A_{i0}$ and $\M A_{j0}$, and constructing a $\M P$-balance between $x_i$ and~$x_j$.
 
 The reader can find the details of this construction in \cite{Lee15}, but it is important to note that even if the system is Moser-reducible at $x_i$, it is only sometimes possible to construct a transformation that lowers $m_i(\M A)$ without increasing Poincar\'e rank at $x_j$.
 Sometimes the best we can do is to choose $x_j$ to be some regular point (with $p_j=-1$), and use a transformation that decreases $m_i(\M A)$ at the expense at increasing $p_j$ to $0$, effectively introducing an apparent singularity where there was none before.\footnote{
-    In practice these apparent singularities are not a major problem, since they are subsequentially removed during the normalization step.
-    Still, we try no to introduce them if possible to decrease intermediate expression sizes and increase overall performance.
+    In practice these apparent singularities are not a major problem, since they are subsequently removed during the normalization step.
+    Still, we try not to introduce them if possible in order to decrease the intermediate expression sizes and to increase the overall performance.
 }
 
-With this in mind, to reduce a system to Fuchsian form we need to combine the reducibility check with the Moser rank-lowering transformation in stepwise fashion, like so:
+With this in mind, to reduce a system to Fuchsian form we need to combine the reducibility check with the Moser rank-lowering transformation in stepwise fashion, as follows:
 
 \begin{enumerate}
     \item Select some point $x_k$ with $m_k(\M A) > 1$. If none exist, reduction is complete.
@@ -234,38 +232,36 @@ With this in mind, to reduce a system to Fuchsian form we need to combine the re
 In \fuchsia, this process is implemented by function \code{fuchsify}; see Section~\ref{sec:usage_py} for it's usage.
 
 Finally, let us mention that a similar problem of reducing Poincar\'e ranks and Moser orders of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
-Together with Pfl\"ugel they developed algorithms implementing their method~\cite{BP99} and available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
-
-% TODO: how does our method differ from super-reduce?
+They developed algorithms implementing their method~\cite{BP99} which is available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
 
 
 \subsubsection{Normalization}
 \label{sec:norm}
 
-To \textit{normalize} a Fuchsian system \eqref{eq:dj} with matrix residue eigenvalues of the form $n+m\,\eps$ (where $n$ is integer), is to find an equivalent Fuchsian system with residue eigenvalues of the form $m\,\eps$.
+To \textit{normalize} a Fuchsian system \eqref{eq:dj} with matrix residue eigenvalues of the form $n+m\,\eps$ (where $n$ is integer), implies to find an equivalent Fuchsian system with residue eigenvalues of the form $m\,\eps$.
 
-Just like in the previous step, normalizing transformations are found by stepwise application of balance transformations~\eqref{eq:bal}.
+Just like in the previous step, the normalizing transformations are found by stepwise application of balance transformations~\eqref{eq:bal}.
 We refer the reader to~\cite[p.~11]{Lee15} for the description of how such balances are constructed, but we will note that this transformation is possible due to these two facts:
 \begin{itemize}
-    \item Given a properly selected projector matrix $\M P(\eps)$, balance $\mathcal{B}(\M P(\eps), x_i, x_j; x)$ shifts one of the eigenvalues of $\M A_{i0}$ by $\pm1$, shifts one of the eigenvalues of $\M A_{j0}$ by $\mp1$, and doesn't change Poincar\'e ranks at any point.
-    \item Since the system is Fuchsian, the sum of all it's matrix residues is zero, and thus, the sum of all residue eigenvalues is zero as well.
+    \item Given a properly selected projector matrix $\M P(\eps)$, the balance $\mathcal{B}(\M P(\eps), x_i, x_j; x)$ shifts one of the eigenvalues of $\M A_{i0}$ by $\pm1$, shifts one of the eigenvalues of $\M A_{j0}$ by $\mp1$, and does not change the Poincar\'e ranks at any point.
+    \item Since the system is Fuchsian, the sum of all its matrix residues is zero, and thus, the sum of all residue eigenvalues is zero as well.
 \end{itemize}
-Combining these two facts, we perform normalization by shifting residue eigenvalues by $1$ at each step, until a state is reached where the integer parts of all the eigenvalues are zero.
+Combining these two facts, we perform the normalization by shifting the residue eigenvalues by $1$ at each step, until a state is reached where the integer parts of all the eigenvalues are zero.
 
-In \fuchsia, normalization step is implemented by function \code{normalize}.
-See Section~\ref{sec:usage_py} for it's usage.
+In \fuchsia, the normalization step is implemented by the function \code{normalize}.
+See Section~\ref{sec:usage_py} for its usage.
 
-It may happen that after fuchsification we obtain a system the residue eigenvalues of which do not fit the $n+m\,\eps$ form neatly.
+It may happen that after fuchsification we obtain a system for which the residue eigenvalues do not fit to the $n+m\,\eps$ form neatly.
 In this case it is sometimes possible to rectify the problem by using some non-linear change of variables.
 Unfortunately we do not have an automated solution for such cases, and users are expected to find transformations appropriate for their system manually.
 
 
 \subsubsection{Factorization}
 \label{sec:fact}
-After normalization we obtained matrix $\M A(x,\eps)$ with all residue eigenvalues having form $m\,\eps$.
-The final step is to \textit{factorize} it by finding an equivalent matrix which is itself proportional to $\eps$, so $\M A'(x,\eps)=\eps\,\M S(x)$.
+After the normalization we have obtained a matrix $\M A(x,\eps)$ with all residue eigenvalues of the form $m\,\eps$.
+The final step is to \textit{factorize} it by finding an equivalent matrix which is by itself proportional to $\eps$, so $\M A'(x,\eps)=\eps\,\M S(x)$.
 
-A transformation constant in $x$ is sufficient for this.
+A transformation which is constant in $x$ is sufficient for this task.
 Let $\M T(\eps)$ be such a transformation, then according to \eqref{eq:ta}, we have:
 \begin{equation}
   \M A'(x,\eps) \equiv \eps\, \sum_i \frac{\M S_i}{x-x_i} = \sum_i \M T^{-1}(\eps) \frac{\M A_{i0}(\eps)}{x-x_i} \M T(\eps),
@@ -289,15 +285,15 @@ Solving this system for $\M T(\eps,\mu)$ we can reconstruct the initial transfor
 In general, the solution for $\M T(\eps,\mu)$ can have multiple free variables aside from just $\mu$.
 We choose to set all of them to random small integers, preferably zeros, which keeps the resulting matrix $\M S(\eps)$ simple.
 
-In \fuchsia factorization step is implemented as \code{factorize} routine (again, see Section~\ref{sec:usage_py} for it's usage).
+In \fuchsia the factorization step is implemented as the \code{factorize} routine (again, see Section~\ref{sec:usage_py} for its usage).
 
 \subsubsection{Block-triangular form}
 \label{sec:blockreduce}
 
-It often happens that a matrix which defines an ODEs is sparse, i.e. has many zeros, and can be shuffled into block-triangular form with small blocks.
-It's possible to exploit this fact to considerably speed up fuchsification and normalization.
+It often happens that a matrix which defines an ODEs is sparse, i.e. it has many zeros, and can be shuffled into block-triangular form with small blocks.
+It is possible to exploit this fact to considerably speed up fuchsification and normalization.
 
-Let's consider a block-triangular matrix of this form:
+Let us consider a block-triangular matrix of this form:
 \begin{equation}
 \label{eq:bdiag}
 \M A(x,\eps)=
@@ -317,42 +313,42 @@ where $\M A^{(ab)}(x,\eps)$ is a sub-matrix of size $n_a \times n_b$.
 
 We start by reducing {\bf diagonal blocks} of this matrix, $\M A^{(ab)}(x,\eps)$, to epsilon form.
 This can be done by treating each diagonal block as an independent matrix, and proceeding as described in the previous sections.
-Since characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
+Since the characteristic polynomial of a block-triangular matrix is a product of characteristic polynomials of its diagonal blocks, i.e.,
 \begin{equation}
   \det(\M A(x,\eps)-\lambda \M I) =
     \det(\M A^{(11)}(x,\eps) - \lambda\M I) \cdot \ldots \cdot
     \det(\M A^{(mm)}(x,\eps) - \lambda \M I),
 \end{equation}
-once we've normalized diagonal blocks, the whole matrix becomes normalized as well (but not necessarily Fuchsian yet).
+once we have normalized the diagonal blocks, the whole matrix becomes normalized as well (but not necessarily Fuchsian yet).
 
 Next, we fuchsify {\bf off-diagonal blocks} given by rectangular matrices $\M A^{(ab)}(x,\eps)$, $a > b$.
-To do this, let's look at the parts of \eqref{eq:dj} related to such a block:
+To do this, let us look at the parts of \eqref{eq:dj} related to such a block:
 \begin{equation}
   \begin{cases}
   \partial_x \V J^{(a)} =
-    \M A^{(aa)}\,\V J^{(a)} +
-    \M A^{(ab)}\,\V J^{(b)} + ...\\
+    \M A^{(aa)}\,\V J^{(a)} + \ldots \\
   \partial_x \V J^{(b)} =
-    \M A^{(bb)}\,\V J^{(b)} + ...
+    \M A^{(b\,a)}\,\V J^{(a)} +
+    \M A^{(bb)}\,\V J^{(b)} + \ldots
   \end{cases}
 \end{equation}
-If $\M A^{(ab)}(x,\eps)$ has a singularity of Poincar\'e rank $r>0$ at $x=x_k$, then to reduce $r$ we can apply this basis transformation:
+If $\M A^{(b\,a)}(x,\eps)$ has a singularity of Poincar\'e rank $r>0$ at $x=x_k$, then to reduce $r$ we can apply this basis transformation:
 \begin{equation}
   \label{eq:offdiagt}
-  \V J^{(a)} = \V J'^{(a)} + \Delta^{-r} \M D \V J^{(b)},
+  \V J^{(b)} = \V J'^{(b)} + \Delta^{-r} \M D\, \V J^{(a)},
 \end{equation}
 where $\M D$ is some constant matrix, and $\Delta=x-x_k$ if $x_k\ne\infty$, or $\Delta=1/x$ if $x_k=\infty$.
-This transformation changes $\M A^{(ab)}_{k0}(\eps)$ into
+This transformation changes $\M A^{(b\,a)}_{k0}(\eps)$ into
 \begin{equation}
-  \M A'^{(ab)}_{k0}(\eps) = \M A^{(ab)}_{k0}(\eps) + r\M D + \M A^{(aa)}_{k0}(\eps) \M D - \M D \M A^{(bb)}_{k0}(\eps)
+  \M A'^{(ba)}_{k0}(\eps) = \M A^{(ba)}_{k0}\!(\eps) + r\,\M D + \M A^{(bb)}_{k0}\!(\eps) \, \M D - \M D\, \M A^{(aa)}_{k0}(\eps)
 \end{equation}
 
-If both $\M A^{(aa)}_{k0}(\eps)$ and $\M A^{(bb)}_{k0}(\eps)$ have been factorized then it is always possible to solve the right-hand side of this equation for $\M D$, thus reducing Poincar\'e rank of $\M A'^{(ab)}$ by one.
-Moreover, this transformation only affects $\M A^{(ai)}$ for $i \le b$ and $\M A^{(ib)}$ for $i > a$, therefore if we'll sequentially apply transformation \eqref{eq:offdiagt} for each off-diagonal block, starting from the first row to the last, and from the last column to the first, we'll obtain fully Fuchsian (and still normalized) matrix.
+If both $\M A^{(aa)}_{k0}(\eps)$ and $\M A^{(bb)}_{k0}(\eps)$ have been factorized then it is always possible to solve the right-hand side of this equation for $\M D$, thus reducing the Poincar\'e rank of $\M A'^{(ba)}$ by one.
+Moreover, this transformation only affects $\M A^{(bi)}$ for $i \le a$ and $\M A^{(ia)}$ for $i > b$, therefore if we will sequentially apply the transformation \eqref{eq:offdiagt} for each off-diagonal block, starting from the first row to the last, and from the last column to the first, we will obtain a fully Fuchsian (and still normalized) matrix.
 
-Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing transformation to epsilon form.
+Finally, we factorize the whole matrix as described in Section~\ref{sec:fact}, thus completing the transformation to epsilon form.
 
-In \fuchsia the process of shuffling a matrix to it's shortest lower block-diagonal form is performed by \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by \code{reduce\_diagonal\_blocks}; fuchsification of the remaining off-diagonal blocks is done by \code{fuchsify\_off\_diagonal\_blocks}.
+In \fuchsia the process of shuffling a matrix to its shortest lower block-diagonal form is performed by the \code{block\_triangular\_form} routine; fuchsification and normalization of diagonal blocks is done by the \code{reduce\_diagonal\_blocks}; fuchsification of the remaining off-diagonal blocks is done by the \code{fuchsify\_off\_diagonal\_blocks}.
 
 
 \section{Using \fuchsia}
@@ -360,8 +356,8 @@ In \fuchsia the process of shuffling a matrix to it's shortest lower block-diago
 
 \subsection{Installation}
 
-To run \fuchsia you need \sage version 7.0 or higher to be installed on your computer.
-You can find installation instructions for \sage over at it's website, \url{http://www.sagemath.org}.
+To run \fuchsia one needs \sage version 7.0 or higher to be installed on the computer.
+This task can be accomplished by following installation instructions available at the website \url{http://www.sagemath.org}.
 \footnote{
     Some \linux distributions have \sage available in their package repositories; we do not recommend using those.
     A number of \maxima releases contain bugs which \fuchsia is sensitive to, and so far the official \sage builds have avoided those releases (unlike some \linux distributions).
@@ -381,13 +377,14 @@ To install \fuchsia run the following command in your shell:
 
 This will install the latest stable version of \fuchsia from the Python Package Index (PyPI) to your \sage environment.
 
-\subsubsection{Installation form sources}
+\subsubsection{Installation from sources}
 
 If you are interested in the latest development version then visit \url{https://github.com/gituliar/fuchsia/}.
 
+
 \subsection{Usage from the command line}
 
-An easy way to use \fuchsia is to run \code{fuchsia} shell script,\footnote{If you used \code{sage -pip} to install \fuchsia, you'll find this script at \code{<path~to~SageMath>/local/bin/fuchsia}.} which has the following invocation signature:
+An easy way to use \fuchsia is to run the command \code{fuchsia}\footnote{If you have used \code{sage -pip} to install \fuchsia, then you will find this script at \code{<path~to~SageMath>/local/bin/fuchsia}.} or \code{sage -python fuchsia.py} which has the following invocation signature:
 
 \begin{Verbatim}
     \prompt{$}{fuchsia <action> <options>}
@@ -456,7 +453,7 @@ Arguments:
 \subsection{Usage from \sage or \python}
 \label{sec:usage_py}
 
-You can use \fuchsia as a library by starting \sage prompt and importing \texttt{fuchsia} module like this:
+You can use \fuchsia as a library by starting the \sage prompt and importing the \texttt{fuchsia} module like this:
 
 \begin{Verbatim}
     \prompt{$}{sage}
@@ -468,7 +465,8 @@ You can use \fuchsia as a library by starting \sage prompt and importing \texttt
     \prompt{sage:}{from fuchsia import *}
 \end{Verbatim}
 
-You can read the next section for the list of functions you'll get after import, but to give you a feel for the API, let's try reducing a simple matrix.
+In order to give an example for the API, let us try to reduce a simple matrix.
+For the list of functions available after import, please, read the next section.
 
 \begin{Verbatim}
     \prompt{sage:}{x, eps = var("x eps")}
@@ -479,15 +477,15 @@ You can read the next section for the list of functions you'll get after import,
     \prompt{....:}{])}
 \end{Verbatim}
 
-First, let's see where the singularities of this matrix lie:
+First, let us see where the singularities of this matrix are located:
 
 \begin{Verbatim}[commandchars=\\!|]
     \prompt!sage:|!singularities(M, x)|
     {-1: 0, 0: 2, 1: 0, +Infinity: 1}
 \end{Verbatim}
 
-So, 4 singularities in total, with Poincar\'e rank being 2 at $\code{x}=0$, 1 at $\code{x}=\infty$ and 0 everywhere else.
-To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we'll need to \textit{fuchsify} this matrix like so:
+So, 4 singularities in total, with the Poincar\'e rank being 2 at $\code{x}=0$, 1 at $\code{x}=\infty$ and 0 everywhere else.
+To get rid of non-zero ranks (thus transforming the system into Fuchsian form) we will need to \textit{fuchsify} this matrix as:
 
 \begin{Verbatim}[commandchars=\\!|]
     \prompt!sage:|!Mf, Tf = fuchsify(M, x)|
@@ -499,7 +497,7 @@ To get rid of non-zero ranks (thus transforming the system into Fuchsian form) w
     {-1: 0, 0: 0, 1: 0, +Infinity: 0}
 \end{Verbatim}
 
-So far, so good. Now, let's take a look at the eigenvalues of \code{Mf} residues:
+Now, let us take a look at the eigenvalues of \code{Mf} residues:
 
 \begin{Verbatim}
     \prompt{sage:}{[matrix_residue(Mf, x, x0).eigenvalues()}
@@ -510,9 +508,9 @@ So far, so good. Now, let's take a look at the eigenvalues of \code{Mf} residues
      [-eps + 1, eps - 2, -2]]
 \end{Verbatim}
 
-Many of these eigenvalues are not equal to zero in limit $\code{eps}\to0$, so \code{Mf} is not normalized.
-It is however the case that all of the eigenvalues are of the form $n + m*\code{eps}$, so there's a chance we'll be able to normalize \code{Mf}.
-Let's try:
+Many of these eigenvalues are not equal to zero in the limit $\code{eps}\to0$, so \code{Mf} is not normalized.
+It is, however, the case that all of the eigenvalues are of the form $n + m*\code{eps}$, so there is a chance that we will be able to normalize \code{Mf}.
+Let us try:
 
 \begin{Verbatim}
     \prompt{sage:}{Mn, Tn = normalize(Mf, x, eps)}
@@ -530,7 +528,7 @@ Let's try:
 
 So, the matrix is normalized, but it grew quite a bit larger.
 This happens.
-Sometimes it's possible to simplify it a bit like so:
+Sometimes it is possible to simplify it a bit:
 
 \begin{Verbatim}
     \prompt{sage:}{Ms, Ts = simplify_by_jordanification(Mn, x)}
@@ -540,7 +538,7 @@ Sometimes it's possible to simplify it a bit like so:
     [1/2*(eps + 1)/(x + 1)      0  eps/(x^2 + x)]
 \end{Verbatim}
 
-That's much better.
+That is much better.
 
 Finally, we need to \textit{factorize} \code{Ms} to complete the reduction:
 
@@ -562,10 +560,10 @@ To make sure we got everything right, we can double-check the full transformatio
     True
 \end{Verbatim}
 
-Note that we've used construct \code{(A - B).is\_zero()} to compare matrices instead of the more obvious \code{bool(A == B)}.
+Note that we have used the construct \code{(A - B).is\_zero()} to compare matrices instead of the more obvious \code{bool(A == B)}.
 This is a \sage idiosyncrasy; the more obvious way compares symbolic matrices only structurally.
 
-Of course, you don't need to walk through all these steps yourself every time.
+Of course, you do not need to walk through all these steps yourself every time.
 Normally, you just need to call this one function to do all the reduction work:
 
 \begin{Verbatim}
@@ -578,122 +576,124 @@ Normally, you just need to call this one function to do all the reduction work:
     True
 \end{Verbatim}
 
-Notice that this matrix is slightly more complex than the one we obtained step by step above.
+Notice that this matrix is slightly more complex than the one we have obtained step by step above.
 This also happens.
-The final form we're computing is not unique, and it will be different depending on the precise sequence of reduction steps you've taken.
+The final form we are computing is not unique, and it will be different depending on the precise sequence of reduction steps you have taken.
 
 Additionally, many of the transformations take a special $seed$ parameter to control the order of operations they perform internally.
 By supplying different seeds, you will obtain different results as well.
 
-\subsubsection{Function reference}
+\subsubsection{Functions reference}
 
 \begin{description}[style=nextline]
 
 \functionitem{epsilon\_form}{\M M, x, epsilon, seed=0}
-Fully reduce a system of equations defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$.
-Return a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
-Raise $FuchsiaError$ if the system is irreducible.
+Fully reduces a system of equations defined by a matrix $\M M$, an independent variable $x$, and an infinitesimal parameter $epsilon$.
+Returns a pair of values: the transformed matrix $\M M'$ and the transformation matrix $\M T$.
+Raises $FuchsiaError$, if the system is irreducible.
 
-Reduction is performed by first converting $\M M$ to block-triangular form, then reducing the diagonal blocks via $\F{fuchsify}$, $\F{normalize}$ and $\F{factorize}$, reducing off-diagonal blocks as described in Section~\ref{sec:blockreduce}, and finally factorizing $epsilon$ via $\F{factorize}$.
+The reduction is performed by first converting $\M M$ to block-triangular form, then reducing the diagonal blocks via $\F{fuchsify}$, $\F{normalize}$ and $\F{factorize}$, reducing off-diagonal blocks as described in Section~\ref{sec:blockreduce}, and finally factorizing $epsilon$ via $\F{factorize}$.
 
 \functionitem{fuchsify}{\M M, x, seed=0}
-Reduce a system defined by matrix $\M M$ and independent variable $x$ to Fuchsian form.
-That is, make sure that Poincar\'e ranks of all singularities of the transformed matrix $\M M'$ are $0$.
-Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
-If the system is irreducible, raise $FuchsiaError$.
+Reduces a system defined by a matrix $\M M$ and an independent variable $x$ to Fuchsian form.
+That is, it makes sure that the Poincar\'e ranks of all singularities of the transformed matrix $\M M'$ are $0$.
+Returns a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If the system is irreducible, it raises $FuchsiaError$.
 
 \functionitem{normalize}{\M M, x, epsilon, seed=0}
-Transform a Fuchsian system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$ to a normalized form.
-That is, make sure that real parts of eigenvalues of all matrix residues of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$ in the limit $epsilon\to0$.
-Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
-If such transformation can not be found, raise $FuchsiaError$.
+Transforms a Fuchsian system defined by a matrix $\M M$, an independent variable $x$ and, an infinitesimal parameter $epsilon$ to a normalized form.
+That is, it makes sure that real parts of the eigenvalues of all matrix residues of the transformed matrix $\M M'$ lie in the range $[-1/2, 1/2)$ in the limit $epsilon\to0$.
+Returns a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If such a transformation can not be found, it raises $FuchsiaError$.
 
 \functionitem{factorize}{\M M, x, epsilon, seed=0}
-Transform a normalized system defined by matrix $\M M$, independent variable $x$ and infinitesimal parameter $epsilon$ so that the
+Transforms a normalized system defined by a matrix $\M M$, an independent variable $x$, and an infinitesimal parameter $epsilon$ so that the
 transformed matrix $\M M'$ is proportional to $epsilon$.
-Return a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
-If such transformation can not be found, raise $FuchsiaError$.
+Returns a pair of values: the transformed matrix $\M M'$ and the transformation $\M T$.
+If such a transformation can not be found, it raises $FuchsiaError$.
 
 \functionitem{block\_triangular\_form}{\M M}
-Transform matrix $\M M$ into a lower block-triangular form.
+Transforms a matrix $\M M$ into a lower block-triangular form.
 
-Return three values: transformed matrix $\M M'$, transformation matrix $\M T$, and a list of tuples $(m_i, n_i)$, where $n_i$ is the size of $i$-th diagonal block, and $m_i = \sum_{j=1}^{i-1} n_j$.
-The tuple list represents block structure of $\M M'$; it is used by the next two functions, where it is passed as argument $B$.
+Returns three values: a transformed matrix $\M M'$, a transformation matrix $\M T$, and a list of tuples $(m_i, n_i)$, where $n_i$ is the size of $i$-th diagonal block, and $m_i = \sum_{j=1}^{i-1} n_j$.
+The tuple list represents block structure of $\M M'$; it is used by the next two functions, where it is passed as the argument $B$.
 
 \functionitem{reduce\_diagonal\_blocks}{\M M, x, epsilon, B=None, seed=0}
-Find a transformation that reduces diagonal blocks of $\M M$ into epsilon form.
-If $B$ is not provided, transform $\M M$ into lower triangual form before reduction, otherwise assume $\M M$ blocks are described by $B$.
+Finds a transformation that reduces diagonal blocks of $\M M$ into epsilon form.
+If $B$ is not provided, it transforms $\M M$ into lower triangual form before reduction.
+Otherwise it assumes $\M M$ blocks are described by $B$.
 
-Return two values: transformed matrix $\M M$ and transformation matrix $\M T$.
+Returns two values: a transformed matrix $\M M$ and a transformation matrix $\M T$.
 
 \functionitem{fuchsify\_off\_diagonal\_blocks}{\M M, x, epsilon, r=None}
-Given a matrix $M$ with diagonal blocks in epsilon form, transform off-diagonal blocks in to Fuchsian form.
-If $B$ is not provided, transform $\M M$ into lower triangual form before reduction, otherwise assume $\M M$ blocks are described by $B$.
+Given a matrix $M$ with diagonal blocks in epsilon form, it transforms off-diagonal blocks in to Fuchsian form.
+If $B$ is not provided, it transforms $\M M$ into lower triangual form before reduction.
+Otherwise it assumes that blocks of $\M M$ are described by $B$.
 
-Return two values: transformed matrix $\M M$ and transformation matrix $\M T$.
+Returns two values: a transformed matrix $\M M$ and a transformation matrix $\M T$.
 
 \functionitem{simplify\_by\_jordanification}{\M M, x}
-Try to simplify a system defined by matrix $\M M$ and independent variable $x$ by constant transformations that transform leading expansion coefficients of $\M M$ into their Jordan forms.
-Return a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
-If none of the attempted transformations reduce the complexity of $\M M$ (as measured by $\F{matrix\_complexity}$), return the original matrix and the identity transformation.
+Tries to simplify a system defined by a matrix $\M M$ and an independent variable $x$ by constant transformations that transform leading expansion coefficients of $\M M$ into their Jordan forms.
+Returns a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
+If none of the attempted transformations reduces the complexity of $\M M$ (as measured by $\F{matrix\_complexity}$), it returns the original matrix and the identity transformation.
 
 \functionitem{simplify\_by\_factorization}{\M M, x}
-Try to simplify a system defined by matrix $\M M$ and independent variable $x$ by a constant transformation that extracts common factors found in $\M M$ (if any).
-Return a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
+Tries to simplify a system defined by a matrix $\M M$ and an independent variable $x$ by a constant transformation that extracts common factors found in $\M M$ (if any).
+Returns a pair of values: the simplified matrix $\M M'$ and the transformation $\M T$.
 
 \functionitem{matrix\_complexity}{\M M}
 This function is used as a measure of matrix complexity by $\F{fuchsify}$ and simplification functions.
 Currently it is defined as the length of textual representation of matrix $\M M$.
 
 \functionitem{balance}{\M P, x_1, x_2, x}
-Return a \textit{balance} transformation between points $x=x_1$ and $x=x_2$ using projector matrix $\M P$.
+Returns a \textit{balance} transformation between points $x=x_1$ and $x=x_2$ using the projector matrix $\M P$.
 See eq.~\eqref{eq:bal} for the definition of a \textit{balance}.
 
 \functionitem{transform}{\M M, x, \M T}
-Transform a system defined by matrix $\M M$ and independent variable $x$ using transformation matrix $\M T$ as specified by eq.~\eqref{eq:ta}.
-Return the transformed matrix $\M M'$.
+Transforms a system defined by a matrix $\M M$ and an independent variable $x$ using the transformation matrix $\M T$ as specified by eq.~\eqref{eq:ta}.
+Returns the transformed matrix $\M M'$.
 
 \functionitem{balance\_transform}{\M M, \M P, x_1, x_2, x}
 Same as $\F{transform}(\M M, x, \F{balance}(\M P, x_1, x_2, x))$, but implemented more efficiently: since the inverse of $\F{balance}(\M P, x_1, x_2, x)$ is $\F{balance}(\M P, x_2, x_1, x)$, this function can avoid a time-consuming matrix inversion operation that $\F{transform}$ must perform.
 
 \functionitem{singularities}{\M M, x}
-Find values of $x$ around which matrix $\M M$ has a singularity in $x$.
-Return a dictionary with $\{x_i: p_i\}$ entries, where $p_i$ is the Poincar\'e rank of $\M M$ at $x=x_i$.
+Finds values of $x$ around which the matrix $\M M$ has a singularity in $x$.
+Returns a dictionary with $\{x_i: p_i\}$ entries, where $p_i$ is the Poincar\'e rank of $\M M$ at $x=x_i$.
 The set of singular points can include \code{Infinity}, if $\M M$ has a singularity at $x\to\infty$.
 
 \functionitem{matrix\_c0}{\M M, x, x_0, p}
-Return the 0-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is \code{Infinity}, return minus the coefficient at the highest power of $x$.
-In other words, return $\M A_{k0}$ from eq.~\eqref{eq:axeps}.
+Returns the 0-th coefficient of the series expansion of a matrix $\M M$ around $x=x_0$, assuming the Poincar\'e rank of $\M M$ at that point is $p$.
+If $x_0$ is \code{Infinity}, it returns minus the coefficient at the highest power of $x$.
+In other words, it returns $\M A_{k0}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_c1}{\M M, x, x_0, p}
-Return the 1-th coefficient of the series expansion of matrix $\M M$ around $x=x_0$, assuming Poincar\'e rank of $\M M$ at that point is $p$.
-If $x_0$ is \code{Infinity}, return minus the coefficient at the second-to-highest power of $x$.
-In other words, return $\M A_{k1}$ from eq.~\eqref{eq:axeps}.
+Returns the 1-th coefficient of the series expansion of a matrix $\M M$ around $x=x_0$, assuming the Poincar\'e rank of $\M M$ at that point is $p$.
+If $x_0$ is \code{Infinity}, it returns minus the coefficient at the second-to-highest power of $x$.
+In other words, it returns $\M A_{k1}$ from eq.~\eqref{eq:axeps}.
 
 \functionitem{matrix\_residue}{\M M, x, x_0}
-Return matrix residue of matrix $\M M$ at $x=x_0$, assuming that Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
-Return matrix residue at infinity if $x_0$ is \code{Infinity}.
+Returns a residue of a matrix $\M M$ at $x=x_0$, assuming that the Poincar\'e rank of $\M M$ at $x=x_0$ is $0$.
+Returns matrix residue at infinity if $x_0$ is \code{Infinity}.
 
 This is the same as $\F{matrix\_c0}(\M M, x, x_0, 0)$.
 
 \functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"mtx"}}
-Write matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.
+Writes a matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.
 
 \functionitem{import\_matrix\_from\_file}{filename}
-Read a symbolic matrix from a file $filename$.
+Reads a symbolic matrix from a file $filename$.
 Both Mathematica and MatrixMarket array formats are supported.
 The exact format will be autodetected.
 
 \functionitem{setup\_fuchsia}{verbosity=0, use\_maple=\code{False}}
-Modify some of the \fuchsia inner workings.
-In particular, set $verbosity$ to $2$ to enable verbose logging, $1$ to enable normal logging, and $0$ to only log errors.
+Modifies some of the \fuchsia inner workings.
+In particular, it sets $verbosity$ to $2$ to enable verbose logging, $1$ to enable normal logging, and $0$ to only log errors.
 
 Set $use\_maple$ to \code{True} to enable usage of \texttt{Maple} to speed up calculations when possible; this may be particularly beneficial for big matrices, and for matrices with singularities at complex points.
 
 \classitem{FuchsiaError}
-This is the class of exceptions raised by \fuchsia routines.
-It signifies inability to perform requested reduction. 
+This is the class of exceptions raised by the \fuchsia routines.
+It indicates the inability to perform the requested reduction. 
 
 \end{description}
 
@@ -702,11 +702,11 @@ It signifies inability to perform requested reduction.
 \label{sec:4}
 
 In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to epsilon form.
-\fuchsia is free and open-source: it is build in \python using \maximasage computer algebra system which are available free of charge.
-To find the corresponding analytical transformation \fuchsia uses a method proposed by Roman Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
+\fuchsia is free and open-source: it is build in \python using the \maximasage computer algebra system which is available free of charge.
+To find the corresponding analytical transformation \fuchsia uses a method proposed by Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
 
 In additional, an optimization for block-triangular (or sparse) matrices is also implemented, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 real and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
-In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex coefficients in \maximasage system, which we hope to improve in the next version of the program.
+In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex coefficients in the \maximasage system, which we hope to improve in the next version of the program.
 Another promising direction for improvements could be support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
 
 \section*{Acknowledgment}
@@ -714,7 +714,6 @@ Another promising direction for improvements could be support for multivariate p
 We are gratefully thankful for advanced examples of differential equations provided by Roman Lee and Costas Papadopolous.
 
 This work has been partly supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
-Financial support by DESY during the conference ``Loops and Legs in Quantum Field Theory 2016'' is also gratefully acknowledged. 
 
 \bibliography{fuchsia}
 
