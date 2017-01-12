@@ -58,17 +58,19 @@ In particular, we focus on the fact that a solution to the system of DEs may be 
 We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}.
 This method allows
 \begin{enumerate}
-  \item to find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59}; and then
-  \item to normalize eigenvalues of the Fuchsian system in all singular points.
+  \item To find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59}; and then
+  \item To normalize eigenvalues of the Fuchsian system in all singular points.
 \end{enumerate}
 If these two steps are successfully completed%
 \footnote{In principle, the first step can always be done because Feynman integrals contain only logarithmic singularities. For the discussion of potential complications in the second step see Section~\ref{sec:2}.}
 then a transformation which puts the initial system into the epsilon form may be easily found.
 Although this method is focused on systems for Feynman integrals, it also may be successfully used for different problems provided that the requirements on particular properties of the initial system are satisfied.
+For another method for finding the epsilon form of a given system with multiple scales see \cite{Mey16a,Mey16b}.
 
-Unfortunately, no implementation of the Lee method was made publicly available so far.
-We close this gap and introduce \fuchsia \ --- a complete implementation of the method~\cite{Lee15} in the computer algebra system \sage.
-Combined together with Laporta algorithm \cite{Lap00} and its implementations~\cite{Smi08,MS12,Lee12,Lee13,SS13,Smi14}, these tools form a powerful tandem for evaluating Feynman integrals.
+Until recently, no implementation of the Lee method was made publicly available.
+This fact motivated us to develop \fuchsia \ --- the first public implementation of the Lee algorithm~\cite{Lee15} which was presented in \cite{GM16}.
+Another implementation of this method, called \texttt{Epsilon}, was recently presented in \cite{Pra17}.
+In this paper we provide a description of some implementation and usage details of \fuchsia which together with algorithms and tools for the integration-by-parts reduction~\cite{Lap00,Smi08,MS12,Lee12,Lee13,SS13,Smi14,GLZ16} form a powerful tandem for evaluating Feynman integrals.
 
 This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method and related algorithms implemented in \fuchsia.
 In Section \ref{sec:3} we describe how to install \fuchsia and to use it from different environments, depending on your goal and programming experience.
@@ -356,7 +358,7 @@ In \fuchsia the process of shuffling a matrix to its shortest lower block-diagon
 
 \subsection{Installation}
 
-To run \fuchsia one needs \sage version 7.0 or higher to be installed on the computer.
+To run \fuchsia one needs \sage~\cite{sagemath} version 7.0 or higher to be installed on the computer.
 This task can be accomplished by following installation instructions available at the website \url{http://www.sagemath.org}.
 \footnote{
     Some \linux distributions have \sage available in their package repositories; we do not recommend using those.
@@ -367,29 +369,17 @@ This task can be accomplished by following installation instructions available a
 It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Singular}, and others with the goal of providing the best free CAS.
 In particular our code heavily relies on the interface to \maxima~\cite{maxima}.
 
-\subsubsection{Installation from PyPI}
+We also should obtain a file \code{fuchsia.py} which can be downloaded from the website \url{https://github.com/gituliar/fuchsia}, where many examples of usage and reduced matrices are also collected.
 
-To install \fuchsia run the following command in your shell:
 
-\begin{Verbatim}
-    \prompt{$}{sage -pip install fuchsia}
-\end{Verbatim}
-
-This will install the latest stable version of \fuchsia from the Python Package Index (PyPI) to your \sage environment.
-
-\subsubsection{Installation from sources}
-
-If you are interested in the latest development version then visit \url{https://github.com/gituliar/fuchsia/}.
-
+\vspace{10mm}
 
 \subsection{Usage from the command line}
 
-An easy way to use \fuchsia is to run the command \code{fuchsia}\footnote{If you have used \code{sage -pip} to install \fuchsia, then you will find this script at \code{<path~to~SageMath>/local/bin/fuchsia}.} or \code{sage -python fuchsia.py} which has the following invocation signature:
-
+To run \fuchsia use the command\footnote{For brevity, sometimes we use a shortcut \code{fuchsia} which is equal to \code{sage -python fuchsia.py}.}
 \begin{Verbatim}
-    \prompt{$}{fuchsia <action> <options>}
+    \prompt{$}{sage -python fuchsia.py <action> <options>}
 \end{Verbatim}
-
 where
 \begin{itemize}
   \item \code{<action>} is one of the algorithms described in the previous section, i.e., \code{fuchsify}, \code{normalize}, \code{factorize}, or auxiliary action \code{transform}, which applies a user-defined transformation to the given matrix.
@@ -398,7 +388,7 @@ where
 
 In the following we provide a complete help information printed by \code{fuchsia -h}:
 \begin{Verbatim}
-Fuchsia v16.6.8
+Fuchsia v16.11.4
 Authors: Oleksandr Gituliar, Vitaly Magerya
 
 Usage:
@@ -706,14 +696,18 @@ In this paper we have presented \fuchsia, a program for reducing differential eq
 To find the corresponding analytical transformation \fuchsia uses a method proposed by Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
 
 In additional, an optimization for block-triangular (or sparse) matrices is also implemented, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 real and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
-In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex coefficients in the \maximasage system, which we hope to improve in the next version of the program.
-Another promising direction for improvements could be support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
+In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex (or, in the general case, algebraic) roots in the \maximasage system, which we hope to improve in the next version of the program.
+Another promising direction for improvements could be a full support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
+In fact, these two issues are tightly connected.
 
 \section*{Acknowledgment}
 
 We are gratefully thankful for advanced examples of differential equations provided by Roman Lee and Costas Papadopolous.
 
-This work has been partly supported by Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
+This work has been supported by the Deutsche Forschungsgemeinschaft in Sonderforschungs\-be\-reich 676 {\it Particles, Strings, and the Early Universe} and by the Narodowe Centrum Nauki with the Sonata Bis grant DEC-2013/10/E/ST2/00656.
+
+
+
 
 \bibliography{fuchsia}
 
