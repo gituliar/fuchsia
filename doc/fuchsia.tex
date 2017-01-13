@@ -73,8 +73,8 @@ Another implementation of this method, called \texttt{Epsilon}, was recently pre
 In this paper we provide a description of some implementation and usage details of \fuchsia which together with algorithms and tools for the integration-by-parts reduction~\cite{Lap00,Smi08,MS12,Lee12,Lee13,SS13,Smi14,GLZ16} form a powerful tandem for evaluating Feynman integrals.
 
 This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method and related algorithms implemented in \fuchsia.
-In Section \ref{sec:3} we describe how to install \fuchsia and to use it from different environments, depending on your goal and programming experience.
-In Section \ref{sec:4} we discuss limitations and possible extensions of the current implemented and the method in general.
+In Section~\ref{sec:3} we describe how to install and use \fuchsia from different environments, depending on your goal and programming experience.
+In Section~\ref{sec:4} we make a summary and discuss limitations and possible extensions of the current implementation.
 
 
 \section{Overview of the Lee method}
@@ -376,7 +376,7 @@ We also should obtain a file \code{fuchsia.py} which can be downloaded from the 
 
 \subsection{Usage from the command line}
 
-To run \fuchsia use the command\footnote{For brevity, sometimes we use a shortcut \code{fuchsia} which is equal to \code{sage -python fuchsia.py}.}
+To run \fuchsia use the command\footnote{For brevity, we use a shortcut \code{fuchsia} which is equivalent to \code{sage -python fuchsia.py}.}
 \begin{Verbatim}
     \prompt{$}{sage -python fuchsia.py <action> <options>}
 \end{Verbatim}
@@ -439,11 +439,14 @@ Arguments:
     <expr>      arbitrary expression
 \end{Verbatim}
 
+Simple and more advanced results obtained with the help of \fuchsia are located in the directory \code{examples}.
+There you will find many examples of original matrices together with generated transformations which lead to the epsilon form of corresponding matrices.
+Another example of applying \fuchsia to find master integrals for next-to-leading order contributions to splitting functions in QCD were discussed in \cite{GM16}.
 
 \subsection{Usage from \sage or \python}
 \label{sec:usage_py}
 
-You can use \fuchsia as a library by starting the \sage prompt and importing the \texttt{fuchsia} module like this:
+You can also use \fuchsia as a library by starting the \sage prompt and importing the \texttt{fuchsia} module like this:
 
 \begin{Verbatim}
     \prompt{$}{sage}
@@ -691,14 +694,18 @@ It indicates the inability to perform the requested reduction.
 \section{Summary}
 \label{sec:4}
 
-In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to epsilon form.
-\fuchsia is free and open-source: it is build in \python using the \maximasage computer algebra system which is available free of charge.
-To find the corresponding analytical transformation \fuchsia uses a method proposed by Lee~\cite{Lee15}, which consists of three main computational steps: fuchsification, normalization, and factorization.
+In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to the epsilon form based on the Lee algorithm \cite{Lee15} which consists of three main computational steps: fuchsification, normalization, and factorization.
+\fuchsia is open-source nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
+Unfortunately, for some heavy-duty computations one needs to switch from \maxima to \maple, which is more powerful for some tasks, hence the access to latter is desirable.
+Though it helps a lot in some situation, \maple can not deal with huge intermediate expressions which arise during the reduction process of some advanced examples.
+On the one hand, it is partly connected with non-optimal algorithmic optimizations of \fuchsia code.
+On the other hand, it happens due to poor implementation of factorization of polynomials with algebraic (or even complex) roots in the \maxima and \maple.
+In fact, these two issues are tightly interconnected and we hope to make discussed optimizations in the next version of the program.
 
-In additional, an optimization for block-triangular (or sparse) matrices is also implemented, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 real and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
-In spite of that we still have difficulties to reduce somewhat smaller matrices with complex singular points due to the lack of support of factorization of polynomials with complex (or, in the general case, algebraic) roots in the \maximasage system, which we hope to improve in the next version of the program.
-Another promising direction for improvements could be a full support for multivariate polynomials and symbolic singular points, which would allow to reduce differential equations for multi-scale Feynman master integrals.
-In fact, these two issues are tightly connected.
+Despite of the discussed limitation \fuchsia can show great performance in some cases.
+It is possible due to the optimization for block-triangular (or sparse) matrices, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 rational and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
+Moreover, \fuchsia can deal with symbolic singular points.
+This allows to use it for reduction of single-variable differential equations for multi-scale Feynman master integrals.
 
 \section*{Acknowledgment}
 
