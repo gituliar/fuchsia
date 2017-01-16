@@ -55,8 +55,8 @@ Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and 
 
 In this paper we discuss the method of differential equations.
 In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when an epsilon form of this system is known~\cite{Henn13}.
-We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}.
-This method allows
+We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}, for the review of the subject see \cite{Henn14} and \cite{Pap14,Tan15,ABB15}.
+The Lee algorithm allows
 \begin{enumerate}
   \item To find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59}; and then
   \item To normalize eigenvalues of the Fuchsian system in all singular points.
@@ -73,8 +73,7 @@ Another implementation of this method, called \texttt{Epsilon}, was recently pre
 In this paper we provide a description of some implementation and usage details of \fuchsia which together with algorithms and tools for the integration-by-parts reduction~\cite{Lap00,Smi08,MS12,Lee12,Lee13,SS13,Smi14,GLZ16} form a powerful tandem for evaluating Feynman integrals.
 
 This paper is organized as follows: in Section \ref{sec:2} we introduce notation and definitions followed by a brief review of the Lee method and related algorithms implemented in \fuchsia.
-In Section~\ref{sec:3} we describe how to install and use \fuchsia from different environments, depending on your goal and programming experience.
-In Section~\ref{sec:4} we make a summary and discuss limitations and possible extensions of the current implementation.
+In Section~\ref{sec:3} we describe how to install and how to use \fuchsia from different environments, depending on your goal and programming experience.
 
 
 \section{Overview of the Lee method}
@@ -576,7 +575,7 @@ The final form we are computing is not unique, and it will be different dependin
 Additionally, many of the transformations take a special $seed$ parameter to control the order of operations they perform internally.
 By supplying different seeds, you will obtain different results as well.
 
-\subsubsection{Functions reference}
+\subsubsection{Function reference}
 
 \begin{description}[style=nextline]
 
@@ -697,15 +696,11 @@ It indicates the inability to perform the requested reduction.
 In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to the epsilon form based on the Lee algorithm \cite{Lee15} which consists of three main computational steps: fuchsification, normalization, and factorization.
 \fuchsia is open-source nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
 Unfortunately, for some heavy-duty computations one needs to switch from \maxima to \maple, which is more powerful for some tasks, hence the access to latter is desirable.
-Though it helps a lot in some situation, \maple can not deal with huge intermediate expressions which arise during the reduction process of some advanced examples.
-On the one hand, it is partly connected with non-optimal algorithmic optimizations of \fuchsia code.
-On the other hand, it happens due to poor implementation of factorization of polynomials with algebraic (or even complex) roots in the \maxima and \maple.
-In fact, these two issues are tightly interconnected and we hope to make discussed optimizations in the next version of the program.
+Though it helps a lot in some situation, \maple is not a universal solution and is not able to process huge intermediate expressions which arise during the reduction process of some advanced examples.
+It happens due to inability to work with polynomials which contain algebraic numbers in their coefficients (even in the case of complex coefficients the performance drastically decreases).
 
-Despite of the discussed limitation \fuchsia can show great performance in some cases.
+Despite of the discussed limitation \fuchsia shows a great performance in many cases.
 It is possible due to the optimization for block-triangular (or sparse) matrices, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 rational and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
-Moreover, \fuchsia can deal with symbolic singular points.
-This allows to use it for reduction of single-variable differential equations for multi-scale Feynman master integrals.
 
 \section*{Acknowledgment}
 
