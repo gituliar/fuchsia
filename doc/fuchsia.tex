@@ -31,7 +31,8 @@
 
 \begin{abstract}
 We present \fuchsia\xspace --- an implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
-Systems in such a form can be trivially solved, which makes the construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial equations.
+A system of this form can be trivially solved in terms of polylogarithms as a Laurent series in the dimensional regulator $\eps$.
+That makes the construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial system.
 
 In principle, \fuchsia can deal with any regular systems, however its primary task is to reduce differential equations for Feynman master integrals.
 It ensures that solutions contain only regular singularities due to the properties of Feynman integrals.
