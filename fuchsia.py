@@ -50,7 +50,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "16.11.14"
+__version__ = "17.01.19"
 
 __all__ = [
     "balance",
@@ -89,7 +89,7 @@ class FuchsiaLogger(object):
     def __init__(self):
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(logging.Formatter(
-            "\033[32m[%(asctime)s] %(levelname)5s\033[0m %(message)s",
+            "\033[32m[%(asctime)s]\033[0m %(message)s",
             "%Y-%m-%d %I:%M:%S"
         ))
         logger = logging.getLogger('fuchsia')
@@ -1189,7 +1189,6 @@ def factorize(M, x, epsilon, b=None, seed=0):
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
     logger.info("-> factorize")
-    logger.info("M =\n%s" % partial_fraction(M,x))
     n = M.nrows()
     M = fuchsia_simplify(M, x)
     if epsilon not in (M/epsilon).variables():
@@ -1220,7 +1219,6 @@ def factorize(M, x, epsilon, b=None, seed=0):
         eqs.extend(eq.list())
     logger.info("    found %d equations with %d unknowns" % (len(eqs), len(T_symbols)))
     solutions = fuchsia_solve(eqs, T_symbols)
-    logger.info("SOLUTIONS = %s" % solutions)
     for solution in solutions:
         S = T.subs(solution)
         # Right now S likely has a number of free variables in
