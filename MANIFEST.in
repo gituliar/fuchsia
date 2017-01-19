@@ -1,6 +1,0 @@
-exclude .gitignore Makefile
-prune doc
-prune examples
-prune papers
-prune test
-include LICENSE
