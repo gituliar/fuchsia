@@ -1,0 +1,32 @@
+FUCHSIA is a program for reducing differential equations for Feynman master
+integrals to epsilon form [arxiv:1701.04269]. It is based on the algorithm of
+Roman Lee [arXiv:1411.0911].
+
+Authors:
+  Oleksandr Gituliar <oleksandr@gituliar.net>
+  Vitaly Magerya
+
+Version: 17.01.19
+
+
+INSTALL
+=======
+
+To run Fuchsia you need only `fuchsia.py` file and SageMath.
+
+1. Obtain `fuchsia.py` file from one of the following locations
+   * a folder with this README file; or
+   * from <http://github.com/gituliar/fuchsia> repository
+
+2. Install SageMath 7.0 (or later) from <http://www.sagemath.org>.
+
+
+USAGE
+=====
+
+Try to run Fuchsia with the command
+
+  sage -python fuchsia.py
+
+If it prints a help message then everything works fine and you can further
+use Fuchsia as described in the documentation.
