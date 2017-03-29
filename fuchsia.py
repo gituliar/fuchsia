@@ -26,7 +26,7 @@ Commands:
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
-    changevar [-x <name>] [-m <path>] <matrix> <expr>
+    changevar [-x <name>] [-y <name>] [-m <path>] <matrix> <expr>
         transform matrix by susbtituting free variable by a
         given expression
 
@@ -37,6 +37,7 @@ Options:
     -v          produce a more verbose log
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
+    -y <name>   name of the new free variable (default: y)
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -1496,7 +1497,7 @@ def main():
         fmt = "m"
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:],
-                "hvl:f:P:x:e:m:t:", ["help", "use-maple"])
+                "hvl:f:P:x:y:e:m:t:", ["help", "use-maple"])
         for key, value in kwargs:
             if key in ["-h", "--help"]: usage()
             if key == "-f":
@@ -1513,6 +1514,7 @@ def main():
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = parse(value)
+            if key == "-y": y = parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
@@ -1547,10 +1549,9 @@ def main():
                 M = import_matrix_from_file(args[1])
                 fy = parse(args[2])
                 extravars = set(fy.variables()) - set(M.variables())
-                if len(extravars) != 1:
+                if y not in extravars:
                     raise getopt.GetoptError(
-                            "need to have one free variable in '%s'" % args[2])
-                y = extravars.pop()
+                            "'%s' is missed in '%s'" % (y, fy))
                 M = change_variable(M, x, y, fy)
                 x = y
             elif len(args) == 0:
