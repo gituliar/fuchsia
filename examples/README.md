@@ -1,5 +1,11 @@
-In this directory you will find matrices which appear in real problems of physics.
+In this directory you will find assorted selection of matrices
+and their reduced versions.
 
-  * `lee_[01,02,03].mtx` (from R.Lee)
-  * `pop_01.m` (from C.Papadopoulos at LL2016)
-  * `pop_02.m` same as above, but with some `ep` factored out
+The fully reduced matrices are marked with "--reduced" suffix,
+fuchsified matrices are marked with "--fuchsified", normalized
+with "--normalized". Suffixes "--m" and "--t" denote the matrices
+themselves and the transformation matrices correspondingly.
+
+Some of the examples here either can not be fully reduced in
+principle, or are too difficult for Fuchsia. Those examples are
+left without a "--reduced" version.

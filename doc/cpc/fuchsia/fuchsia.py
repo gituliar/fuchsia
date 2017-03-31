@@ -6,7 +6,7 @@ Usage:
 
 Commands:
     reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
-        find a epsilon form of the given matrix
+        find an epsilon form of the given matrix
 
     fuchsify [-x <name>] [-m <path>] [-t <path>] <matrix>
         find a transformation that will transform a given matrix
@@ -26,17 +26,18 @@ Commands:
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
-    changevar [-x <name>] [-m <path>] <matrix> <expr>
-        transform matrix by susbtituting free variable by a
-        given expression
+    changevar [-x <name>] [-y <name>] [-m <path>] <matrix> <expr>
+        transform a given matrix by susbtituting free variable
+        by a given expression
 
 Options:
     -h          show this help message
-    -f <fmt>    matrix file format: mtx or m (default: mtx)
+    -f <fmt>    matrix file format: mtx or m (default: m)
     -l <path>   write log to this file
     -v          produce a more verbose log
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
+    -y <name>   use this name for the new free variable (default: y)
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -513,7 +514,7 @@ def any_integer(rng, ring, excluded):
         r *= 2
 
 #==================================================================================================
-# Transformation routines 
+# Transformation routines
 #==================================================================================================
 
 def block_triangular_form(m):
@@ -677,7 +678,7 @@ def fuchsify(M, x, seed=0):
     if reduction_points == []:
         logger.info("already fuchsian")
     else:
-        for pt in reduction_points: 
+        for pt in reduction_points:
             logger.info("rank = %d, x = %s" % (poincare_map[pt], pt))
     while reduction_points:
         pointidx = rng.randint(0, len(reduction_points) - 1)
@@ -740,11 +741,11 @@ def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
                     a0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
                     b0 = matrix_c0(bj, x, x0, p)
                     c0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
-        
+
                     d_vars = [gensym() for i in xrange(ni*nj)]
                     d = matrix(SR, ni, nj, d_vars)
                     eq = d + eps/p*(a0*d - d*c0) + b0/p
-                    sol = solve(eq.list(), *d_vars, solution_dict=True)
+                    sol = fuchsia_solve(eq.list(), d_vars)
                     d = d.subs(sol[0])
 
                     t0 = identity_matrix(SR, n)
@@ -1191,7 +1192,7 @@ def factorize(M, x, epsilon, b=None, seed=0):
     logger.info("-> factorize")
     n = M.nrows()
     M = fuchsia_simplify(M, x)
-    if epsilon not in (M/epsilon).variables():
+    if epsilon not in expand(M/epsilon).variables():
         logger.info("   already in epsilon form")
         logger.info("<- factorize")
         return M, identity_matrix(SR, n)
@@ -1414,7 +1415,7 @@ def import_matrix_matrixmarket(f):
     m = matrix(ncols, nrows, data).T
     return m
 
-def export_matrix_to_file(filename, m, fmt="mtx"):
+def export_matrix_to_file(filename, m, fmt="m"):
     """Save matrix into a file in a given matrix format. Set
     'fmt' to "mtx" for MatrixMarket array format, or to "m"
     for Mathematica format.
@@ -1496,7 +1497,7 @@ def main():
         fmt = "m"
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:],
-                "hvl:f:P:x:e:m:t:", ["help", "use-maple"])
+                "hvl:f:P:x:y:e:m:t:", ["help", "use-maple"])
         for key, value in kwargs:
             if key in ["-h", "--help"]: usage()
             if key == "-f":
@@ -1513,6 +1514,7 @@ def main():
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
             if key == "-x": x = parse(value)
+            if key == "-y": y = parse(value)
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
@@ -1539,6 +1541,9 @@ def main():
             elif len(args) == 2 and args[0] == 'reduce':
                 m = import_matrix_from_file(args[1])
                 M, T = epsilon_form(m, x, epsilon)
+            elif len(args) == 2 and args[0] == 'cat':
+                M = import_matrix_from_file(args[1])
+                T = None
             elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 t = import_matrix_from_file(args[2])
@@ -1547,10 +1552,9 @@ def main():
                 M = import_matrix_from_file(args[1])
                 fy = parse(args[2])
                 extravars = set(fy.variables()) - set(M.variables())
-                if len(extravars) != 1:
+                if y not in extravars:
                     raise getopt.GetoptError(
-                            "need to have one free variable in '%s'" % args[2])
-                y = extravars.pop()
+                            "'%s' is missing in '%s'" % (y, fy))
                 M = change_variable(M, x, y, fy)
                 x = y
             elif len(args) == 0:
@@ -1559,7 +1563,7 @@ def main():
                 raise getopt.GetoptError("unknown command: %s" % (args))
         if M is not None:
             M = partial_fraction(M, x)
-            if mpath is not None: 
+            if mpath is not None:
                 export_matrix_to_file(mpath, M, fmt=fmt)
             else:
                 print M
@@ -1576,9 +1580,4 @@ def main():
         exit(1)
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as error:
-        if logger.is_verbose():
-            logger.debug("\n%s" % error)
-        print error
+    main()

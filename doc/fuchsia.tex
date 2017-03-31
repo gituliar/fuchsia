@@ -30,7 +30,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-We present \fuchsia\xspace --- an implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V f(x,\eps) = \M A(x,\eps)\,\V f(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V f(x,\eps) = \M T(x,\eps)\,\V g(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V g(x,\eps) = \eps\,\M S(x)\,\V g(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
+We present \fuchsia\xspace --- an implementation of the Lee algorithm, which for a given system of ordinary differential equations with rational coefficients $\partial_x\,\V J(x,\eps) = \M A(x,\eps)\,\V J(x,\eps)$ finds a basis transformation $\M T(x,\eps)$, i.e., $\V J(x,\eps) = \M T(x,\eps)\,\V J'(x,\eps)$, such that the system turns into the \textit{epsilon form}: $\partial_x\, \V J'(x,\eps) = \eps\,\M S(x)\,\V J'(x,\eps)$, where $\M S(x)$ is a Fuchsian matrix.
 A system of this form can be trivially solved in terms of polylogarithms as a Laurent series in the dimensional regulator $\eps$.
 That makes the construction of the transformation $\M T(x,\eps)$ crucial for obtaining solutions of the initial system.
 
@@ -56,7 +56,7 @@ Among the most popular are integration-by-parts (IBP) reduction~\cite{CT81} and 
 
 In this paper we discuss the method of differential equations.
 In particular, we focus on the fact that a solution to the system of DEs may be easily found as an $\eps$-series when an epsilon form of this system is known~\cite{Henn13}.
-We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}, for the review of the subject see \cite{Henn14} and \cite{Pap14,Tan15,ABB15}.
+We consider a general algorithm to find an epsilon form of a given system of differential equations in one variable developed by Lee~\cite{Lee15}, for the review of the subject see~\cite{Henn14} and \cite{Pap14,Tan15,ABB15}.
 The Lee algorithm allows
 \begin{enumerate}
   \item To find a Fuchsian form of the system using improved Moser reduction algorithm \cite{Mos59}; and then
@@ -155,7 +155,7 @@ Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\e
 as the {\em Moser order} of $\M A(x,\eps)$ at point $x=x_k$.
 
 Equivalent systems do not necessarily have identical Moser orders.
-In fact \cite{Mos59} introduces an algorithm that constructs a transformation decreasing $rank(\M A_{k0})$ by at least one (thus reducing $m_k(\M A)$),\footnote{Note, that if $rank(\M A_{k0})$ reaches zero, this means that $\M A_{k0}$ is now zero itself, and thus the Poincar\'e rank $p_k$ was decreased by at least one.} or certifies that no further order reduction can be achieved.
+In fact, \cite{Mos59} introduces an algorithm that constructs a transformation decreasing $rank(\M A_{k0})$ by at least one (thus reducing $m_k(\M A)$),\footnote{Note, that if $rank(\M A_{k0})$ reaches zero, this means that $\M A_{k0}$ is now zero itself, and thus the Poincar\'e rank $p_k$ was decreased by at least one.} or certifies that no further order reduction can be achieved.
 
 Let us then denote the {\em minimal order} of $\M A(x,\eps)$ at $x=x_k$ as:
 \begin{equation}
@@ -165,9 +165,8 @@ Let us then denote the {\em minimal order} of $\M A(x,\eps)$ at $x=x_k$ as:
 
 If $\mu_k(\M A) < m_k(\M A)$ we say that the matrix $\M A(x,\eps)$ is {\em Moser-reducible} at $x=x_k$.
 
-With this in mind we can classify a point $x=x_k$ of $\M A(x,\eps)$ as:
+With this in mind we can classify a pole $x=x_k$ of $\M A(x,\eps)$ as:
 \begin{itemize}
-  \item {\em regular point}, if $m_k(\M A) = 0$;
   \item {\em apparent singularity}, if $m_k(\M A) > 0$ and $\mu_k(\M A) = 0$;
   \item {\em regular singularity}, if $0 < \mu_k(\M A) \le 1$;
   \item {\em irregular singularity}, if $\mu_k(\M A) > 1$.
@@ -217,7 +216,7 @@ In addition to this criterion we have a method for constructing a transformation
 This is done by selecting a projector matrix $\M P$ equal to a sum of products of a particular subset of (generalized) eigenvectors of $\M A_{i0}$ and $\M A_{j0}$, and constructing a $\M P$-balance between $x_i$ and~$x_j$.
 
 The reader can find the details of this construction in \cite{Lee15}, but it is important to note that even if the system is Moser-reducible at $x_i$, it is only sometimes possible to construct a transformation that lowers $m_i(\M A)$ without increasing Poincar\'e rank at $x_j$.
-Sometimes the best we can do is to choose $x_j$ to be some regular point (with $p_j=-1$), and use a transformation that decreases $m_i(\M A)$ at the expense at increasing $p_j$ to $0$, effectively introducing an apparent singularity where there was none before.\footnote{
+Sometimes the best we can do is to choose $x_j$ to be some arbitrary regular point, and use a transformation that decreases $m_i(\M A)$ at the expense of turning $x_j$ into a pole (with $p_j=0$), effectively introducing an apparent singularity where there was none before.\footnote{
     In practice these apparent singularities are not a major problem, since they are subsequently removed during the normalization step.
     Still, we try not to introduce them if possible in order to decrease the intermediate expression sizes and to increase the overall performance.
 }
@@ -369,7 +368,7 @@ This task can be accomplished by following installation instructions available a
 It is written in \python~2.7 and combines together a number of existing open-source mathematical systems and libraries like \texttt{Maxima}, \texttt{Singular}, and others with the goal of providing the best free CAS.
 In particular our code heavily relies on the interface to \maxima~\cite{maxima}.
 
-We also should obtain a file \code{fuchsia.py} which can be downloaded from the website \url{https://github.com/gituliar/fuchsia}, where many examples of usage and reduced matrices are also collected.
+Next, source file \code{fuchsia.py} should be downloaded from the website \url{https://github.com/gituliar/fuchsia} (additional materials like examples of reduced matrices and the up-to-date documentation is located there as well).
 
 
 \vspace{10mm}
@@ -386,9 +385,9 @@ where
   \item \code{<options>} are action-dependent options described in the help message printed with the help of \code{fuchsia -h} command.
 \end{itemize}
 
-In the following we provide a complete help information printed by \code{fuchsia -h}:
+In the following we provide a complete help information printed by \code{fuchsia~-h}:
 \begin{Verbatim}
-Fuchsia v16.11.14
+Fuchsia v17.01.19
 Authors: Oleksandr Gituliar, Vitaly Magerya
 
 Usage:
@@ -417,17 +416,18 @@ Commands:
     transform [-x <name>] [-m <path>] <matrix> <transform>
         transform a given matrix using a given transformation
 
-    changevar [-x <name>] [-m <path>] <matrix> <expr>
-        transform matrix by susbtituting free variable by a
-        given expression
+    changevar [-x <name>] [-y <name>] [-m <path>] <matrix> <expr>
+        transform a given matrix by susbtituting free variable
+        by a given expression
 
 Options:
     -h          show this help message
-    -f <fmt>    matrix file format: mtx or m (default: mtx)
+    -f <fmt>    matrix file format: mtx or m (default: m)
     -l <path>   write log to this file
     -v          produce a more verbose log
     -P <path>   save profile report into this file
     -x <name>   use this name for the free variable (default: x)
+    -y <name>   use this name for the new free variable (default: y)
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
@@ -670,8 +670,8 @@ Returns matrix residue at infinity if $x_0$ is \code{Infinity}.
 
 This is the same as $\F{matrix\_c0}(\M M, x, x_0, 0)$.
 
-\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"mtx"}}
-Writes a matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"} (which is the default), or Mathematica format if $fmt$ is \code{"m"}.
+\functionitem{export\_matrix\_to\_file}{filename, \M M, fmt=\code{"m"}}
+Writes a matrix $\M M$ to a file $filename$ using MatrixMarket array format if $fmt$ is \code{"mtx"}, or Mathematica format if $fmt$ is \code{"m"} (which is the default).
 
 \functionitem{import\_matrix\_from\_file}{filename}
 Reads a symbolic matrix from a file $filename$.
@@ -695,12 +695,13 @@ It indicates the inability to perform the requested reduction.
 \label{sec:4}
 
 In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to the epsilon form based on the Lee algorithm \cite{Lee15} which consists of three main computational steps: fuchsification, normalization, and factorization.
-\fuchsia is open-source nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
-Unfortunately, for some heavy-duty computations one needs to switch from \maxima to \maple, which is more powerful for some tasks, hence the access to latter is desirable.
-Though it helps a lot in some situation, \maple is not a universal solution and is not able to process huge intermediate expressions which arise during the reduction process of some advanced examples.
-It happens due to inability to work with polynomials which contain algebraic numbers in their coefficients (even in the case of complex coefficients the performance drastically decreases).
+\fuchsia is open-source in it's nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
 
-Despite of the discussed limitation \fuchsia shows a great performance in many cases.
+Unfortunately in some cases \fuchsia may exhibit poor performance: complex and/or irrational coefficients (or singular point locations) are particularly known to lead to a slowdown (or a complete halt) due to difficulty of working with those numbers symbolically.
+In many such cases switching from \maxima to \maple will help, speeding up the calculations and preventing resource exhaustion, hence the access to latter is desirable.
+In other cases, even \maple is not powerful enough.
+
+Despite such limitation \fuchsia shows great performance in many cases.
 It is possible due to the optimization for block-triangular (or sparse) matrices, which allows to reduce relatively large matrices: the reduction of ${74\times74}$ matrix with 20 rational and complex singular points and at most $3\times3$ coupled blocks takes about an hour on a laptop with Intel i5 CPU.
 
 \section*{Acknowledgment}

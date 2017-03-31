@@ -45,14 +45,17 @@
     Hence, a tool which is able to find the epsilon form transformations can be used to evaluate Feynman master integrals. 
 
 {\em Solution method:}
-    Methods of Moser \cite{Mos59} and Lee \cite{Lee15}.
+    The solution method is based on the Lee algorithm \cite{Lee15} which consists of three main steps: fuchsification, normalization, and factorization.
+    During the fuchsification step a given system of differential equations is transformed into the Fuchsian form with the help of the Moser method \cite{Mos59}.
+    Next, during the normalization step the system is transformed to the form where eigenvalues of all residues are proportional to the dimensional regulator $\eps$.
+    Finally, the system is factorized to the epsilon form by finding an unknown transformation which satisfies a system of linear equations.
 
 {\em Restrictions:}
-    Systems of single-variable differential equations are considered, however unknown functions may also depend on other symbolic arguments.
+    Systems of single-variable differential equations are considered.
     A system needs to be reducible to Fuchsian form and eigenvalues of its residues must be of the form $n + m\,\eps$, where $n$ is integer.
 
 {\em Running time:}
-    Depends upon the input data, its size and complexity.
-    Around an hour in total for an example $74\times74$ matrix with 20 singular points on a PC with a 1.7GHz Intel Core i5 CPU.
+    Around an hour in total for an example $74\times74$ matrix with 20 singular points on a PC with a 1.7GHz Intel Core i5 CPU, but dependent upon input matrix, it's size, number of singular points and their degrees.
+    An additional slowdown is to be expected for matrices with complex and/or irrational singular point locations, as these are particularly difficult for symbolic algebra software to handle.
 
 \end{small}

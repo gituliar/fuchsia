@@ -1,0 +1,8 @@
+%%MatrixMarket matrix array Fuchsia[symbolic] general
+2 2
+% #1
+eps-1
+-1/x
+% #2
+0
+-1
