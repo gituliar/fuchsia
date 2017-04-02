@@ -745,7 +745,7 @@ def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
                     d_vars = [gensym() for i in xrange(ni*nj)]
                     d = matrix(SR, ni, nj, d_vars)
                     eq = d + eps/p*(a0*d - d*c0) + b0/p
-                    sol = fuchsia_solve(eq.list(), d_vars)
+                    sol = solve(eq.list(), *d_vars, solution_dict=True)
                     d = d.subs(sol[0])
 
                     t0 = identity_matrix(SR, n)
