@@ -147,7 +147,7 @@ In particular, we will be using the transformation constructed by stepwise appli
 where $\M P(\eps)$ is a projector matrix (that is, $\M P^2=\M P$).
 
 \paragraph{Classification of singularities.}
-Following \cite{Mos59}, for a system \eqref{eq:dj} and it's Laurent expansion~\eqref{eq:axeps} we define a rational number
+Following \cite{Mos59}, for a system \eqref{eq:dj} and its Laurent expansion~\eqref{eq:axeps} we define a rational number
 \begin{equation}
 \label{eq:mk}
     m_k(\M A) = p_k + \frac{rank(\M A_{k0})}{n}
@@ -230,7 +230,7 @@ With this in mind, to reduce a system to Fuchsian form we need to combine the re
     \item Apply $\M T(x,\eps)$ and repeat from Step 1.
 \end{enumerate}
 
-In \fuchsia, this process is implemented by function \code{fuchsify}; see Section~\ref{sec:usage_py} for it's usage.
+In \fuchsia, this process is implemented by function \code{fuchsify}; see Section~\ref{sec:usage_py} for its usage.
 
 Finally, let us mention that a similar problem of reducing Poincar\'e ranks and Moser orders of rational matrices was actively studied by Barkatou and co-authors, e.g., see~\cite{BP99}.
 They developed algorithms implementing their method~\cite{BP99} which is available in the standard \texttt{Maple} package \texttt{DEtools} as \code{moser\_reduce} and \code{super\_reduce} routines.
@@ -695,7 +695,7 @@ It indicates the inability to perform the requested reduction.
 \label{sec:4}
 
 In this paper we have presented \fuchsia, a program for reducing differential equations for Feynman master integrals to the epsilon form based on the Lee algorithm \cite{Lee15} which consists of three main computational steps: fuchsification, normalization, and factorization.
-\fuchsia is open-source in it's nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
+\fuchsia is open-source in its nature and depends on free software tools only: the programming language \python and the computer algebra system \maximasage, which makes it available for everyone.
 
 Unfortunately in some cases \fuchsia may exhibit poor performance: complex and/or irrational coefficients (or singular point locations) are particularly known to lead to a slowdown (or a complete halt) due to difficulty of working with those numbers symbolically.
 In many such cases switching from \maxima to \maple will help, speeding up the calculations and preventing resource exhaustion, hence the access to latter is desirable.
