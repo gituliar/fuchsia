@@ -134,13 +134,13 @@ This restriction guarantees that the equivalent matrix $\M A'(x,\eps)$ and hence
 In particular, we will be using the transformation constructed by stepwise application of a \textit{$\M P$-balance between $x=x_1$ and $x=x_2$}, defined as:
 \begin{equation}
 \label{eq:bal}
-    \mathcal{B}(\M P(\eps), x_1, x_2; x) = \M I - \M P(\eps) + c \frac{x-x_1}{x-x_2} \M P(\eps),
+    \mathcal{B}(\M P(\eps), x_1, x_2; x) = \M I - \M P(\eps) + c \frac{x-x_2}{x-x_1} \M P(\eps),
 \end{equation}
 \begin{equation*}
     c \equiv
     \begin{cases}
-        1/x_1 & \text{if $x_1=\infty$}, \\
-        x_2 & \text{if $x_2=\infty$}, \\
+        1/x_2 & \text{if $x_2=\infty$}, \\
+        x_1 & \text{if $x_1=\infty$}, \\
         1 & \text{otherwise},
     \end{cases}
 \end{equation*}
