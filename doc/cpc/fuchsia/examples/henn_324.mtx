@@ -1,6 +1,0 @@
-%%MatrixMarket matrix array Maple[symbolic] general
-2 2
-eps/x
--1/x^2
-0
-eps/(1+x)

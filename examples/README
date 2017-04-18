@@ -1,0 +1,5 @@
+This directory contains example of systems of differential equations and their
+equivalent versions reduced to an epsilon form by Fuchsia.  The exact commands
+used to obtain these examples are collected in Makefile. Using this information
+it is easy to deduce the content of every file in this directory.
+
