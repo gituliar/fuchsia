@@ -23,16 +23,16 @@ class Test(unittest.TestCase):
 
     def test_git_409(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "git_409.mtx"))
+            "data", "git_409.m"))
 
     def test_git_410(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "git_410.mtx"))
+            "data", "git_410.m"))
 
     def test_henn_324(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "henn_324.mtx"))
+            "data", "henn_324.m"))
 
-    def test_pap_03_52_slow(t):
+    def test_pap_3_50_slow(t):
         t.assertReductionWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "pap_03_52.mtx"), fuchsian=True)
+            "data", "pap_3_50.m"), fuchsian=True)

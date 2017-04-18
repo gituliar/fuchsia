@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
     def test_normalize_5(t):
         # An unnormalizable example by A. A. Bolibrukh
         x, e = SR.var("x eps")
-        b = import_matrix_from_file("examples/bolibrukh.mtx")
+        b = import_matrix_from_file("test/data/bolibrukh.mtx")
         f, ft = fuchsify(b, x)
         f_pranks = singularities(f, x).values()
         t.assertEqual(f_pranks, [0]*len(f_pranks))
@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
 
     def test_pap_03_52_slow(t):
         x, eps = SR.var("x eps")
-        M = import_matrix_from_file("examples/pap_03_52.mtx")
+        M = import_matrix_from_file("test/data/pap_3_52.m")
         N, T = normalize(M, x, eps)
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())

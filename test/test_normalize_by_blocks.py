@@ -26,8 +26,8 @@ class Test(unittest.TestCase):
 
     def test_git_409(test):
         test.assertNormalizeBlocksWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "git_409.mtx"))
+            "data", "git_409.m"))
 
     def test_git_410(test):
         test.assertNormalizeBlocksWorks(os.path.join(os.path.dirname(__file__),
-            "..", "examples", "git_410.mtx"))
+            "data", "git_410.m"))
