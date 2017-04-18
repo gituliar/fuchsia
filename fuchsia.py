@@ -51,7 +51,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "17.01.19"
+__version__ = "17.04.18"
 
 __all__ = [
     "balance",
@@ -1493,7 +1493,7 @@ def main():
         print "Authors: %s\n" % __author__
         mpath = tpath = profpath = fmt = None
         M = T = None
-        x, epsilon = SR.var("x eps")
+        x, y, epsilon = SR.var("x y eps")
         fmt = "m"
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:],
