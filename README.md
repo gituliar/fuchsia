@@ -1,4 +1,4 @@
-*Fuchsia* reduces differential equations for Feynman master integrals to epsilon form.
+*Fuchsia* reduces differential equations for Feynman master integrals to the epsilon form.
 
 To illustrate, let us say we have a system of differential equations of this form:
 
@@ -25,4 +25,4 @@ Documentation with more information, installation and usage details is here [4].
   * [1] https://arxiv.org/abs/1304.1806
   * [2] https://arxiv.org/abs/1411.0911
   * [3] http://www.sagemath.org/
-  * [4] http://www.gituliar.net/fuchsia/fuchsia.pdf
+  * [4] https://arxiv.org/abs/1701.04269
