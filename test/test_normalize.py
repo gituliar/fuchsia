@@ -88,9 +88,9 @@ class Test(unittest.TestCase):
         with t.assertRaises(FuchsiaError):
             n, nt = normalize(f, x, e)
 
-    def test_pap_03_52_slow(t):
+    def test_pap_3_52_slow(t):
         x, eps = SR.var("x eps")
-        M = import_matrix_from_file("test/data/pap_3_52.m")
+        M = import_matrix_from_file("test/data/pap_3_52.mtx")
         N, T = normalize(M, x, eps)
         N = N.simplify_rational()
         t.assertEqual(N, transform(M, x, T).simplify_rational())
