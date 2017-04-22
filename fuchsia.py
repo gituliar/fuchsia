@@ -97,6 +97,7 @@ class FuchsiaLogger(object):
         logger.addHandler(log_handler)
         logger.setLevel(logging.WARNING)
 
+        self.addHandler = logger.addHandler
         self.error = logger.error
         self.isEnabledFor = logger.isEnabledFor
         self.logger = logger
