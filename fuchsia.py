@@ -81,17 +81,26 @@ from   collections import defaultdict
 from   itertools import permutations
 from   random import Random
 import logging
+import time
 
 from   sage.all import *
 from   sage.misc.parser import Parser
 from   sage.libs.ecl import ecl_eval
 
+class ElapsedTimeFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None):
+        super(ElapsedTimeFormatter, self).__init__(fmt, datefmt)
+        self.start_time = time.time()
+    def formatTime(self, record, datefmt=None):
+        if datefmt is None:
+            return "%7.1fs" % (record.created - self.start_time)
+        return time.strftime(datefmt, time.localtime(record.created))
+
 class FuchsiaLogger(object):
     def __init__(self):
         log_handler = logging.StreamHandler()
-        log_handler.setFormatter(logging.Formatter(
-            "\033[32m[%(asctime)s]\033[0m %(message)s",
-            "%Y-%m-%d %I:%M:%S"
+        log_handler.setFormatter(ElapsedTimeFormatter(
+            "\033[32m[%(asctime)s]\033[0m %(message)s"
         ))
         logger = logging.getLogger('fuchsia')
         logger.addHandler(log_handler)
@@ -1509,8 +1518,8 @@ def main():
                 fmt = value
             if key == "-l":
                 fh = logging.FileHandler(value, "w")
-                logger_format = '%(levelname)s [%(asctime)s]\n%(message)s'
-                fh.setFormatter(logging.Formatter(logger_format))
+                logger_format = '%(levelname)-8s [%(asctime)s] %(message)s'
+                fh.setFormatter(ElapsedTimeFormatter(logger_format))
                 logger.addHandler(fh)
             if key == "-v": logger.setLevel(logging.DEBUG)
             if key == "-P": profpath = value
