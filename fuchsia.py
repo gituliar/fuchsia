@@ -81,19 +81,243 @@ from   collections import defaultdict
 from   itertools import permutations
 from   random import Random
 import logging
+import sys
 import time
 
 from   sage.all import *
 from   sage.misc.parser import Parser
 from   sage.libs.ecl import ecl_eval
 
+class GeneralSystem:
+    @staticmethod
+    def from_M(M, x):
+        return GeneralSystem(M, x, identity_matrix(SR, M.nrows()))
+
+    def __init__(self, M, x, T):
+        self.M = M
+        self.x = x
+        self.T = T
+
+    def singular_points(self):
+        return singularities(self.M, self.x)
+
+    def c0(self, point, prank):
+        return matrix_c0(self.M, self.x, point, prank)
+
+    def c1(self, point, prank):
+        return matrix_c1(self.M, self.x, point, prank)
+
+    def apply_balance(self, P, x1, x2):
+        M = balance_transform(self.M, P, x1, x2, self.x)
+        M = fuchsia_simplify(M)
+        T = self.T * balance(P, x1, x2, self.x)
+        return GeneralSystem(M, self.x, T=T)
+
+    def complexity(self):
+        return matrix_complexity(self.M)
+
+    def get_M(self):
+        return self.M
+
+    def get_T(self):
+        self.T = fuchsia_simplify(self.T)
+        return self.T
+
+def cmap_add_div(Cmap, C, pi, ki, x0):
+    # M += C*(x-pi)^ki/(x-x0)
+    if pi == x0:
+        Cmap[pi, ki-1] += C
+    elif ki >= 0:
+        assert(pi == 0)
+        for k in range(0, ki):
+            Cmap[pi, k] += C * x0**(ki-1-k)
+        Cmap[x0, -1] += C * x0**ki
+    else:
+        for k in range(ki, 0):
+            Cmap[pi, k] -= C * (x0-pi)**(ki-1-k)
+        Cmap[x0, -1] += C * (x0-pi)**ki
+
+def cmap_add_mul(Cmap, C, pi, ki, x0):
+    # M += C*(x-pi)^ki*(x-x0) = C*(x-pi)^ki*{(x-pi) + (pi-x0)}
+    Cmap[pi, ki] += C*(pi-x0)
+    if ki == -1:
+        Cmap[SR(0), ki+1] += C
+    else:
+        Cmap[pi, ki+1] += C
+
+class RationalSystem:
+    @staticmethod
+    def from_M(M, x):
+        Cmap = matrix_partial_fraction_form(M, x)
+        T = identity_matrix(SR, M.nrows())
+        return RationalSystem(Cmap, x, T)
+
+    def __str__(self):
+        result = "M ="
+        for (p, k), C in self.Cmap.iteritems():
+            result += "\n+(x-{})^{}*\n{}".format(p, k, C)
+        return result
+
+    def __init__(self, Cmap, x, T):
+        self.Cmap = Cmap
+        self.x = x
+        self.T = T
+
+    def c0_oo(self):
+        Coo = zero_matrix(SR, self.T.nrows())
+        for (_, k), C in self.Cmap.iteritems():
+            if k == -1: Coo -= C
+        return Coo.simplify_rational()
+
+    def singular_points(self):
+        result = {}
+        for (p, k), C in self.Cmap.iteritems():
+            if k >= 0:
+                result[oo] = max(k+1, result.get(oo, 0))
+            else:
+                result[p] = max(-k-1, result.get(p, 0))
+        if oo not in result and not self.c0_oo().is_zero():
+            result[oo] = 0
+        return result
+
+    def c0(self, point, prank):
+        if point == oo:
+            if prank == 0: return self.c0_oo()
+            return -self.Cmap.get((SR(0), prank-1), SR(0))
+        else:
+            return self.Cmap.get((point, -prank-1), SR(0))
+
+    def c1(self, point, prank):
+        assert(prank >= 1)
+        if point == oo:
+            if prank == 1: return self.c0_oo()
+            C = self.Cmap.get((SR(0), prank-2), None)
+            return -C if C is not None else zero_matrix(SR, self.T.nrows())
+        else:
+            C = self.Cmap.get((point, -prank), None)
+            return C if C is not None else zero_matrix(SR, self.T.nrows())
+
+    def apply_balance(self, P, x1, x2):
+        x1 = SR(x1)
+        x2 = SR(x2)
+        coP = 1-P
+        if x1 == oo:
+            Cmap = defaultdict(SR.zero)
+            for (pi, ki), Ci in self.Cmap.iteritems():
+                # coP Ci coP (x-pi)^ki + P Ci P (x-pi)^ki
+                Cmap[pi, ki] += coP*Ci*coP + P*Ci*P
+                # coP Ci P -(x-x2) (x-pi)^ki
+                cmap_add_mul(Cmap, -coP*Ci*P, pi, ki, x2)
+                # P Ci coP -1/(x-x2) (x-pi)^ki
+                cmap_add_div(Cmap, -P*Ci*coP, pi, ki, x2)
+            # -P/(x-x2)
+            Cmap[x2, -1] -= P
+        elif x2 == oo:
+            Cmap = defaultdict(SR.zero)
+            for (pi, ki), Ci in self.Cmap.iteritems():
+                # coP Ci coP (x-pi)^ki + P Ci P (x-pi)^ki
+                Cmap[pi, ki] += coP*Ci*coP + P*Ci*P
+                # P Ci coP -(x-x1) (x-pi)^ki
+                cmap_add_mul(Cmap, -P*Ci*coP, pi, ki, x1)
+                # coP Ci P -1/(x-x1) (x-pi)^ki
+                cmap_add_div(Cmap, -coP*Ci*P, pi, ki, x1)
+            # P/(x-x1)
+            Cmap[x1, -1] += P
+        else:
+            Cmap = defaultdict(SR.zero, self.Cmap)
+            for (pi, ki), Ci in self.Cmap.iteritems():
+                # coP Ci P (x1-x2)/(x-x1) (x-pi)^ki
+                cmap_add_div(Cmap, coP*Ci*P*(x1-x2), pi, ki, x1)
+                # P Ci coP (x2-x1)/(x-x2) (x-pi)^ki
+                cmap_add_div(Cmap, P*Ci*coP*(x2-x1), pi, ki, x2)
+            # P/(x-x1) - P/(x-x2)
+            Cmap[x1, -1] += P
+            Cmap[x2, -1] -= P
+        for key, C in Cmap.items():
+            Cmap[key] = C = C.simplify_rational()
+            if C.is_zero():
+                del Cmap[key]
+        return RationalSystem(dict(Cmap), self.x, self.T*balance(P, x1, x2, self.x))
+
+    def complexity(self):
+        return matrix_complexity(self.get_M().simplify_rational())
+
+    def get_M(self):
+        M = zero_matrix(SR, self.T.nrows())
+        for (p, k), C in self.Cmap.iteritems():
+            M += C*(self.x-p)**k
+        return M
+
+    def get_T(self):
+        self.T = fuchsia_simplify(self.T)
+        return self.T
+
+def matrix_partial_fraction_form(M, x):
+    """Convert a rational matrix into partial fraction form:
+        M(x) = Sum_i C_i*(x-p_i)^k_i {where p_i=0 if k_i>=0}
+
+    Return a dictionary with {(p_i, k_i): C_i} entries.
+
+    If the matrix is not rational, raise an (assertion) error.
+    """
+    n, m = M.nrows(), M.ncols()
+    result = {}
+    for i in range(n):
+        for j in range(m):
+            for p, k, c in partialer_fraction(M[i,j], x):
+                key = (p,k)
+                cm = result.get(key, None)
+                if cm is None:
+                    result[key] = cm = zero_matrix(SR, n, m)
+                cm[i,j] = c.simplify_rational()
+    return result
+
+def partialer_fraction(ex, x):
+    """Convert a rational expression into partial fraction form:
+        ex(x) = Sum_i c_i*(x-p_i)^k_i {where p_i=0 if k_i>=0}
+    ... and return a list of (p_i, k_i, c_i) tuples.
+
+    If the expression is not rational, raise an (assertion) error.
+
+    Note that unlike the usual partial_fraction function, this
+    one decomposes polynomials even if their roots are complex.
+    """
+    if not ex.has(x):
+        if not ex.is_zero():
+            return [(SR(0), 0, SR(ex))]
+        return []
+    result = []
+    r = SR(0)
+    sols, mults = solve(factor(SR(1)/ex), x, multiplicities=True)
+    for sol, n in zip(sols, mults):
+        assert(sol.left_hand_side() == x)
+        p = expand(sol.right_hand_side())
+        s = ex.subs({x:x+p}).taylor(x, 0, -1)
+        for k in range(1, n+1):
+            c = s.coefficient(SR(1)/x**k)
+            if not c.is_zero():
+                result.append((p, -k, c))
+                r += c*(x-p)**(-k)
+    d = (ex-r).simplify_rational()
+    for c, k in d.coefficients(x):
+        assert(x not in c.variables())
+        assert(k.is_integer())
+        assert(k >= 0)
+        if not c.is_zero():
+            result.append((SR(0), int(k), c))
+            r += c*x**k
+    #assert (ex-r).is_zero()
+    return result
+
 class ElapsedTimeFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):
         super(ElapsedTimeFormatter, self).__init__(fmt, datefmt)
         self.start_time = time.time()
+        self.last_time = self.start_time
     def formatTime(self, record, datefmt=None):
         if datefmt is None:
-            return "%7.1fs" % (record.created - self.start_time)
+            dt = record.created - self.start_time
+            return "%7.1fs" % dt
         return time.strftime(datefmt, time.localtime(record.created))
 
 class FuchsiaLogger(object):
@@ -419,6 +643,7 @@ def matrix_c1(M, x, point, p):
     [-1  0]
     [ 0 -1]
     """
+    assert(p >= 1)
     if point == oo:
         return -matrix_taylor1(M.subs({x: 1/x}), x, 0, p-1)
     else:
@@ -668,21 +893,28 @@ def fuchsify(M, x, seed=0):
     logger.enter("fuchsify")
     assert M.is_square()
     rng = Random(seed)
-    poincare_map = singularities(M, x)
+    M = RationalSystem.from_M(M, x)
+    poincare_map = M.singular_points()
     def iter_reductions(p1, U):
         for p2, prank2 in poincare_map.iteritems():
             if bool(p2 == p1): continue
             while prank2 >= 0:
-                B0 = matrix_c0(M, x, p2, prank2)
+                B0 = M.c0(p2, prank2)
                 if not B0.is_zero(): break
                 poincare_map[p2] = prank2 = prank2 - 1
             if prank2 < 0: continue
-            v = find_dual_basis_spanning_left_invariant_subspace(B0, U, rng)
-            if v is None: continue
-            P = fuchsia_simplify(U*v, x)
-            M2 = fuchsia_simplify(balance_transform(M, P, p1, p2, x), x)
-            yield p2, P, M2
-    combinedT = identity_matrix(M.base_ring(), M.nrows())
+            try:
+                for v in find_dual_basis_spanning_left_invariant_subspace(B0, U, rng):
+                    P = fuchsia_simplify(U*v, x)
+                    yield p2, P, M.apply_balance(P, p1, p2)
+            except TypeError as err:
+                if "THROW: The catch RAT-ERR is undefined." in str(err):
+                    # Such an error is probably caused by this bug:
+                    # https://sourceforge.net/p/maxima/bugs/3283/
+                    logger.error("Maxima gave this error: %s" % err)
+                    logger.info(" ...let's skip reduction between %s and %s" % (point, point2))
+                else:
+                    raise err
     reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
     reduction_points.sort()
     if reduction_points == []:
@@ -698,9 +930,12 @@ def fuchsify(M, x, seed=0):
             del reduction_points[pointidx]
             continue
         while True:
-            A0 = matrix_c0(M, x, point, prank)
-            if A0.is_zero(): break
-            A1 = matrix_c1(M, x, point, prank)
+            logger.debug("Looking at point %s, prank=%s" % (point, prank))
+            A0 = M.c0(point, prank)
+            if A0.is_zero():
+                logger.debug("C0[%s; %s] is now zero" % (point, prank))
+                break
+            A1 = M.c1(point, prank)
             try:
                 U, V = alg1x(A0, A1, x)
             except FuchsiaError as e:
@@ -708,23 +943,24 @@ def fuchsify(M, x, seed=0):
                         "%s\nfurther reduction is pointless:\n%s" % (M, e))
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
-                point2, P, M = min(iter_reductions(point, U), \
-                        key=lambda (point2, P, M2): matrix_complexity(M2))
+                def complexity((point2, P, M)):
+                    #logger.debug("Measuring complexity at %s" % (point2))
+                    c = M.complexity()
+                    logger.debug("Reduction to %s yields complexity %s" % (point2, c))
+                    return c
+                point2, P, M = min(iter_reductions(point, U), key=complexity)
             except ValueError as e:
-                point2 = any_integer(rng, M.base_ring(), poincare_map)
+                point2 = any_integer(rng, SR, poincare_map)
                 P = fuchsia_simplify(U*V, x)
-                M = balance_transform(M, P, point, point2, x)
-                M = fuchsia_simplify(M, x)
+                M = M.apply_balance(P, point, point2)
                 logger.info("Will introduce an apparent singularity at %s." % point2)
             logger.debug(
                 "Applying balance between %s and %s with projector:\n%s" % (point, point2, P))
-            combinedT = combinedT * balance(P, point, point2, x)
             if point2 not in poincare_map:
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
-    combinedT = fuchsia_simplify(combinedT, x)
     logger.exit("fuchsify")
-    return M, combinedT
+    return M.get_M(), M.get_T()
 
 def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
     logger.enter("fuchsify_off_diagonal_blocks")
@@ -803,9 +1039,9 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
     W = matrix(evlist)
     try:
         M = solve_left_fixed(W*U, identity_matrix(U.ncols()))
-        return M*W
+        yield M*W
     except ValueError:
-        return None
+        pass
 
 def alg1x(A0, A1, x):
     #if not matrix_is_nilpotent(A0):
