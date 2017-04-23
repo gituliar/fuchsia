@@ -1,8 +1,7 @@
 #!/usr/bin/env sage
 """\
 Usage:
-    fuchsia [-hv] [--use-maple] [-f <fmt>] [-l <path>] [-P <path>]
-            <command> <args>...
+    fuchsia [options] <command> <args>...
 
 Commands:
     reduce [-x <name>] [-e <name>] [-m <path>] [-t <path>] <matrix>
@@ -41,6 +40,7 @@ Options:
     -e <name>   use this name for the infinitesimal parameter (default: eps)
     -m <path>   save the resulting matrix into this file
     -t <path>   save the resulting transformation into this file
+    -s <number> use this random seed when applicable (default: 0)
     --use-maple speed up calculations by using Maple when possible
 
 Arguments:
@@ -962,10 +962,10 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
         if logger.is_verbose():
             logger.debug("\n%s" % matrix_str(mi, 2))
 
-        mi_fuchs, ti_fuchs = fuchsify(mi, x, seed)
+        mi_fuchs, ti_fuchs = fuchsify(mi, x, seed=seed)
         ti = ti*ti_fuchs
 
-        mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed)
+        mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed=seed)
         ti = ti*ti_norm
 
         mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
@@ -1505,9 +1505,10 @@ def main():
         M = T = None
         x, y, epsilon = SR.var("x y eps")
         fmt = "m"
+        seed = 0
         logger.setLevel(logging.INFO)
         kwargs, args = getopt.gnu_getopt(sys.argv[1:],
-                "hvl:f:P:x:y:e:m:t:", ["help", "use-maple"])
+                "hvl:f:P:x:y:e:m:t:s:", ["help", "use-maple"])
         for key, value in kwargs:
             if key in ["-h", "--help"]: usage()
             if key == "-f":
@@ -1528,6 +1529,7 @@ def main():
             if key == "-e": epsilon = SR.var(value)
             if key == "-m": mpath = value
             if key == "-t": tpath = value
+            if key == "-s": seed = int(value)
             if key == "--use-maple":
                 global USE_MAPLE
                 USE_MAPLE = True
@@ -1535,22 +1537,22 @@ def main():
             if len(args) == 2 and args[0] == 'fuchsify':
                 M = import_matrix_from_file(args[1])
                 M, t1 = simplify_by_factorization(M, x)
-                M, t2 = fuchsify(M, x)
+                M, t2 = fuchsify(M, x, seed=seed)
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'normalize':
                 M = import_matrix_from_file(args[1])
                 M, t1 = simplify_by_factorization(M, x)
-                M, t2 = normalize(M, x, epsilon)
+                M, t2 = normalize(M, x, epsilon, seed=seed)
                 T = t1*t2
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
-                M, T = factorize(M, x, epsilon)
+                M, T = factorize(M, x, epsilon, seed=seed)
             elif len(args) == 2 and args[0] == 'sort':
                 M = import_matrix_from_file(args[1])
                 M, T, B = block_triangular_form(M)
             elif len(args) == 2 and args[0] == 'reduce':
                 m = import_matrix_from_file(args[1])
-                M, T = epsilon_form(m, x, epsilon)
+                M, T = epsilon_form(m, x, epsilon, seed=seed)
             elif len(args) == 2 and args[0] == 'cat':
                 M = import_matrix_from_file(args[1])
                 T = None
