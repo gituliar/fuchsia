@@ -97,20 +97,30 @@ class GeneralSystem:
         self.M = M
         self.x = x
         self.T = T
+        self.c0_cache = {}
+        self.c1_cache = {}
 
     def singular_points(self):
         return singularities(self.M, self.x)
 
     def c0(self, point, prank):
-        return matrix_c0(self.M, self.x, point, prank)
+        c0 = self.c0_cache.get((point, prank), None)
+        if c0 is None:
+            self.c0_cache[point, prank] = c0 = \
+                    matrix_c0(self.M, self.x, point, prank)
+        return c0
 
     def c1(self, point, prank):
-        return matrix_c1(self.M, self.x, point, prank)
+        c1 = self.c1_cache.get((point, prank), None)
+        if c1 is None:
+            self.c1_cache[point, prank] = c1 = \
+                    matrix_c1(self.M, self.x, point, prank)
+        return c1
 
     def apply_balance(self, P, x1, x2):
         M = balance_transform(self.M, P, x1, x2, self.x)
         M = fuchsia_simplify(M)
-        T = self.T * balance(P, x1, x2, self.x)
+        T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
         return GeneralSystem(M, self.x, T=T)
 
     def complexity(self):
@@ -120,7 +130,6 @@ class GeneralSystem:
         return self.M
 
     def get_T(self):
-        self.T = fuchsia_simplify(self.T)
         return self.T
 
 def cmap_add_div(Cmap, C, pi, ki, x0):
@@ -237,7 +246,8 @@ class RationalSystem:
             Cmap[key] = C = C.simplify_rational()
             if C.is_zero():
                 del Cmap[key]
-        return RationalSystem(dict(Cmap), self.x, self.T*balance(P, x1, x2, self.x))
+        T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
+        return RationalSystem(dict(Cmap), self.x, T)
 
     def complexity(self):
         return matrix_complexity(self.get_M().simplify_rational())
@@ -249,7 +259,6 @@ class RationalSystem:
         return M
 
     def get_T(self):
-        self.T = fuchsia_simplify(self.T)
         return self.T
 
 def matrix_partial_fraction_form(M, x):
@@ -1212,7 +1221,7 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
     logger.exit("reduce_diagonal_blocks")
     return mt, t
 
-def normalize(m, x, eps, seed=0):
+def normalize(M, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
     form dF/dx=m*F, find a transformation that will shift all
     the eigenvalues of m's residues into [-1/2, 1/2) range (in
@@ -1221,16 +1230,16 @@ def normalize(m, x, eps, seed=0):
     is not found.
     """
     class State(object):
-        def __init__(self, m, x, eps, seed):
+        def __init__(self, M, eps, seed):
             # random
             self.random = Random(seed)
             # points
-            self.points = singularities(m, x).keys()
+            self.points = M.singular_points().keys()
             # ev_cum
             self.ev_cum = {}
             for x0 in self.points:
                 pos, neg = 0, 0
-                a0 = matrix_residue(m, x, x0)
+                a0 = M.c0(x0, 0)
                 for ev in a0.eigenvalues():
                     ev0 = limit_fixed(ev, eps, 0)
                     if ev0 > 0:
@@ -1274,16 +1283,15 @@ def normalize(m, x, eps, seed=0):
                 ev_cum_x2[0] += 1
 
     logger.enter("normalize")
-    state = State(m, x, eps, seed)
-    T = identity_matrix(m.base_ring(), m.nrows())
+    M = RationalSystem.from_M(M, x)
+    state = State(M, eps, seed)
     if state.is_normalized():
         logger.info("already normalized")
     i = 0
     while not state.is_normalized():
         i += 1
-        m = fuchsia_simplify(m, x)
         logger.info("step %s" % i)
-        balances = find_balances(m, x, eps, state)
+        balances = find_balances(M, x, eps, state)
         b = select_balance(balances, eps, state)
         if b is None:
             raise FuchsiaError("can not balance matrix")
@@ -1294,26 +1302,22 @@ def normalize(m, x, eps, seed=0):
         cond, x1, x2, a0_eval, b0_eval, a0_evec, b0_evec, scale = b
         if cond == 1:
             P = cross_product(a0_evec, b0_evec) / scale
-            m = balance_transform(m, P, x1, x2, x)
-            T0 = balance(P, x1, x2, x)
+            M = M.apply_balance(P, x1, x2)
             state.update_ev_cum(x1, x2)
         else:
             P = cross_product(b0_evec, a0_evec) / scale
-            m = balance_transform(m, P, x2, x1, x)
-            T0 = balance(P, x2, x1, x)
+            M = M.apply_balance(P, x2, x1)
             state.update_ev_cum(x2, x1)
-
-        T = fuchsia_simplify(T*T0, x)
     logger.exit("normalize")
-    return m, T
+    return M.get_M(), M.get_T()
 
-def find_balances(m, x, eps, state={}):
+def find_balances(M, x, eps, state):
     residues = {}
     for x1, x2 in state.pairs():
         logger.debug("trying to balance x = %s and x = %s" % (x1,x2))
         for xi in [x1,x2]:
             if xi not in residues:
-                residues[xi] = matrix_residue(m, x, xi)
+                residues[xi] = M.c0(xi, 0)
         a0, b0 = residues[x1], residues[x2]
 
         a0_evr, b0_evl = eigenvectors_right(a0), eigenvectors_left(b0)
@@ -1361,7 +1365,7 @@ def find_balances_by_cond(a0_ev, b0_ev, cond):
                     res.append(balance)
     return res
 
-def select_balance(balances, eps, state={}):
+def select_balance(balances, eps, state):
     min_degree, min_balance = None, None
     bs = []
     for b in balances:
