@@ -176,7 +176,7 @@ class RationalSystem:
         Coo = zero_matrix(SR, self.T.nrows())
         for (_, k), C in self.Cmap.iteritems():
             if k == -1: Coo -= C
-        return Coo.simplify_rational()
+        return fuchsia_simplify(Coo)
 
     def singular_points(self):
         result = {}
@@ -243,14 +243,14 @@ class RationalSystem:
             Cmap[x1, -1] += P
             Cmap[x2, -1] -= P
         for key, C in Cmap.items():
-            Cmap[key] = C = C.simplify_rational()
+            Cmap[key] = C = fuchsia_simplify(C)
             if C.is_zero():
                 del Cmap[key]
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
         return RationalSystem(dict(Cmap), self.x, T)
 
     def complexity(self):
-        return matrix_complexity(self.get_M().simplify_rational())
+        return matrix_complexity(fuchsia_simplify(self.get_M()))
 
     def get_M(self):
         M = zero_matrix(SR, self.T.nrows())
@@ -278,7 +278,7 @@ def matrix_partial_fraction_form(M, x):
                 cm = result.get(key, None)
                 if cm is None:
                     result[key] = cm = zero_matrix(SR, n, m)
-                cm[i,j] = c.simplify_rational()
+                cm[i,j] = fuchsia_simplify(c)
     return result
 
 def partialer_fraction(ex, x):
@@ -307,7 +307,7 @@ def partialer_fraction(ex, x):
             if not c.is_zero():
                 result.append((p, -k, c))
                 r += c*(x-p)**(-k)
-    d = (ex-r).simplify_rational()
+    d = fuchsia_simplify(ex-r)
     for c, k in d.coefficients(x):
         assert(x not in c.variables())
         assert(k.is_integer())
