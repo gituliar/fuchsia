@@ -51,7 +51,7 @@ Arguments:
 
 __author__ = "Oleksandr Gituliar, Vitaly Magerya"
 __author_email__ = "oleksandr@gituliar.net"
-__version__ = "17.04.18"
+__version__ = "17.06.28"
 
 __all__ = [
     "balance",
@@ -1354,7 +1354,8 @@ def simplify_by_factorization(M, x):
 #==============================================================================
 
 _parser = Parser(make_int=SR, make_float=SR,
-        make_var=lambda v: I if v in "Ii" else SR.var(v))
+        make_var=lambda v: I if v in "Ii" else SR.var(v),
+        make_function={"sqrt": sqrt})
 
 def parse(s):
     """Convert a given string to a Sage expression.
@@ -1388,6 +1389,7 @@ def import_matrix_mathematica(f):
     nr = data.count('},{')+1
     data = data.translate(None, '{}')
     data = data.replace(',', '\n')
+    data = data.replace('Sqrt[', 'sqrt(').replace(']', ')')
     nc = int((data.count('\n')+1)/nr)
 
     import StringIO
