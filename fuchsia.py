@@ -1408,7 +1408,7 @@ def normalize(M, x, eps, seed=0):
     while not state.is_normalized():
         i += 1
         logger.info("step %s" % i)
-        balances = find_balances(M, x, eps, state)
+        balances = find_balances(M, eps, state)
         b = select_balance(balances, eps, state)
         if b is None:
             raise FuchsiaError("can not balance matrix")
@@ -1428,7 +1428,7 @@ def normalize(M, x, eps, seed=0):
     logger.exit("normalize")
     return M.get_M(), M.get_T()
 
-def find_balances(M, x, eps, state):
+def find_balances(M, eps, state):
     residues = {}
     for x1, x2 in state.pairs():
         logger.debug("trying to balance x = %s and x = %s" % (x1,x2))
