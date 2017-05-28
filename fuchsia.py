@@ -1715,7 +1715,8 @@ def simplify_by_factorization(M, x):
 #==============================================================================
 
 _parser = Parser(make_int=SR, make_float=SR,
-        make_var=lambda v: I if v in "Ii" else SR.var(v))
+        make_var=lambda v: I if v in "Ii" else SR.var(v),
+        make_function={"sqrt": sqrt})
 
 def parse(s):
     """Convert a given string to a Sage expression.
