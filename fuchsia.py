@@ -1628,6 +1628,7 @@ def simplify_by_jordanification(M, x):
     by 'matrix_complexity()'), return the original matrix and
     the identity transformation.
     """
+    logger.enter("simplify_by_jordanification")
     minM = M
     minC = matrix_complexity(M)
     minT = identity_matrix(M.base_ring(), M.nrows())
@@ -1640,6 +1641,7 @@ def simplify_by_jordanification(M, x):
             minM = MM
             minC = C
             minT = T
+    logger.exit("simplify_by_jordanification")
     return minM, minT
 
 def common_factor(expressions, filter):
@@ -1690,6 +1692,7 @@ def simplify_by_factorization(M, x):
     that extracts common factors found in M (if any). Return
     the simplified matrix and the transformation.
     """
+    logger.enter("simplify_by_factorization")
     n = M.nrows()
     T = identity_matrix(M.base_ring(), n)
     factors = []
@@ -1704,6 +1707,7 @@ def simplify_by_factorization(M, x):
             M = transform(M, x, dT)
     logger.debug(
             "stripping common factors with this transform:\ndiagonal_matrix([\n  %s\n])" % ",\n  ".join(str(e) for e in T.diagonal()))
+    logger.exit("simplify_by_factorization")
     return fuchsia_simplify(M, x), T
 
 #==============================================================================
