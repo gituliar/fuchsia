@@ -100,8 +100,15 @@ class GeneralSystem:
         self.c0_cache = {}
         self.c1_cache = {}
 
+    def size(self):
+        return self.M.nrows()
+
     def singular_points(self):
         return singularities(self.M, self.x)
+
+    def sub_singular_points(self, row, col, nrows, ncols):
+        subM = self.M.submatrix(row, col, nrows, ncols)
+        return singularities(subM, self.x)
 
     def c0(self, point, prank):
         c0 = self.c0_cache.get((point, prank), None)
@@ -109,6 +116,10 @@ class GeneralSystem:
             self.c0_cache[point, prank] = c0 = \
                     matrix_c0(self.M, self.x, point, prank)
         return c0
+
+    def sub_c0(self, row, col, nrows, ncols, point, prank):
+        subM = self.M.submatrix(row, col, nrows, ncols)
+        return matrix_c0(subM, self.x, point, prank)
 
     def c1(self, point, prank):
         c1 = self.c1_cache.get((point, prank), None)
@@ -121,6 +132,13 @@ class GeneralSystem:
         M = balance_transform(self.M, P, x1, x2, self.x)
         M = fuchsia_simplify(M)
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
+        return GeneralSystem(M, self.x, T=T)
+
+    def apply_off_diagonal_t(self, D, x0, p):
+        # assert (D*D).is_zero()
+        T = 1 + D*(self.x - x0)**(-p) if not (x0 == oo) else 1 + D*(self.x**p)
+        M = fuchsia_simplify(transform(self.M, self.x, T), self.x)
+        T = fuchsia_simplify(self.T * T)
         return GeneralSystem(M, self.x, T=T)
 
     def complexity(self):
@@ -137,7 +155,7 @@ def cmap_add_div(Cmap, C, pi, ki, x0):
     if pi == x0:
         Cmap[pi, ki-1] += C
     elif ki >= 0:
-        assert(pi == 0)
+        assert pi == 0
         for k in range(0, ki):
             Cmap[pi, k] += C * x0**(ki-1-k)
         Cmap[x0, -1] += C * x0**ki
@@ -153,6 +171,44 @@ def cmap_add_mul(Cmap, C, pi, ki, x0):
         Cmap[SR(0), ki+1] += C
     else:
         Cmap[pi, ki+1] += C
+
+def cmap_add(Cmap, C, p1, k1, p2, k2):
+    # M += C*(x-p1)^k1*(x-p2)^k2
+    def cmap_add_inner(Cmap, C, p1, k1, p2, k2):
+        #if k1 >= 0: assert(p1 == 0)
+        #if k2 >= 0: assert(p2 == 0)
+        if p1 == p2:
+            Cmap[p1, k1+k2] += C
+        elif k1 == 0:
+            Cmap[p2, k2] += C
+        elif k2 == 0:
+            Cmap[p1, k1] += C
+        elif k1 >= 0 and k2 >= 0:
+            Cmap[p1, k1+k2] += C
+        elif k1 < 0 and k2 < 0:
+            d = p1-p2
+            Cmap[p1, k1] += C*d**k2
+            for i in range(k2, 0):
+                cmap_add_inner(Cmap, C*(-d**i), SR(0) if k1+1 == 0 else p1, k1+1, p2, k2-i-1)
+        elif k1 < 0 and k2 > 0:
+            b = 1
+            for i in range(min(-k1, k2 + 1)):
+                Cmap[p1, k1+i] += C*(b*p1**(k2-i))
+                b = b*(k2 - i)//(i + 1)
+            for i in range(min(-k1, k2 + 1), k2 + 1):
+                b2 = b
+                for j in range(k1 + i + 1):
+                    Cmap[SR(0), j] += C*(b2*p1**(k1+k2-j)*(-1)**(k1+i-j))
+                    b2 = b2*(k1 + i - j)//(j + 1)
+                b = b*(k2 - i)//(i + 1)
+        elif k1 > 0 and k2 < 0:
+            cmap_add_inner(Cmap, C, p2, k2, p1, k1)
+        else:
+            assert(False)
+    Kmap = defaultdict(SR.zero)
+    cmap_add_inner(Kmap, SR(1), p1, k1, p2, k2)
+    for key, K in Kmap.iteritems():
+        Cmap[key] += C*K
 
 class RationalSystem:
     @staticmethod
@@ -171,12 +227,19 @@ class RationalSystem:
         self.Cmap = Cmap
         self.x = x
         self.T = T
+        self.c0_oo_cached = None
+
+    def size(self):
+        return self.T.nrows()
 
     def c0_oo(self):
-        Coo = zero_matrix(SR, self.T.nrows())
+        if self.c0_oo_cached is not None:
+            return self.c0_oo_cached
+        Coo = zero_matrix(SR, self.size())
         for (_, k), C in self.Cmap.iteritems():
             if k == -1: Coo -= C
-        return fuchsia_simplify(Coo)
+        self.c0_oo_cached = r = fuchsia_simplify(Coo)
+        return r
 
     def singular_points(self):
         result = {}
@@ -189,22 +252,40 @@ class RationalSystem:
             result[oo] = 0
         return result
 
+    def sub_singular_points(self, row, col, nrows, ncols):
+        result = {}
+        for (p, k), C in self.Cmap.iteritems():
+            if C.submatrix(row, col, nrows, ncols).is_zero():
+                continue
+            if k >= 0:
+                result[oo] = max(k+1, result.get(oo, 0))
+            else:
+                result[p] = max(-k-1, result.get(p, 0))
+        if oo not in result and not self.c0_oo().submatrix(row, col, nrows, ncols).is_zero():
+            result[oo] = 0
+        return result
+
     def c0(self, point, prank):
         if point == oo:
             if prank == 0: return self.c0_oo()
-            return -self.Cmap.get((SR(0), prank-1), SR(0))
+            C = self.Cmap.get((SR(0), prank-1), None)
+            return -C if C is not None else zero_matrix(SR, self.size())
         else:
-            return self.Cmap.get((point, -prank-1), SR(0))
+            C = self.Cmap.get((point, -prank-1), None)
+            return C if C is not None else zero_matrix(SR, self.size())
+
+    def sub_c0(self, row, col, nrows, ncols, point, prank):
+        return self.c0(point, prank).submatrix(row, col, nrows, ncols)
 
     def c1(self, point, prank):
         assert(prank >= 1)
         if point == oo:
             if prank == 1: return self.c0_oo()
             C = self.Cmap.get((SR(0), prank-2), None)
-            return -C if C is not None else zero_matrix(SR, self.T.nrows())
+            return -C if C is not None else zero_matrix(SR, self.size())
         else:
             C = self.Cmap.get((point, -prank), None)
-            return C if C is not None else zero_matrix(SR, self.T.nrows())
+            return C if C is not None else zero_matrix(SR, self.size())
 
     def apply_balance(self, P, x1, x2):
         x1 = SR(x1)
@@ -249,11 +330,47 @@ class RationalSystem:
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
         return RationalSystem(dict(Cmap), self.x, T)
 
+    def apply_off_diagonal_t(self, D, x0, k):
+        # assert (D*D).is_zero()
+        # assert D.is_sparse()
+        Cmap = defaultdict(SR.zero, self.Cmap)
+        def sparse_commutator(A, B):
+            # assert B.is_sparse()
+            C = zero_matrix(SR, A.nrows(), sparse=True)
+            for (i, j), v in B.dict().iteritems():
+                for k in range(A.nrows()):
+                    C[k,j] += A[k,i]*v
+                    C[i,k] -= v*A[j,k]
+            return C
+        dirty = set(D.nonzero_positions())
+        if not (x0 == oo):
+            for (pi, ki), Ci in self.Cmap.iteritems():
+                # M += (Ci*D - D*Ci)*(self.x-pi)**ki*(self.x-x0)**(-k)
+                CD = sparse_commutator(Ci, D)
+                dirty.update(CD.nonzero_positions())
+                cmap_add(Cmap, CD, pi, ki, x0, -k)
+            T = 1 + D*(self.x - x0)**(-k)
+            Cmap[x0, -k-1] += -(-k)*D
+        else:
+            for (pi, ki), Ci in self.Cmap.iteritems():
+                # M += (Ci*D - D*Ci)*(self.x-pi)**ki*(self.x)**(k)
+                CD = sparse_commutator(Ci, D)
+                dirty.update(CD.nonzero_positions())
+                cmap_add(Cmap, CD, pi, ki, SR(0), k)
+            T = 1 + D*(self.x**k)
+            Cmap[SR(0), k-1] += -(k)*D
+        for key, C in Cmap.items():
+            for ij in dirty:
+                C[ij] = fuchsia_simplify(C[ij])
+            if C.is_zero():
+                del Cmap[key]
+        return RationalSystem(dict(Cmap), self.x, fuchsia_simplify(self.T*T))
+
     def complexity(self):
         return matrix_complexity(fuchsia_simplify(self.get_M()))
 
     def get_M(self):
-        M = zero_matrix(SR, self.T.nrows())
+        M = zero_matrix(SR, self.size())
         for (p, k), C in self.Cmap.iteritems():
             M += C*(self.x-p)**k
         return M
@@ -269,9 +386,11 @@ def matrix_partial_fraction_form(M, x):
 
     If the matrix is not rational, raise an (assertion) error.
     """
+    logger.enter("matrix_partial_fraction_form")
     n, m = M.nrows(), M.ncols()
     result = {}
     for i in range(n):
+        logger.debug("Converting row {}".format(i))
         for j in range(m):
             for p, k, c in partialer_fraction(M[i,j], x):
                 key = (p,k)
@@ -279,6 +398,7 @@ def matrix_partial_fraction_form(M, x):
                 if cm is None:
                     result[key] = cm = zero_matrix(SR, n, m)
                 cm[i,j] = fuchsia_simplify(c)
+    logger.exit("matrix_partial_fraction_form")
     return result
 
 def partialer_fraction(ex, x):
@@ -297,21 +417,24 @@ def partialer_fraction(ex, x):
         return []
     result = []
     r = SR(0)
-    sols, mults = solve(factor(SR(1)/ex), x, multiplicities=True)
+    sols, mults = solve(factor(SR(1)/ex, x), x, multiplicities=True)
     for sol, n in zip(sols, mults):
         assert(sol.left_hand_side() == x)
         p = expand(sol.right_hand_side())
         s = ex.subs({x:x+p}).taylor(x, 0, -1)
-        for k in range(1, n+1):
-            c = s.coefficient(SR(1)/x**k)
+        if s.is_zero(): continue
+        for c, k in s.coefficients(x):
+            assert not c.has(x)
+            assert k.is_integer()
+            assert k < 0
             if not c.is_zero():
-                result.append((p, -k, c))
-                r += c*(x-p)**(-k)
+                result.append((p, int(k), c))
+                r += c*(x-p)**k
     d = fuchsia_simplify(ex-r)
     for c, k in d.coefficients(x):
-        assert(x not in c.variables())
-        assert(k.is_integer())
-        assert(k >= 0)
+        assert not c.has(x)
+        assert k.is_integer()
+        assert k >= 0
         if not c.is_zero():
             result.append((SR(0), int(k), c))
             r += c*x**k
@@ -971,47 +1094,41 @@ def fuchsify(M, x, seed=0):
     logger.exit("fuchsify")
     return M.get_M(), M.get_T()
 
-def fuchsify_off_diagonal_blocks(m, x, eps, b=None):
+def fuchsify_off_diagonal_blocks(M, x, eps, b=None):
     logger.enter("fuchsify_off_diagonal_blocks")
-    n = m.nrows()
     if b is None:
-        m, t, b = block_triangular_form(m)
+        M, t0, b = block_triangular_form(M)
     else:
-        t = identity_matrix(SR, n)
+        t0 = identity_matrix(SR, M.nrows())
+    M = RationalSystem.from_M(M, x)
     for i, (ki, ni) in enumerate(b):
         for j, (kj, nj) in enumerate(reversed(b[:i])):
-            pts = singularities(m.submatrix(ki, kj, ni, nj), x)
-            printed = False
+            pts = M.sub_singular_points(ki, kj, ni, nj)
+            if any(pts.values()):
+                logger.info("Fuchsifying a %dx%d block at (%d, %d)" % (ni, nj, ki, kj))
+                logger.debug("... singular points: {}".format(pts))
             while any(pts.values()):
-                bj = m.submatrix(ki, kj, ni, nj)
-                if bj.is_zero():
-                    break
-                for x0, p in pts.iteritems():
+                for x0, p in pts.items():
                     if p < 1:
                         continue
-                    if not printed:
-                        printed = True
-                        logger.info("Fuchsifying block (%d, %d) (%d, %d)" % (ki, ni, kj, nj))
-                        logger.debug("  singular points = %s" % (pts,))
-                    a0 = matrix_residue(m.submatrix(ki, ki, ni, ni)/eps, x, x0)
-                    b0 = matrix_c0(bj, x, x0, p)
-                    c0 = matrix_residue(m.submatrix(kj, kj, nj, nj)/eps, x, x0)
+                    logger.debug("... fuchsifying at point {}, rank={}".format(x0, p))
+                    a0 = M.sub_c0(ki, ki, ni, ni, x0, 0)
+                    b0 = M.sub_c0(ki, kj, ni, nj, x0, p)
+                    c0 = M.sub_c0(kj, kj, nj, nj, x0, 0)
 
                     d_vars = [gensym() for i in xrange(ni*nj)]
                     d = matrix(SR, ni, nj, d_vars)
-                    eq = d + eps/p*(a0*d - d*c0) + b0/p
+                    eq = d + (a0*d - d*c0 + b0)/p
                     sol = solve(eq.list(), *d_vars, solution_dict=True)
                     d = d.subs(sol[0])
 
-                    t0 = identity_matrix(SR, n)
-                    t0[ki:ki+ni, kj:kj+nj] = \
-                            d/(x-x0)**p if not (x0 == oo) else d*(x**p)
-                    m = fuchsia_simplify(transform(m, x, t0), x)
+                    D = zero_matrix(SR, M.size(), sparse=True)
+                    D[ki:ki+ni, kj:kj+nj] = d
+                    M = M.apply_off_diagonal_t(D, x0, p)
 
-                    t = fuchsia_simplify(t*t0, x)
                     pts[x0] -= 1
     logger.exit("fuchsify_off_diagonal_blocks")
-    return m, t
+    return M.get_M(), t0*M.get_T()
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,

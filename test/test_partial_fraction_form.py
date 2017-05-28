@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from   sage.all import SR, matrix, oo
+from   sage.all import SR, matrix, oo, sqrt, I
 import fuchsia
 
 class Test(unittest.TestCase):
@@ -16,6 +16,21 @@ class Test(unittest.TestCase):
     def test_matrix_2(t):
         x = SR.var("x")
         M = matrix([[1/x+2/(x-1)**2+3+4*x+5*x*x, 1/(x-1)/(x-2)], [x*(x-1), (x+1)/(x+2)]])
+        m1 = fuchsia.GeneralSystem.from_M(M, x)
+        m2 = fuchsia.RationalSystem.from_M(M, x)
+        t.assertTrue((m1.get_M() - M).is_zero())
+        t.assertTrue((m2.get_M() - M).is_zero())
+
+    def test_matrix_3(t):
+        return
+        x, eps = SR.var("x eps")
+        M = matrix([
+            [eps/(x - 1), 0, 0],
+            [(x**3 + x**2 - 3*x - 3)/(2*x**3 - 2*x**2 - x + 1), 2*eps/(x - 3), 0],
+            [-(x**3 + 3*x**2 - 3*x + 2)/(2*x**3 + x**2 - 2*x) + 2*(x**3 - x**2 - x + 1)/(2*x + 1),
+                -3*(x**3 + x - 1)/(3*x**3 + x - 2),
+                4*eps/(x - 5)]
+        ])
         m1 = fuchsia.GeneralSystem.from_M(M, x)
         m2 = fuchsia.RationalSystem.from_M(M, x)
         t.assertTrue((m1.get_M() - M).is_zero())
@@ -165,3 +180,38 @@ class Test(unittest.TestCase):
         testB(oo, 3)
         testB(3, 1)
         testB(-3, 7)
+
+    def test_partialer_fraction_1(t):
+        x = SR.var("x")
+        t.assertEqual(fuchsia.partialer_fraction(SR(0), x), [])
+
+    def test_partialer_fraction_2(t):
+        x = SR.var("x")
+        t.assertEqual(
+                fuchsia.partialer_fraction(SR(9), x),
+                [(SR(0), 0, SR(9))])
+
+    def test_partialer_fraction_3(t):
+        x = SR.var("x")
+        ex = 3*x**2 + 4*x + 5 + 6/(x - 2)**3
+        t.assertEqual(
+                set(fuchsia.partialer_fraction(ex, x)),
+                set([
+                    (SR(0), 0, SR(5)),
+                    (SR(0), 1, SR(4)),
+                    (SR(0), 2, SR(3)),
+                    (SR(2), -3, SR(6))
+                ]))
+
+    def test_partialer_fraction_4(t):
+        x = SR.var("x")
+        ex = (x*3+1)/(x**3+x**2+x+1)+1/(x**2-5)+(x**3*(2+3/x)+2)/(x**2+7)
+        pf = SR(0)
+        for p, k, c in fuchsia.partialer_fraction(ex, x):
+            t.assertEqual(p.variables(), ())
+            t.assertTrue(type(k) is int)
+            if k >= 0: t.assertEqual(p, SR(0))
+            t.assertFalse(c.is_zero())
+            t.assertEqual(c.variables(), ())
+            pf += c*(x-p)**k
+        t.assertEqual(pf, ex)
