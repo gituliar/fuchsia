@@ -1693,18 +1693,22 @@ def simplify_by_factorization(M, x):
     the simplified matrix and the transformation.
     """
     logger.enter("simplify_by_factorization")
+    M = copy(M)
     n = M.nrows()
-    T = identity_matrix(M.base_ring(), n)
+    T = identity_matrix(SR, n)
     factors = []
     for i in xrange(n):
+        logger.debug("Looking at row {}".format(i))
         factor = common_factor(
             [M[i,k] for k in xrange(n) if i != k and not M[i,k].is_zero()] +
             [1/M[k,i] for k in xrange(n) if k != i and not M[k,i].is_zero()],
-            lambda e: x not in e.variables())
+            lambda e: not e.has(x))
         if factor != 1:
-            dT = identity_matrix(M.base_ring(), n)
-            dT[i,i] = T[i,i] = factor
-            M = transform(M, x, dT)
+            T[i,i] = factor
+            for k in range(n):
+                if k != i:
+                    M[k,i] *= factor
+                    M[i,k] /= factor
     logger.debug(
             "stripping common factors with this transform:\ndiagonal_matrix([\n  %s\n])" % ",\n  ".join(str(e) for e in T.diagonal()))
     logger.exit("simplify_by_factorization")
