@@ -90,8 +90,10 @@ from   sage.libs.ecl import ecl_eval
 
 class GeneralSystem:
     @staticmethod
-    def from_M(M, x):
-        return GeneralSystem(M, x, identity_matrix(SR, M.nrows()))
+    def from_M(M, x, T=None):
+        assert M.is_square()
+        if T is None: T = identity_matrix(SR, M.nrows())
+        return GeneralSystem(M, x, T)
 
     def __init__(self, M, x, T):
         self.M = M
@@ -128,18 +130,30 @@ class GeneralSystem:
                     matrix_c1(self.M, self.x, point, prank)
         return c1
 
+    def sub_system(self, n, k):
+        return GeneralSystem(M.submatrix(n, n, k, k), self.x, identity_matrix(SR, k))
+
+    def is_factorized(self, epsilon):
+        return epsilon not in expand(self.M/epsilon).variables()
+
     def apply_balance(self, P, x1, x2):
         M = balance_transform(self.M, P, x1, x2, self.x)
         M = fuchsia_simplify(M)
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
-        return GeneralSystem(M, self.x, T=T)
+        return GeneralSystem(M, self.x, T)
+
+    def apply_constant_t(self, T, invT=None):
+        assert self.x not in T.variables()
+        if invT is None:
+            invT = T.inverse()
+        return GeneralSystem(invT*self.M*T, self.x, self.T*T)
 
     def apply_off_diagonal_t(self, D, x0, p):
         # assert (D*D).is_zero()
         T = 1 + D*(self.x - x0)**(-p) if not (x0 == oo) else 1 + D*(self.x**p)
-        M = fuchsia_simplify(transform(self.M, self.x, T), self.x)
+        M = fuchsia_simplify(transform(self.M, self.x, T))
         T = fuchsia_simplify(self.T * T)
-        return GeneralSystem(M, self.x, T=T)
+        return GeneralSystem(M, self.x, T)
 
     def complexity(self):
         return matrix_complexity(self.M)
@@ -149,6 +163,9 @@ class GeneralSystem:
 
     def get_T(self):
         return self.T
+
+    def get_bool_M(self):
+        return matrix([[not ex.is_zero() for ex in row] for row in self.M])
 
 def cmap_add_div(Cmap, C, pi, ki, x0):
     # M += C*(x-pi)^ki/(x-x0)
@@ -212,9 +229,10 @@ def cmap_add(Cmap, C, p1, k1, p2, k2):
 
 class RationalSystem:
     @staticmethod
-    def from_M(M, x):
+    def from_M(M, x, T=None):
+        assert M.is_square()
         Cmap = matrix_partial_fraction_form(M, x)
-        T = identity_matrix(SR, M.nrows())
+        if T is None: T = identity_matrix(SR, M.nrows())
         return RationalSystem(Cmap, x, T)
 
     def __str__(self):
@@ -287,6 +305,20 @@ class RationalSystem:
             C = self.Cmap.get((point, -prank), None)
             return C if C is not None else zero_matrix(SR, self.size())
 
+    def sub_system(self, n, k):
+        Cmap = {}
+        for key, C in self.Cmap.iteritems():
+            C = C.submatrix(n, n, k, k)
+            if not C.is_zero():
+                Cmap[key] = C
+        return RationalSystem(Cmap, self.x, identity_matrix(SR, k))
+
+    def is_factorized(self, epsilon):
+        for key, C in self.Cmap.iteritems():
+            if epsilon in expand(C/epsilon).variables():
+                return False
+        return True
+
     def apply_balance(self, P, x1, x2):
         x1 = SR(x1)
         x2 = SR(x2)
@@ -329,6 +361,13 @@ class RationalSystem:
                 del Cmap[key]
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
         return RationalSystem(dict(Cmap), self.x, T)
+
+    def apply_constant_t(self, T, invT=None):
+        assert self.x not in T.variables()
+        if invT is None:
+            invT = T.inverse()
+        Cmap = {key: invT*C*T for key, C in self.Cmap.iteritems()}
+        return RationalSystem(Cmap, self.x, self.T*T)
 
     def apply_off_diagonal_t(self, D, x0, k):
         # assert (D*D).is_zero()
@@ -377,6 +416,14 @@ class RationalSystem:
 
     def get_T(self):
         return self.T
+
+    def get_bool_M(self):
+        B = zero_matrix(self.size())
+        for _, C in self.Cmap.iteritems():
+            for i in range(self.size()):
+                for j in range(self.size()):
+                    B[i,j] = bool(B[i,j]) or not C[i,j].is_zero()
+        return B
 
 def matrix_partial_fraction_form(M, x):
     """Convert a rational matrix into partial fraction form:
@@ -519,14 +566,11 @@ def dot_product(v1, v2):
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
 
-def fuchsia_simplify(obj, x=None):
+def fuchsia_simplify(obj):
     if USE_MAPLE:
         def maple_simplify(ex):
-            if hasattr(ex, "variables") and ((x is None) or (x in ex.variables())):
-                res = maple.factor(maple.radnormal(ex))
-                return parse(str(res))
-            else:
-                return ex
+            res = maple.radnormal(ex)
+            return parse(str(res))
         if hasattr(obj, "apply_map"):
             return obj.apply_map(maple_simplify)
         else:
@@ -544,7 +588,7 @@ def fuchsia_solve(eqs, var):
             r = []
             for s in solution:
                 try:
-                    expr = fuchsia_simplify(parse(s))
+                    expr = parse(s)
                     r.append(expr)
                 except SyntaxError as error:
                     print "ERROR:  \n%s\n  %s\n" % (s, error)
@@ -600,20 +644,6 @@ def balance_transform(M, P, x1, x2, x):
     return mm
 
 def limit_fixed(expr, x, x0):
-    if USE_MAPLE:
-        return limit_fixed_maple(expr, x, x0)
-    else:
-        return limit_fixed_maxima(expr, x, x0)
-
-def limit_fixed_maple(expr, x, x0):
-    res = maple.limit(expr, **{str(x): x0})
-    try:
-        res = parse(str(res))
-    except:
-        res = NaN
-    return res
-
-def limit_fixed_maxima(expr, x, x0):
     """Return a limit of expr when x->lim.
 
     The standard 'limit()' function of SageMath does not allow
@@ -621,8 +651,12 @@ def limit_fixed_maxima(expr, x, x0):
     argument. If you have a variable, and not it's name, use
     this function instead.
     """
-    l = maxima_calculus.sr_limit(expr, x, x0)
-    return expr.parent()(l)
+    if USE_MAPLE:
+        l = maple.limit(expr, **{str(x): x0})
+        return parse(str(l))
+    else:
+        l = maxima_calculus.sr_limit(expr, x, x0)
+        return expr.parent()(l)
 
 def singularities(m, x):
     """Find values of x around which rational matrix M has
@@ -795,14 +829,7 @@ def matrix_residue(M, x, x0):
     [-1 -2]
     [-3 -4]
     """
-    if M._cache is None:
-        M._cache = {}
-    key = "matrix_residue_%s_%s" % (x, x0)
-    if M._cache.has_key(key):
-        return M._cache[key]
-
     m0 = matrix_c0(M, x, x0, 0)
-    M._cache[key] = m0
     return m0
 
 def matrix_is_nilpotent(M):
@@ -884,19 +911,9 @@ def any_integer(rng, ring, excluded):
 # Transformation routines
 #==================================================================================================
 
-def block_triangular_form(m):
-    """Find a lower block-triangular form of a given matrix.
-
-    Return a tuple `(M, T, B)` where:
-      * `M` is a new matrix;
-      * `T` is a transformation matrix;
-      * `B` is a list of tuples (ki, ni), such that M's i-th
-        diagonal block is given by `M.submatrix(ki, ki, ni, ni)`.
-    """
-    logger.enter("block_triangular_form")
-    if logger.is_verbose():
-        logger.debug("matrix before transformation:\n%s\n" % matrix_mask_str(m))
-
+def block_triangular_transform(m):
+    logger.debug("Matrix shape before triangularization:\n{}".format(
+        "\n".join("".join("#" if ex else "." for ex in row) for row in m)))
     n = m.nrows()
     deps_1_1 = {}
     for i, row in enumerate(m.rows()):
@@ -963,57 +980,38 @@ def block_triangular_form(m):
             t[j,i] = 1
             i += 1
     logger.info("found %d blocks" % len(blocks))
-    mt = transform(m, None, t)
-    if logger.is_verbose():
-        logger.debug("matrix after transformation:\n%s\n" % matrix_mask_str(mt))
+    return t, blocks
+
+def block_triangular_form(M):
+    """
+    Find a lower block-triangular form of a given matrix.
+    """
+    logger.enter("block_triangular_form")
+    T, blocks = block_triangular_transform(M.get_bool_M())
+    M = M.apply_constant_t(T)
     logger.exit("block_triangular_form")
-    return mt, t, blocks
+    return M, blocks
 
-def epsilon_form(m, x, eps, seed=0):
+def epsilon_form(M, eps, seed=0):
     logger.enter("epsilon_form")
-    m, t1, b = block_triangular_form(m)
-    m, t2 = reduce_diagonal_blocks(m, x, eps, b=b, seed=seed)
-    m, t3 = fuchsify_off_diagonal_blocks(m, x, eps, b=b)
-    m, t4 = factorize(m, x, eps, b=b, seed=seed)
-    t = t1*t2*t3*t4
+    M, b = block_triangular_form(M)
+    M = reduce_diagonal_blocks(M, eps, b=b, seed=seed)
+    M = fuchsify_off_diagonal_blocks(M, eps, b=b)
+    M = factorize(M, eps, b=b, seed=seed)
     logger.exit("epsilon_form")
-    return m, t
-
-def matrix_mask(m):
-    n = m.nrows()
-    return matrix(SR, n, n, [int(not bool(ex==0)) for ex in m.list()])
-
-def matrix_mask_str(m):
-    s = ''
-    for row in matrix_mask(m).rows():
-        s += ' '.join([str(ex) for ex in row]).replace('0', '.').replace('1','x') + "\n"
-    return s
-
-def matrix_str(m, n=2):
-    buf = ""
-    ind = " "*n
-    for col in m.columns():
-        for ex in col:
-            buf += ind + str(ex) + "\n"
-        buf += "\n"
-    buf = buf[:-1]
-    return buf
+    return M
 
 #==================================================================================================
 # Step I: Fuchsify
 #==================================================================================================
 
-def is_fuchsian(m, x):
-    for i, expr in enumerate(m.list()):
-        if expr.is_zero():
-            continue
-        points = singularities_expr(expr, x)
-        for x0, p in points.iteritems():
-            if p > 0:
-                return False
+def is_fuchsian(M, x):
+    for p, prank in M.singular_points().iteritems():
+        if prank != 0:
+            return False
     return True
 
-def fuchsify(M, x, seed=0):
+def fuchsify(M, seed=0):
     """Given a system of differential equations of the form dF/dx=M*F,
     try to find a transformation T, which will reduce M to Fuchsian
     form. Return the transformed M and T. Raise FuchsiaError if
@@ -1023,9 +1021,7 @@ def fuchsify(M, x, seed=0):
     different ones by supplying different seeds.
     """
     logger.enter("fuchsify")
-    assert M.is_square()
     rng = Random(seed)
-    M = RationalSystem.from_M(M, x)
     poincare_map = M.singular_points()
     def iter_reductions(p1, U):
         for p2, prank2 in poincare_map.iteritems():
@@ -1037,7 +1033,7 @@ def fuchsify(M, x, seed=0):
             if prank2 < 0: continue
             try:
                 for v in find_dual_basis_spanning_left_invariant_subspace(B0, U, rng):
-                    P = fuchsia_simplify(U*v, x)
+                    P = fuchsia_simplify(U*v)
                     yield p2, P, M.apply_balance(P, p1, p2)
             except TypeError as err:
                 if "THROW: The catch RAT-ERR is undefined." in str(err):
@@ -1069,21 +1065,20 @@ def fuchsify(M, x, seed=0):
                 break
             A1 = M.c1(point, prank)
             try:
-                U, V = alg1x(A0, A1, x)
+                U, V = alg1x(A0, A1)
             except FuchsiaError as e:
                 logger.debug("Managed to fuchsify matrix to this state:\n"
                         "%s\nfurther reduction is pointless:\n%s" % (M, e))
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
                 def complexity((point2, P, M)):
-                    #logger.debug("Measuring complexity at %s" % (point2))
                     c = M.complexity()
                     logger.debug("Reduction to %s yields complexity %s" % (point2, c))
                     return c
                 point2, P, M = min(iter_reductions(point, U), key=complexity)
             except ValueError as e:
                 point2 = any_integer(rng, SR, poincare_map)
-                P = fuchsia_simplify(U*V, x)
+                P = fuchsia_simplify(U*V)
                 M = M.apply_balance(P, point, point2)
                 logger.info("Will introduce an apparent singularity at %s." % point2)
             logger.debug(
@@ -1092,15 +1087,12 @@ def fuchsify(M, x, seed=0):
                 poincare_map[point2] = 1
         poincare_map[point] = prank - 1
     logger.exit("fuchsify")
-    return M.get_M(), M.get_T()
+    return M
 
-def fuchsify_off_diagonal_blocks(M, x, eps, b=None):
+def fuchsify_off_diagonal_blocks(M, eps, b=None):
     logger.enter("fuchsify_off_diagonal_blocks")
     if b is None:
-        M, t0, b = block_triangular_form(M)
-    else:
-        t0 = identity_matrix(SR, M.nrows())
-    M = RationalSystem.from_M(M, x)
+        M, b = block_triangular_form(M)
     for i, (ki, ni) in enumerate(b):
         for j, (kj, nj) in enumerate(reversed(b[:i])):
             pts = M.sub_singular_points(ki, kj, ni, nj)
@@ -1119,7 +1111,7 @@ def fuchsify_off_diagonal_blocks(M, x, eps, b=None):
                     d_vars = [gensym() for i in xrange(ni*nj)]
                     d = matrix(SR, ni, nj, d_vars)
                     eq = d + (a0*d - d*c0 + b0)/p
-                    sol = solve(eq.list(), *d_vars, solution_dict=True)
+                    sol = fuchsia_solve(eq.list(), d_vars)
                     d = d.subs(sol[0])
 
                     D = zero_matrix(SR, M.size(), sparse=True)
@@ -1128,7 +1120,7 @@ def fuchsify_off_diagonal_blocks(M, x, eps, b=None):
 
                     pts[x0] -= 1
     logger.exit("fuchsify_off_diagonal_blocks")
-    return M.get_M(), t0*M.get_T()
+    return M
 
 def reduce_at_one_point(M, x, v, p, v2=oo):
     """Given a system of differential equations of the form dF/dx=M*F,
@@ -1145,12 +1137,12 @@ def reduce_at_one_point(M, x, v, p, v2=oo):
         A0 = matrix_c0(M, x, v, p)
         if A0.is_zero(): break
         A1 = matrix_c1(M, x, v, p)
-        U, V = alg1x(A0, A1, x)
+        U, V = alg1x(A0, A1)
         P = U*V
         M = balance_transform(M, P, v, v2, x)
-        M = fuchsia_simplify(M, x)
+        M = fuchsia_simplify(M)
         combinedT = combinedT * balance(P, v, v2, x)
-    combinedT = fuchsia_simplify(combinedT, x)
+    combinedT = fuchsia_simplify(combinedT)
     return M, combinedT
 
 def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
@@ -1169,7 +1161,7 @@ def find_dual_basis_spanning_left_invariant_subspace(A, U, rng):
     except ValueError:
         pass
 
-def alg1x(A0, A1, x):
+def alg1x(A0, A1):
     #if not matrix_is_nilpotent(A0):
     #    raise FuchsiaError("matrix is irreducible (non-nilpotent residue)")
     # We will rely on undocumented behavior of jordan_form() call:
@@ -1188,7 +1180,7 @@ def alg1x(A0, A1, x):
         [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
         for k in xrange(ncells)
     ])
-    L0 = fuchsia_simplify(L0, x)
+    L0 = fuchsia_simplify(L0)
     L1 = matrix([
         [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
         for k in xrange(ncells)
@@ -1298,12 +1290,12 @@ def are_diagonal_blocks_reduced(m, b, x, eps):
     True
     """
     for ki, ni in b:
-        mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
+        mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni))
         if not is_normalized(mi, x, eps):
             return False
     return True
 
-def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
+def reduce_diagonal_blocks(M, eps, b=None, seed=0):
     """Given a lower block-triangular system of differential equations of the form dF/dx=m*F,
     find a transformation that will shift all eigenvalues of all residues of all its diagonal
     blocks into the range [-1/2, 1/2) in eps->0 limit. Return the transformed matrix m and the
@@ -1312,33 +1304,21 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
     `block_triangular_form` routine.
     """
     logger.enter("reduce_diagonal_blocks")
-    n = m.nrows()
     if b is None:
-        m, t, b = block_triangular_form(m)
-    else:
-        t = identity_matrix(SR, n)
-    for i, (ki, ni) in enumerate(b):
-        mi = fuchsia_simplify(m.submatrix(ki, ki, ni, ni), x)
-        ti = identity_matrix(SR, ni)
-        logger.info("reducing block #%d (%d,%d)" % (i,ki,ni))
-        if logger.is_verbose():
-            logger.debug("\n%s" % matrix_str(mi, 2))
-
-        mi_fuchs, ti_fuchs = fuchsify(mi, x, seed=seed)
-        ti = ti*ti_fuchs
-
-        mi_norm, ti_norm = normalize(mi_fuchs, x, eps, seed=seed)
-        ti = ti*ti_norm
-
-        mi_eps, ti_eps = factorize(mi_norm, x, eps, seed=seed)
-        ti = ti*ti_eps
-
-        t[ki:ki+ni, ki:ki+ni] = ti
-    mt = fuchsia_simplify(transform(m, x, t), x)
+        M, b = block_triangular_form(M)
+    T = identity_matrix(SR, M.size())
+    for ki, ni in b:
+        Mi = M.sub_system(ki, ni)
+        logger.info("Reducing a %dx%d block at (%d, %d)" % (ni, ni, ki, ki))
+        Mi = fuchsify(Mi, seed=seed)
+        Mi = normalize(Mi, eps, seed=seed)
+        Mi = factorize(Mi, eps, seed=seed)
+        T[ki:ki+ni, ki:ki+ni] = Mi.get_T()
+    M = RationalSystem.from_M(transform(M.get_M(), M.x, T), M.x, T=M.get_T()*T)
     logger.exit("reduce_diagonal_blocks")
-    return mt, t
+    return M
 
-def normalize(M, x, eps, seed=0):
+def normalize(M, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
     form dF/dx=m*F, find a transformation that will shift all
     the eigenvalues of m's residues into [-1/2, 1/2) range (in
@@ -1400,7 +1380,6 @@ def normalize(M, x, eps, seed=0):
                 ev_cum_x2[0] += 1
 
     logger.enter("normalize")
-    M = RationalSystem.from_M(M, x)
     state = State(M, eps, seed)
     if state.is_normalized():
         logger.info("already normalized")
@@ -1426,7 +1405,7 @@ def normalize(M, x, eps, seed=0):
             M = M.apply_balance(P, x2, x1)
             state.update_ev_cum(x2, x1)
     logger.exit("normalize")
-    return M.get_M(), M.get_T()
+    return M
 
 def find_balances(M, eps, state):
     residues = {}
@@ -1549,27 +1528,26 @@ def gensym():
     SR.symbols[str(sym)] = sym
     return sym
 
-def factorize(M, x, epsilon, b=None, seed=0):
+def factorize(M, epsilon, b=None, seed=0):
     """Given a normalized Fuchsian system of differential equations:
         dF/dx = M(x,epsilon)*F,
     try to find a transformation that will factor out an epsilon
     from M. Return a transformed M (proportional to epsilon)
     and T. Raise FuchsiaError if epsilon can not be factored.
     """
-    logger.info("-> factorize")
-    n = M.nrows()
-    M = fuchsia_simplify(M, x)
-    if epsilon not in expand(M/epsilon).variables():
-        logger.info("   already in epsilon form")
-        logger.info("<- factorize")
-        return M, identity_matrix(SR, n)
+    logger.enter("factorize")
+    n = M.size()
+    if M.is_factorized(epsilon):
+        logger.info("Already in epsilon form")
+        logger.exit("factorize")
+        return M
     rng = Random(seed)
     mu = gensym()
     if b is None:
         T_symbols = [gensym() for i in xrange(n*n)]
         T = matrix(SR, n, n, T_symbols)
     else:
-        T, T_symbols = matrix(SR, n), []
+        T, T_symbols = identity_matrix(SR, n), []
         for ki,ni in b:
             for i in xrange(ki,ki+ni):
                 for j in xrange(ki+ni):
@@ -1577,18 +1555,18 @@ def factorize(M, x, epsilon, b=None, seed=0):
                     T[i,j] = sym
                     T_symbols.append(sym)
     eqs = []
-    for point, prank in singularities(M, x).iteritems():
+    for point, prank in M.singular_points().iteritems():
         assert prank == 0
-        logger.debug("    processing point x = %s" % point)
-        R = matrix_c0(M, x, point, 0)
-        R = fuchsia_simplify(R)
+        logger.debug("Processing point x = %s" % point)
+        R = M.c0(point, 0)
         eq = (R/epsilon)*T-T*(R.subs({epsilon: mu})/mu)
         eq = fuchsia_simplify(eq)
         eqs.extend(eq.list())
-    logger.info("    found %d equations with %d unknowns" % (len(eqs), len(T_symbols)))
+    logger.info("Found %d equations with %d unknowns" % (len(eqs), len(T_symbols)))
     solutions = fuchsia_solve(eqs, T_symbols)
     for solution in solutions:
         S = T.subs(solution)
+        logger.info("Found a solution, {} free variables remain".format(len(S.variables())))
         # Right now S likely has a number of free variables in
         # it; we can set them to arbibtrary values, as long as
         # it'll make S invertible.
@@ -1599,12 +1577,12 @@ def factorize(M, x, epsilon, b=None, seed=0):
                     e==rng.randint(-rndrange, rndrange)
                     for e in S.variables() if e != epsilon
                 ])
-                sT = fuchsia_simplify(sT,x)
-                M = fuchsia_simplify(transform(M, x, sT), x)
+                sT = fuchsia_simplify(sT)
+                M = M.apply_constant_t(sT)
                 # We're leaking a bunch of temprary variables here,
                 # which accumulate in SR.variables, but who cares?
-                logger.info("<- factorize")
-                return M, sT
+                logger.exit("factorize")
+                return M
             except (ZeroDivisionError, ValueError):
                 rndrange += 1 + rndrange//16
                 # We've tried a bunch of substituions, and they didn't
@@ -1635,7 +1613,7 @@ def simplify_by_jordanification(M, x):
     for point, prank in singularities(M, x).iteritems():
         R = matrix_c0(M, x, point, prank)
         J, T = R.jordan_form(transformation=True)
-        MM = fuchsia_simplify(transform(M, x, T), x)
+        MM = fuchsia_simplify(transform(M, x, T))
         C = matrix_complexity(MM)
         if C < minC:
             minM = MM
@@ -1693,7 +1671,7 @@ def simplify_by_factorization(M, x):
     the simplified matrix and the transformation.
     """
     logger.enter("simplify_by_factorization")
-    M = copy(M)
+    M = M.factor()
     n = M.nrows()
     T = identity_matrix(SR, n)
     factors = []
@@ -1710,9 +1688,11 @@ def simplify_by_factorization(M, x):
                     M[k,i] *= factor
                     M[i,k] /= factor
     logger.debug(
-            "stripping common factors with this transform:\ndiagonal_matrix([\n  %s\n])" % ",\n  ".join(str(e) for e in T.diagonal()))
+            "Stripping common factors with this transform:\n"
+            "diagonal_matrix([\n  {}\n])".format(
+                ",\n  ".join(str(e) for e in T.diagonal())))
     logger.exit("simplify_by_factorization")
-    return fuchsia_simplify(M, x), T
+    return M, T
 
 #==============================================================================
 # Import/Export routines
@@ -1868,7 +1848,7 @@ def main():
         print '\033[35;1mFuchsia v%s\033[0m' % (__version__)
         print "Authors: %s\n" % __author__
         mpath = tpath = profpath = fmt = None
-        M = T = None
+        M = None
         x, y, epsilon = SR.var("x y eps")
         fmt = "m"
         seed = 0
@@ -1902,30 +1882,35 @@ def main():
         with profile(profpath):
             if len(args) == 2 and args[0] == 'fuchsify':
                 M = import_matrix_from_file(args[1])
-                M, t1 = simplify_by_factorization(M, x)
-                M, t2 = fuchsify(M, x, seed=seed)
-                T = t1*t2
+                #M, t = simplify_by_factorization(M, x)
+                M = RationalSystem.from_M(M, x)
+                M = fuchsify(M, seed=seed)
             elif len(args) == 2 and args[0] == 'normalize':
                 M = import_matrix_from_file(args[1])
-                M, t1 = simplify_by_factorization(M, x)
-                M, t2 = normalize(M, x, epsilon, seed=seed)
-                T = t1*t2
+                #M, t = simplify_by_factorization(M, x)
+                M = RationalSystem.from_M(M, x)
+                M = normalize(M, epsilon, seed=seed)
             elif len(args) == 2 and args[0] == 'factorize':
                 M = import_matrix_from_file(args[1])
-                M, T = factorize(M, x, epsilon, seed=seed)
+                M = RationalSystem.from_M(M, x)
+                M = factorize(M, epsilon, seed=seed)
             elif len(args) == 2 and args[0] == 'sort':
                 M = import_matrix_from_file(args[1])
-                M, T, B = block_triangular_form(M)
+                M = GeneralSystem.from_M(M, x)
+                M, _ = block_triangular_form(M)
             elif len(args) == 2 and args[0] == 'reduce':
-                m = import_matrix_from_file(args[1])
-                M, T = epsilon_form(m, x, epsilon, seed=seed)
+                M = import_matrix_from_file(args[1])
+                #M, t = simplify_by_factorization(M, x)
+                M = RationalSystem.from_M(M, x)
+                M = epsilon_form(M, epsilon, seed=seed)
             elif len(args) == 2 and args[0] == 'cat':
                 M = import_matrix_from_file(args[1])
-                T = None
+                M = GeneralSystem.from_M(M, x)
             elif len(args) == 3 and args[0] == 'transform':
                 M = import_matrix_from_file(args[1])
                 t = import_matrix_from_file(args[2])
                 M = transform(M, x, t)
+                M = GeneralSystem.from_M(M, x, T=t)
             elif len(args) == 3 and args[0] == 'changevar':
                 M = import_matrix_from_file(args[1])
                 fy = parse(args[2])
@@ -1935,18 +1920,19 @@ def main():
                             "'%s' is missing in '%s'" % (y, fy))
                 M = change_variable(M, x, y, fy)
                 x = y
+                M = GeneralSystem.from_M(M, x)
             elif len(args) == 0:
                 usage()
             else:
                 raise getopt.GetoptError("unknown command: %s" % (args))
         if M is not None:
-            M = partial_fraction(M, x)
+            M = partial_fraction(M.get_M(), x)
             if mpath is not None:
                 export_matrix_to_file(mpath, M, fmt=fmt)
             else:
                 print M
-        if tpath is not None and T is not None:
-            T = partial_fraction(T, x)
+        if tpath is not None and M is not None:
+            T = partial_fraction(M.get_T(), x)
             export_matrix_to_file(tpath, T, fmt=fmt)
     except getopt.GetoptError as error:
         logger.error("%s", error)
