@@ -120,6 +120,7 @@ class GeneralSystem:
         return c0
 
     def sub_c0(self, row, col, nrows, ncols, point, prank):
+        # TODO: cache?
         subM = self.M.submatrix(row, col, nrows, ncols)
         return matrix_c0(subM, self.x, point, prank)
 
@@ -130,11 +131,19 @@ class GeneralSystem:
                     matrix_c1(self.M, self.x, point, prank)
         return c1
 
+    def sub_c1(self, row, col, nrows, ncols, point, prank):
+        # TODO: cache?
+        subM = self.M.submatrix(row, col, nrows, ncols)
+        return matrix_c1(subM, self.x, point, prank)
+
     def sub_system(self, n, k):
         return GeneralSystem(M.submatrix(n, n, k, k), self.x, identity_matrix(SR, k))
 
     def is_factorized(self, epsilon):
         return epsilon not in expand(self.M/epsilon).variables()
+
+    def sub_is_factorized(self, row, col, nrows, ncols, epsilon):
+        return epsilon not in expand(self.M.submatrix(row, col, nrows, ncols)/epsilon).variables()
 
     def apply_balance(self, P, x1, x2):
         M = balance_transform(self.M, P, x1, x2, self.x)
@@ -231,6 +240,8 @@ class RationalSystem:
     @staticmethod
     def from_M(M, x, T=None):
         assert M.is_square()
+        if x not in M.variables():
+            logger.info("Warning: matrix does not contain variable {}".format(x))
         Cmap = matrix_partial_fraction_form(M, x)
         if T is None: T = identity_matrix(SR, M.nrows())
         return RationalSystem(Cmap, x, T)
@@ -256,7 +267,7 @@ class RationalSystem:
         Coo = zero_matrix(SR, self.size())
         for (_, k), C in self.Cmap.iteritems():
             if k == -1: Coo -= C
-        self.c0_oo_cached = r = fuchsia_simplify(Coo)
+        self.c0_oo_cached = r = fuchsia_simplify_sparse(Coo)
         return r
 
     def singular_points(self):
@@ -285,12 +296,12 @@ class RationalSystem:
 
     def c0(self, point, prank):
         if point == oo:
-            if prank == 0: return self.c0_oo()
+            if prank == 0: return self.c0_oo().dense_matrix()
             C = self.Cmap.get((SR(0), prank-1), None)
-            return -C if C is not None else zero_matrix(SR, self.size())
+            return (-C).dense_matrix() if C is not None else zero_matrix(SR, self.size())
         else:
             C = self.Cmap.get((point, -prank-1), None)
-            return C if C is not None else zero_matrix(SR, self.size())
+            return C.dense_matrix() if C is not None else zero_matrix(SR, self.size())
 
     def sub_c0(self, row, col, nrows, ncols, point, prank):
         return self.c0(point, prank).submatrix(row, col, nrows, ncols)
@@ -300,10 +311,13 @@ class RationalSystem:
         if point == oo:
             if prank == 1: return self.c0_oo()
             C = self.Cmap.get((SR(0), prank-2), None)
-            return -C if C is not None else zero_matrix(SR, self.size())
+            return (-C).dense_matrix() if C is not None else zero_matrix(SR, self.size())
         else:
             C = self.Cmap.get((point, -prank), None)
-            return C if C is not None else zero_matrix(SR, self.size())
+            return C.dense_matrix() if C is not None else zero_matrix(SR, self.size())
+
+    def sub_c1(self, row, col, nrows, ncols, point, prank):
+        return self.c1(point, prank).submatrix(row, col, nrows, ncols)
 
     def sub_system(self, n, k):
         Cmap = {}
@@ -315,11 +329,20 @@ class RationalSystem:
 
     def is_factorized(self, epsilon):
         for key, C in self.Cmap.iteritems():
-            if epsilon in expand(C/epsilon).variables():
+            if not (2*C - C.subs(epsilon==2*epsilon)).is_zero():
+                return False
+        return True
+
+    def sub_is_factorized(self, row, col, nrows, ncols, epsilon):
+        for key, C in self.Cmap.iteritems():
+            C = C.submatrix(row, col, nrows, ncols)
+            if not (2*C - C.subs(epsilon==2*epsilon)).is_zero():
                 return False
         return True
 
     def apply_balance(self, P, x1, x2):
+        logger.enter("apply_balance")
+        assert P.is_sparse()
         x1 = SR(x1)
         x2 = SR(x2)
         coP = 1-P
@@ -356,14 +379,16 @@ class RationalSystem:
             Cmap[x1, -1] += P
             Cmap[x2, -1] -= P
         for key, C in Cmap.items():
-            Cmap[key] = C = fuchsia_simplify(C)
+            Cmap[key] = C = fuchsia_simplify_sparse(C)
             if C.is_zero():
                 del Cmap[key]
         T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
+        logger.exit("apply_balance")
         return RationalSystem(dict(Cmap), self.x, T)
 
     def apply_constant_t(self, T, invT=None):
-        assert self.x not in T.variables()
+        assert T.is_sparse()
+        # assert self.x not in T.variables()
         if invT is None:
             invT = T.inverse()
         Cmap = {key: invT*C*T for key, C in self.Cmap.iteritems()}
@@ -371,7 +396,7 @@ class RationalSystem:
 
     def apply_off_diagonal_t(self, D, x0, k):
         # assert (D*D).is_zero()
-        # assert D.is_sparse()
+        assert D.is_sparse()
         Cmap = defaultdict(SR.zero, self.Cmap)
         def sparse_commutator(A, B):
             # assert B.is_sparse()
@@ -406,7 +431,10 @@ class RationalSystem:
         return RationalSystem(dict(Cmap), self.x, fuchsia_simplify(self.T*T))
 
     def complexity(self):
-        return matrix_complexity(fuchsia_simplify(self.get_M()))
+        c = 0
+        for C in self.Cmap.itervalues():
+            c += matrix_complexity(C)
+        return c
 
     def get_M(self):
         M = zero_matrix(SR, self.size())
@@ -424,6 +452,61 @@ class RationalSystem:
                 for j in range(self.size()):
                     B[i,j] = bool(B[i,j]) or not C[i,j].is_zero()
         return B
+
+class SubSystem:
+    def __init__(self, system, offset, size):
+        self._system = system
+        self._offset = offset
+        self._size = size
+
+    def full_system(self):
+        return self._system
+
+    def size(self):
+        return self._size
+
+    def singular_points(self):
+        return self._system.sub_singular_points(self._offset, self._offset, self._size, self._size)
+
+    def sub_singular_points(self, row, col, nrows, ncols):
+        return self._system.sub_singular_points(self._offset + row, self._offset + col, nrows, ncols)
+
+    def c0(self, point, prank):
+        return self._system.sub_c0(self._offset, self._offset, self._size, self._size, point, prank)
+
+    def sub_c0(self, row, col, nrows, ncols, point, prank):
+        return self._system.sub_c0(self._offset + row, self._offset + col, nrows, ncols, point, prank)
+
+    def c1(self, point, prank):
+        return self._system.sub_c1(self._offset, self._offset, self._size, self._size, point, prank)
+
+    def is_factorized(self, epsilon):
+        return self._system.sub_is_factorized(self._offset, self._offset, self._size, self._size, epsilon)
+
+    def sub_is_factorized(self, row, col, nrows, ncols, epsilon):
+        return self._system.sub_is_factorized(self._offset+row, self._offset+col, nrows, ncols, epsilon)
+
+    def apply_balance(self, P, x1, x2):
+        fullP = zero_matrix(SR, self._system.size(), sparse=True)
+        fullP[self._offset:self._offset+self._size, self._offset:self._offset+self._size] = P
+        return SubSystem(self._system.apply_balance(fullP, x1, x2), self._offset, self._size)
+
+    def apply_constant_t(self, T, invT=None):
+        if invT is None: invT = T.inverse()
+        fullT = identity_matrix(SR, self._system.size(), sparse=True)
+        fullT[self._offset:self._offset+self._size, self._offset:self._offset+self._size] = T
+        fullInvT = identity_matrix(SR, self._system.size(), sparse=True)
+        fullInvT[self._offset:self._offset+self._size, self._offset:self._offset+self._size] = invT
+        return SubSystem(self._system.apply_constant_t(fullT, fullInvT), self._offset, self._size)
+
+    def apply_off_diagonal_t(self, D, x0, k):
+        fullD = zero_matrix(SR, self._system.size(), sparse=True)
+        fullD[self._offset:self._offset+self._size, self._offset:self._offset+self._size] = D
+        return SubSystem(self._system.apply_off_diagonal_t(fullD, x0, k), self._offset, self._size)
+
+    def complexity(self):
+        # TODO: sub_complexity?
+        return self._system.complexity()
 
 def matrix_partial_fraction_form(M, x):
     """Convert a rational matrix into partial fraction form:
@@ -443,7 +526,7 @@ def matrix_partial_fraction_form(M, x):
                 key = (p,k)
                 cm = result.get(key, None)
                 if cm is None:
-                    result[key] = cm = zero_matrix(SR, n, m)
+                    result[key] = cm = zero_matrix(SR, n, m, sparse=True)
                 cm[i,j] = fuchsia_simplify(c)
     logger.exit("matrix_partial_fraction_form")
     return result
@@ -565,6 +648,12 @@ def dot_product(v1, v2):
 
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
+
+def fuchsia_simplify_sparse(M):
+    return matrix(SR, M.nrows(), M.ncols(), {
+        key: fuchsia_simplify(value)
+        for key, value in M.dict().iteritems()
+    }, sparse=True)
 
 def fuchsia_simplify(obj):
     if USE_MAPLE:
@@ -971,7 +1060,7 @@ def block_triangular_transform(m):
     if error:
         raise FuchsiaError("Infinite loop")
 
-    t = zero_matrix(SR,n)
+    t = zero_matrix(SR, n, sparse=True)
     i = 0
     blocks = []
     for block in shuffle:
@@ -1306,15 +1395,17 @@ def reduce_diagonal_blocks(M, eps, b=None, seed=0):
     logger.enter("reduce_diagonal_blocks")
     if b is None:
         M, b = block_triangular_form(M)
-    T = identity_matrix(SR, M.size())
+    #T = identity_matrix(SR, M.size())
     for ki, ni in b:
-        Mi = M.sub_system(ki, ni)
         logger.info("Reducing a %dx%d block at (%d, %d)" % (ni, ni, ki, ki))
+        #Mi = M.sub_system(ki, ni)
+        Mi = SubSystem(M, ki, ni)
         Mi = fuchsify(Mi, seed=seed)
         Mi = normalize(Mi, eps, seed=seed)
         Mi = factorize(Mi, eps, seed=seed)
-        T[ki:ki+ni, ki:ki+ni] = Mi.get_T()
-    M = RationalSystem.from_M(transform(M.get_M(), M.x, T), M.x, T=M.get_T()*T)
+        M = Mi.full_system()
+        #T[ki:ki+ni, ki:ki+ni] = Mi.get_T()
+    #M = RationalSystem.from_M(transform(M.get_M(), M.x, T), M.x, T=M.get_T()*T)
     logger.exit("reduce_diagonal_blocks")
     return M
 
@@ -1578,17 +1669,20 @@ def factorize(M, epsilon, b=None, seed=0):
                     for e in S.variables() if e != epsilon
                 ])
                 sT = fuchsia_simplify(sT)
-                M = M.apply_constant_t(sT)
-                # We're leaking a bunch of temprary variables here,
-                # which accumulate in SR.variables, but who cares?
-                logger.exit("factorize")
-                return M
+                sT_inv = sT.inverse()
             except (ZeroDivisionError, ValueError):
                 rndrange += 1 + rndrange//16
                 # We've tried a bunch of substituions, and they didn't
                 # work. Is the matrix at all invertible? Let's check.
                 if rndrange == 16 and not S.is_invertible():
                     break
+                continue
+            M = M.apply_constant_t(sT.sparse_matrix(), invT=sT_inv.sparse_matrix())
+            assert M.is_factorized(epsilon)
+            # We're leaking a bunch of temprary variables here,
+            # which accumulate in SR.variables, but who cares?
+            logger.exit("factorize")
+            return M
     raise FuchsiaError("can not factor epsilon")
 
 #==================================================================================================
