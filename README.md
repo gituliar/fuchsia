@@ -1,3 +1,5 @@
+## Description
+
 *Fuchsia* reduces differential equations for Feynman master integrals to the epsilon form.
 
 To illustrate, let us say we have a system of differential equations of this form:
@@ -21,6 +23,16 @@ You can learn about the algorithm used in *Fuchsia* to find such transformations
 It will run on most Unix-like operating systems.
 
 Documentation with more information, installation and usage details is here [4].
+
+## Publications
+
+*Fuchsia* has been announced in proceedings of The Loops and Legs Conference 2016, PoS LL2016 (2016) 030, [arXiv:1607.00759](http://arxiv.org/abs/arXiv:1607.00759).
+Since then it is available on-line.  
+A complete description of the program has been published in [Comput. Phys. Commun.](http://www.sciencedirect.com/science/article/pii/S0010465517301340), [arXiv:1701.04269](http://arxiv.org/abs/arXiv:1701.04269).
+
+If you find *Fuchsia* useful for your research, please, consider to cite both articles.
+
+## References
 
   * [1] https://arxiv.org/abs/1304.1806
   * [2] https://arxiv.org/abs/1411.0911
