@@ -19,6 +19,10 @@ Commands:
         find a transformation that will make a given normalized
         matrix proportional to the infinitesimal parameter
 
+    info [-x <name>] <matrix>
+        show a description of a given matrix, listing singular
+        points and residue eigenvalues
+
     sort [-m <path>] [-t <path>] <matrix>
         find a block-triangular form of the given matrix
 
@@ -1991,6 +1995,21 @@ def main():
                 M = change_variable(M, x, y, fy)
                 x = y
                 M = GeneralSystem.from_M(M, x)
+            elif len(args) == 2 and args[0] == 'info':
+                M = import_matrix_from_file(args[1])
+                M = RationalSystem.from_M(M, x)
+                print("Matrix size: %s" % M.size())
+                print("Matrix complexity: %s" % M.complexity())
+                print("Matrix expansion:")
+                for point, prank in M.singular_points().iteritems():
+                    c0 = M.c0(point, prank)
+                    print("  C0[%s=%s; %s] = {rank=%s, complexity=%s}" % (
+                        x, point, prank, c0.rank(), matrix_complexity(c0)
+                    ))
+                    if logger.isEnabledFor(logging.DEBUG):
+                        for eigenval in sorted(set(c0.eigenvalues()), key=str):
+                            print("    eigenvalue: %s" % (eigenval))
+                M = None
             elif len(args) == 0:
                 usage()
             else:
