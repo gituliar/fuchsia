@@ -358,14 +358,17 @@ class RationalSystem:
         return True
 
     def apply_balance(self, P, x1, x2):
-        logger.enter("apply_balance")
-        assert P.is_sparse()
+        if not P.is_sparse():
+            P = P.sparse_matrix()
         x1 = SR(x1)
         x2 = SR(x2)
         coP = 1-P
         if x1 == oo:
             Cmap = defaultdict(SR.zero)
             for (pi, ki), Ci in self.Cmap.iteritems():
+                assert Ci.is_sparse()
+                assert P.is_sparse()
+                assert coP.is_sparse()
                 # coP Ci coP (x-pi)^ki + P Ci P (x-pi)^ki
                 Cmap[pi, ki] += coP*Ci*coP + P*Ci*P
                 # coP Ci P -(x-x2) (x-pi)^ki
@@ -377,6 +380,9 @@ class RationalSystem:
         elif x2 == oo:
             Cmap = defaultdict(SR.zero)
             for (pi, ki), Ci in self.Cmap.iteritems():
+                assert Ci.is_sparse()
+                assert P.is_sparse()
+                assert coP.is_sparse()
                 # coP Ci coP (x-pi)^ki + P Ci P (x-pi)^ki
                 Cmap[pi, ki] += coP*Ci*coP + P*Ci*P
                 # P Ci coP -(x-x1) (x-pi)^ki
@@ -388,6 +394,9 @@ class RationalSystem:
         else:
             Cmap = defaultdict(SR.zero, self.Cmap)
             for (pi, ki), Ci in self.Cmap.iteritems():
+                assert Ci.is_sparse()
+                assert P.is_sparse()
+                assert coP.is_sparse()
                 # coP Ci P (x1-x2)/(x-x1) (x-pi)^ki
                 cmap_add_div(Cmap, coP*Ci*P*(x1-x2), pi, ki, x1)
                 # P Ci coP (x2-x1)/(x-x2) (x-pi)^ki
@@ -549,7 +558,7 @@ def partialer_fraction(ex, x):
         if not c.is_zero():
             result.append((SR(0), int(k), c))
             r += c*x**k
-    #assert (ex-r).is_zero()
+    assert (ex-r).is_zero()
     return result
 
 class ElapsedTimeFormatter(logging.Formatter):
