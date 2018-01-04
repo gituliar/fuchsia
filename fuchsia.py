@@ -2024,11 +2024,11 @@ def main():
             else:
                 raise getopt.GetoptError("unknown command: %s" % (args))
         if M is not None:
-            M = partial_fraction(M.get_M(), x)
+            m = partial_fraction(M.get_M(), x)
             if mpath is not None:
-                export_matrix_to_file(mpath, M, fmt=fmt)
+                export_matrix_to_file(mpath, m, fmt=fmt)
             else:
-                print M
+                print m
         if tpath is not None and M is not None:
             T = partial_fraction(M.get_T(), x)
             export_matrix_to_file(tpath, T, fmt=fmt)
