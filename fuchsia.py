@@ -517,9 +517,46 @@ def matrix_partial_fraction_form(M, x):
                 cm = result.get(key, None)
                 if cm is None:
                     result[key] = cm = zero_matrix(SR, n, m, sparse=True)
-                cm[i,j] = fuchsia_simplify(c)
+                cm[i,j] = c
     logger.exit("matrix_partial_fraction_form")
     return result
+
+def terms(ex):
+    """
+    Iterate through all terms in a sum.
+    """
+    if ex.operator() is sage.symbolic.operators.add_vararg:
+        for v in ex.operands():
+            yield v
+    else:
+        yield ex
+
+def factors(ex):
+    """
+    Iterate through all factors in a product, yielding each
+    factor and its power.
+    """
+    if ex.operator() is sage.symbolic.operators.mul_vararg:
+        for f in ex.operands():
+            if f.operator() is operator.pow:
+                a, b = f.operands()
+                yield a, int(b)
+            else:
+                yield f, 1
+    else:
+        if ex.operator() is operator.pow:
+            a, b = ex.operands()
+            yield a, int(b)
+        else:
+            yield ex, 1
+
+def gensym():
+    """
+    Generate a unique temporary variable.
+    """
+    sym = SR.symbol()
+    SR.symbols[str(sym)] = sym
+    return sym
 
 def partialer_fraction(ex, x):
     """Convert a rational expression into partial fraction form:
@@ -533,33 +570,63 @@ def partialer_fraction(ex, x):
     """
     if not ex.has(x):
         if not ex.is_zero():
-            return [(SR(0), 0, SR(ex))]
-        return []
-    result = []
-    r = SR(0)
-    sols, mults = solve(factor(SR(1)/ex, x), x, multiplicities=True)
-    for sol, n in zip(sols, mults):
-        assert(sol.left_hand_side() == x)
-        p = expand(sol.right_hand_side())
-        s = ex.subs({x:x+p}).taylor(x, 0, -1)
-        if s.is_zero(): continue
-        for c, k in s.coefficients(x):
-            assert not c.has(x)
-            assert k.is_integer()
-            assert k < 0
-            if not c.is_zero():
-                result.append((p, int(k), c))
-                r += c*(x-p)**k
-    d = fuchsia_simplify(ex-r)
-    for c, k in d.coefficients(x):
-        assert not c.has(x)
-        assert k.is_integer()
-        assert k >= 0
+            yield (SR(0), 0, SR(ex))
+        return
+    result = defaultdict(lambda: SR(0))
+    for term in terms(ex.partial_fraction(x)):
+        num, den = term.numerator_denominator()
+        dendeg = den.degree(x)
+        if dendeg == 0:
+            for c, k in expand(num/den).coefficients(x):
+                result[SR(0), k] += c
+            continue
+        if dendeg == 1:
+            # den = a + b*x
+            a = den.coefficient(x, 0)
+            b = den.coefficient(x, 1)
+            result[-a/b, -1] += num/b
+            continue
+        newden = expand(den).coefficient(x, dendeg)
+        assert newden != 0
+        submap = {}
+        sols, mults = solve(factor(den, x), x, multiplicities=True)
+        for sol, m in zip(sols, mults):
+            assert(sol.left_hand_side() == x)
+            t = gensym()
+            newden *= (x - t)**m
+            submap[t] = expand(sol.right_hand_side())
+        for t in terms((num/newden).partial_fraction(x)):
+            p_i = None
+            k_i = None
+            c_i = 1
+            for f, k in factors(t):
+                if k >= 0:
+                    c_i *= f**k
+                else:
+                    deg = f.degree(x)
+                    if deg == 0:
+                        c_i *= f**k
+                    elif deg == 1:
+                        assert p_i is None
+                        assert k_i is None
+                        # f = a + b*x
+                        a = f.coefficient(x, 0)
+                        b = f.coefficient(x, 1)
+                        p_i = -a/b
+                        k_i = k
+                        c_i *= b**k
+                    else:
+                        assert False
+            assert p_i is not None
+            assert k_i is not None
+            result[p_i.subs(submap), k_i] += c_i.subs(submap)
+    r = 0
+    for (p, k), c in result.items():
+        c = fuchsia_simplify(c)
         if not c.is_zero():
-            result.append((SR(0), int(k), c))
-            r += c*x**k
-    assert (ex-r).is_zero()
-    return result
+            r += c*(x - p)**k
+            yield (p, k, c)
+    assert (ex - r).is_zero()
 
 class ElapsedTimeFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):
@@ -1606,11 +1673,6 @@ def eigenvectors_right(m):
 #==================================================================================================
 # Step III: Factorize
 #==================================================================================================
-
-def gensym():
-    sym = SR.symbol()
-    SR.symbols[str(sym)] = sym
-    return sym
 
 def factorize(M, epsilon, b=None, seed=0):
     """Given a normalized Fuchsian system of differential equations:
