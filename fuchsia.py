@@ -1059,6 +1059,10 @@ def block_triangular_transform(m):
             t[j,i] = 1
             i += 1
     logger.info("found %d blocks" % len(blocks))
+    logger.debug("Matrix shape after triangularization:\n{}".format(
+        "\n".join(
+            "".join("#" if ex else "." for ex in row)
+            for row in t.inverse()*m*t)))
     return t, blocks
 
 def block_triangular_form(M):
@@ -2009,6 +2013,8 @@ def main():
                 M = RationalSystem.from_M(M, x)
                 print("Matrix size: %s" % M.size())
                 print("Matrix complexity: %s" % M.complexity())
+                print("Matrix shape:")
+                print("\n".join(" " + "".join("#" if ex else "." for ex in row) for row in M.get_M()))
                 print("Matrix expansion:")
                 for point, prank in M.singular_points().iteritems():
                     c0 = M.c0(point, prank)
@@ -2016,6 +2022,8 @@ def main():
                         x, point, prank, c0.rank(), matrix_complexity(c0)
                     ))
                     if logger.isEnabledFor(logging.DEBUG):
+                        print("    shape:")
+                        print("\n".join("     " + "".join("#" if ex else "." for ex in row) for row in c0))
                         for eigenval in sorted(set(c0.eigenvalues()), key=str):
                             print("    eigenvalue: %s" % (eigenval))
                 M = None
