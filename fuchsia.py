@@ -58,6 +58,9 @@ __author_email__ = "oleksandr@gituliar.net"
 __version__ = "17.06.28"
 
 __all__ = [
+    "FuchsianSystem",
+    "NormalizeAssistant",
+
     "balance",
     "balance_transform",
     "block_triangular_form",
@@ -75,6 +78,7 @@ __all__ = [
     "normalize",
     "reduce_diagonal_blocks",
     "setup_fuchsia",
+    "simple",
     "simplify_by_factorization",
     "simplify_by_jordanification",
     "singularities",
@@ -82,14 +86,25 @@ __all__ = [
 ]
 
 from   collections import defaultdict
-from   itertools import permutations
+from   functools import wraps
+from   itertools import combinations, permutations
 from   random import Random
+import inspect
 import logging
 import time
 
 from   sage.all import *
 from   sage.misc.parser import Parser
 from   sage.libs.ecl import ecl_eval
+
+def logcall(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        logger.enter(f.__name__)
+        r = f(*args, **kwargs)
+        logger.exit(f.__name__)
+        return r
+    return wrapper
 
 class ElapsedTimeFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):
@@ -167,6 +182,7 @@ def dot_product(v1, v2):
 def partial_fraction(M, var):
     return M.apply_map(lambda ex: ex.partial_fraction(var))
 
+#@logcall
 def fuchsia_simplify(obj, x=None):
     if USE_MAPLE:
         def maple_simplify(ex):
@@ -247,11 +263,16 @@ def balance_transform(M, P, x1, x2, x):
     mm = (coP + 1/k*P)*M*(coP + k*P) - d/k*P
     return mm
 
+#@logcall
 def limit_fixed(expr, x, x0):
+    #logger.debug("[%s -> %s] %s" % (x, x0, expr))
+    res = None
     if USE_MAPLE:
-        return limit_fixed_maple(expr, x, x0)
+        res = limit_fixed_maple(expr, x, x0)
     else:
-        return limit_fixed_maxima(expr, x, x0)
+        res = limit_fixed_maxima(expr, x, x0)
+    #logger.debug("res = %s" % res)
+    return res
 
 def limit_fixed_maple(expr, x, x0):
     res = maple.limit(expr, **{str(x): x0})
@@ -272,6 +293,7 @@ def limit_fixed_maxima(expr, x, x0):
     l = maxima_calculus.sr_limit(expr, x, x0)
     return expr.parent()(l)
 
+@logcall
 def singularities(m, x):
     """Find values of x around which rational matrix M has
     a singularity; return a dictionary with {val: p} entries,
@@ -980,6 +1002,387 @@ def reduce_diagonal_blocks(m, x, eps, b=None, seed=0):
     logger.exit("reduce_diagonal_blocks")
     return mt, t
 
+
+def cmap_add_div(Cmap, C, pi, ki, x0):
+    # M += C*(x-pi)^ki/(x-x0)
+    if pi == x0:
+        Cmap[pi, ki-1] += C
+    elif ki >= 0:
+        assert pi == 0
+        for k in range(0, ki):
+            Cmap[pi, k] += C * x0**(ki-1-k)
+        Cmap[x0, -1] += C * x0**ki
+    else:
+        for k in range(ki, 0):
+            Cmap[pi, k] -= C * (x0-pi)**(ki-1-k)
+        Cmap[x0, -1] += C * (x0-pi)**ki
+
+def cmap_add_mul(Cmap, C, pi, ki, x0):
+    # M += C*(x-pi)^ki*(x-x0) = C*(x-pi)^ki*{(x-pi) + (pi-x0)}
+    Cmap[pi, ki] += C*(pi-x0)
+    if ki == -1:
+        Cmap[SR(0), ki+1] += C
+    else:
+        Cmap[pi, ki+1] += C
+
+def memoize(f):
+    @wraps(f)
+    def wrapper(self):
+        key = f.__name__+"_cache"
+        if not hasattr(self, key):
+#            print "cache miss: %s" % key
+            setattr(self, key, f(self))
+#        else:
+#            print "cache hit: %s" % key
+        return getattr(self, key)
+    return wrapper
+
+class FuchsianSystem(object):
+    @staticmethod
+    def from_M(m, x, eps):
+        # singular points
+        xs = sorted(singularities(m, x).keys())
+        # residues in singular points
+        rs = {}
+        for xi in xs:
+            rs[xi] = SystemResidue(matrix_residue(m, x, xi), eps)
+        # TODO: check if system's residues have half-integer eigenvalues.
+        # If yes, then inform user about that and let us remove resonances only.
+        # Though, such a form does not allow to construct an eps-form, it
+        # however can be used to find solutions as a power series using
+        # semi-analytical methods.
+        return FuchsianSystem(rs, x, eps)
+
+    def __init__(self, rs, x, eps):
+        self.rs = rs
+        self.xs = sorted(rs.keys())
+        self.x = x
+        self.eps = eps
+
+    def __str__(self):
+        #s = "zeroes:\n  %s\n" % (self.xs,)
+        s = ""
+        a = 0
+        for xi, ri in self.rs.iteritems():
+            s += "a = %s (x = %s)\n%s\n" % (a, xi, ri)
+            a += 1
+        return s
+
+    def write(self, filename):
+        m = SR(0)
+        for xi, ri in self.rs.iteritems():
+            if xi == oo:
+                continue
+            m += ri.m/(self.x-xi)
+        export_matrix_to_file(filename, m)
+
+    def _balance(self, i1, j1, i2, j2):
+        x1, x2 = self.xs[i1], self.xs[i2]
+        r1, r2 = self.rs[x1], self.rs[x2]
+        v1, v2 = r1.eigenvectors_right()[j1][1], r2.eigenvectors_left()[j2][1]
+        print "x1 = %s" % x1
+        print "x2 = %s" % x2
+        print "v1 = %s" % v1
+        print "v2 = %s" % v2
+
+        sp = simple(dot_product(v1, v2))
+        print "sp = %s" % sp
+        P = simple(cross_product(v1, v2) / sp)
+        print "P  =\n%s" % P
+        m = balance_transform(self.m, P, x1, x2, self.x)
+        return FuchsianSystem.from_M(m, self.x, self.eps)
+
+    #@logcall
+    def balance(self, i1, j1, i2, j2):
+        x1, x2 = self.xs[i1], self.xs[i2]
+        r1, r2 = self.rs[x1], self.rs[x2]
+        v1, v2 = r1.eigenvectors_right()[j1][1], r2.eigenvectors_left()[j2][1]
+
+        sp = simple(dot_product(v1, v2))
+        print "sp = %s" % sp
+        P = simple(cross_product(v1, v2) / sp)
+        print "P  =\n%s" % P
+
+        coP = 1-P
+        if x1 == oo:
+            Cmap = defaultdict(SR.zero)
+            for pi, Ci in self.rs.iteritems():
+                if pi == oo:
+                    continue
+                # coP Ci coP (x-pi)^-1 + P Ci P (x-pi)^-1
+                Cmap[pi, -1] += coP*Ci.m*coP + P*Ci.m*P
+                # coP Ci P -(x-x2) (x-pi)^-1
+                cmap_add_mul(Cmap, -coP*Ci.m*P, pi, -1, x2)
+                # P Ci coP -1/(x-x2) (x-pi)^-1
+                cmap_add_div(Cmap, -P*Ci.m*coP, pi, -1, x2)
+            # -P/(x-x2)
+            Cmap[x2, -1] -= P
+        elif x2 == oo:
+            Cmap = defaultdict(SR.zero)
+            for pi, Ci in self.rs.iteritems():
+                if pi == oo:
+                    continue
+                # coP Ci coP (x-pi)^-1 + P Ci P (x-pi)^-1
+                Cmap[pi, -1] += coP*Ci.m*coP + P*Ci.m*P
+                # P Ci coP -(x-x1) (x-pi)^-1
+                cmap_add_mul(Cmap, -P*Ci.m*coP, pi, -1, x1)
+                # coP Ci P -1/(x-x1) (x-pi)^-1
+                cmap_add_div(Cmap, -coP*Ci.m*P, pi, -1, x1)
+            # P/(x-x1)
+            Cmap[x1, -1] += P
+        else:
+            Cmap = defaultdict(SR.zero, [((pi,-1),ri.m) for pi,ri in self.rs.iteritems()])
+            for pi, Ci in self.rs.iteritems():
+                if pi == oo:
+                    continue
+                # coP Ci P (x1-x2)/(x-x1) (x-pi)^-1
+                cmap_add_div(Cmap, coP*Ci.m*P*(x1-x2), pi, -1, x1)
+                # P Ci coP (x2-x1)/(x-x2) (x-pi)^-1
+                cmap_add_div(Cmap, P*Ci.m*coP*(x2-x1), pi, -1, x2)
+            # P/(x-x1) - P/(x-x2)
+            Cmap[x1, -1] += P
+            Cmap[x2, -1] -= P
+        rs = {}
+        Coo = SR.zero()
+        for key, C in Cmap.items():
+            pi, ki = key
+            if pi == oo:
+                continue
+            Cmap[key] = C = simple(C)
+            if C.is_zero():
+                del Cmap[key]
+            else:
+                assert(ki == -1)
+                rs[pi] = SystemResidue(C)
+                Coo -= C
+        Coo = simple(Coo)
+        rs[oo] = SystemResidue(Coo)
+        #T = fuchsia_simplify(self.T * balance(P, x1, x2, self.x))
+        #return RationalSystem(dict(Cmap), self.x, T, self.trace + [("balance", P, x1, x2)])
+        return FuchsianSystem(rs, self.x, self.eps) 
+
+    #@logcall
+    @memoize
+    def balances(self):
+        res = []
+        for i1,x1 in enumerate(self.xs):
+            for i2,x2 in enumerate(self.xs):
+                if i1 == i2:
+                    continue
+                for j1, j2, aux in self.balances2(x1, x2):
+                    res.append((i1,j1, i2,j2, aux))
+        return res
+
+    #@logcall
+    def balances2(self, x1, x2):
+        #assert(not (x1-x2).is_zero())
+        res = []
+        r1, r2 = self.rs[x1], self.rs[x2]
+        for j1, (a1,v1) in enumerate(r1.eigenvectors_right()):
+            for j2, (a2,v2) in enumerate(r2.eigenvectors_left()):
+                sp = simple(dot_product(v1, v2))
+                if sp.is_zero():
+                    continue
+                res.append((j1, j2, (a1,a2, sp)))
+        return res
+
+    #@logcall
+    @memoize
+    def eigenvalues(self):
+        res = []
+        for xi in self.xs:
+            res.append((xi, self.rs[xi].eigenvalues()))
+        return res
+
+#    @memoize
+#    @logcall
+#    def eigenvectors_left(self):
+#        return self._eigenvectors(left=True)
+#
+#    @memoize
+#    @logcall
+#    def eigenvectors_right(self):
+#        return self._eigenvectors(left=False)
+#
+#    def _eigenvectors(self, left=True):
+#        res = []
+#        for xi, ri in self.rs.iteritems():
+#            eigenvectors = ri.eigenvectors_left
+#            if left is not True:
+#                eigenvectors = ri.eigenvectors_right
+#            res.append((xi, eigenvectors()))
+#        return res
+
+    def normalize(self):
+        pass
+
+class SystemResidue(object):
+    def __init__(self, m, eps=None):
+        self.m = m
+        self.eps = eps
+
+    def __str__(self):
+        return str(self.m)
+
+    def __repr__(self):
+        return self.m.__repr__()
+
+    @logcall
+    @memoize
+    def eigenvalues(self):
+        return simple(mathematica.Eigenvalues(self.m).sage())
+
+    @logcall
+    @memoize
+    def eigenvectors_left(self):
+        return self._eigenvectors(left=True)
+
+    @logcall
+    @memoize
+    def eigenvectors_right(self):
+        return self._eigenvectors(left=False)
+
+    def _eigenvectors(self, left=True):
+        m = self.m.transpose() if left is True else self.m
+        s = simple(mathematica.Eigensystem(m).sage())
+        res = zip(s[0], s[1])
+        return res
+
+#    def _eigenvectors(self, left=True):
+#        res = []
+#        eigenvectors = self.m.eigenvectors_left
+#        if left is not True:
+#            eigenvectors = self.m.eigenvectors_right
+#        res = [vvm[0:2] for vvm in eigenvectors()]
+#        return res
+
+# helpers
+@logcall
+def simple(obj, x=None):
+    def _simplify(ex):
+            return mathematica.Simplify(ex).sage()
+    if hasattr(obj, "apply_map"):
+        return obj.apply_map(_simplify)
+    else:
+        return _simplify(obj)
+
+def ex_in(ex, lst):
+    #if any((ex-t).is_zero() for t in printed):
+    for t in lst:
+        if (ex-t).is_zero():
+            return True
+    return False
+        
+
+class NormalizeAssistant(object):
+    def __init__(self, m):
+        self.m = m           # current matrix to balance
+        self.history = []    # matrices balanced so far
+
+    # Entry point
+    def start(self):
+#        cmd = self.cmd_main
+#        while cmd != None:
+#            cmd = cmd()
+#        return
+        try:
+            cmd = self.cmd_main
+            while cmd != None:
+                cmd = cmd()
+        except Exception as error:
+            print "UEXPECTED ERROR:\n%s" % (error,)
+            return self.start()
+
+    # Helpers
+    def choose_balance(self, i1, i2):
+        x1, x2 = self.m.xs[i1], self.m.xs[i2]
+        bs = self.m.balances2(x1, x2)
+        for i, (j1, j2, aux) in enumerate(bs):
+            print "[%s] %s" % (i, aux)
+        n = raw_input("(choose balance) > ")
+        try:
+            n = int(n)
+        except ValueError:
+            return None
+        if n < 0 or n > len(bs):
+            return None
+        b = bs[n]
+        return (i1, b[0], i2, b[1])
+
+    # Commands
+    def cmd_balance(self, b):
+        print "balancing with %s" % (b,)
+
+        mm = apply(self.m.balance, b)
+        self.history.append(mm)
+        self.m = mm
+        return self.cmd_main
+
+    def cmd_balance_res(self, args):
+        if len(args) != 2:
+            return self.cmd_error("needs exactly 2 arguments")
+        try:
+            i1, i2 = [int(n) for n in args]
+        except ValueError:
+            return self.cmd_error("arguments out of range (type e for valid values)")
+        b = self.choose_balance(i1, i2)
+        if b is None:
+            return self.cmd_error("unknown balance")
+        return self.cmd_balance(b[0:4])
+
+    def cmd_error(self, msg):
+        print "ERROR: %s" % msg
+        return self.cmd_main
+
+    def cmd_main(self):
+        cmd = raw_input("> ").split(' ')
+        cmd, args = cmd[0], cmd[1:]
+        if cmd == 's':
+            return self.cmd_save(args)
+        elif cmd == 'b':
+            return self.cmd_balance_res(args)
+        elif cmd == 'e':
+            return self.cmd_print_eigenvalues
+        elif cmd == 'h':
+            return self.cmd_print_help
+        elif cmd == 'q':
+            return None
+        elif cmd == '':
+            return self.cmd_print_help
+        return self.cmd_unknown_command(cmd)
+
+    def cmd_print_eigenvalues(self):
+        for i, (xi, a) in enumerate(self.m.eigenvalues()):
+            print "[%s] x = %s\n    %s" % (i, xi, a)
+        return self.cmd_main
+
+    def cmd_print_help(self):
+        """
+        Available commands:
+            b <i> <j>    balance xi, xj points
+            e            show eigenvectors
+            h            print this help
+            q            quit
+            s <file>     save matrix to file
+        """
+        print(inspect.cleandoc(self.cmd_print_help.__doc__))
+        return self.cmd_main
+
+    def cmd_save(self, args):
+        if len(args) != 1:
+            return self.cmd_error("needs exactly 1 arguments")
+        name = args[0]
+        self.m.write(name)
+        return self.cmd_main
+
+    def cmd_unknown_balance(self, n):
+        print "Unknown balance: '%s'" % n
+        return self.cmd_main
+
+    def cmd_unknown_command(self, cmd):
+        print "Unknown command: '%s'" % cmd
+        return self.cmd_print_help
+
 def normalize(m, x, eps, seed=0):
     """Given a Fuchsian system of differential equations of the
     form dF/dx=m*F, find a transformation that will shift all
@@ -1005,8 +1408,10 @@ def normalize(m, x, eps, seed=0):
                         pos += ev0
                     if ev0 < 0:
                         neg += ev0
+                    logger.debug("x = %s, ev = %s" % (x0, ev0))
                 self.ev_cum[x0] = [pos,neg]
             # x0
+            logger.debug("state.ev_cum = %s" % self.ev_cum)
             self.x0 = None
 
         def is_normalized(self):
