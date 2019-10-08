@@ -211,7 +211,7 @@ def fuchsia_solve(eqs, var):
                     expr = fuchsia_simplify(parse(s))
                     r.append(expr)
                 except SyntaxError as error:
-                    print "ERROR:  \n%s\n  %s\n" % (s, error)
+                    print("ERROR:  \n%s\n  %s\n" % (s, error))
                     continue
             result.append(r)
         return result
@@ -1030,10 +1030,10 @@ def memoize(f):
     def wrapper(self):
         key = f.__name__+"_cache"
         if not hasattr(self, key):
-#            print "cache miss: %s" % key
+#            print("cache miss: %s" % key)
             setattr(self, key, f(self))
 #        else:
-#            print "cache hit: %s" % key
+#            print("cache hit: %s" % key)
         return getattr(self, key)
     return wrapper
 
@@ -1080,15 +1080,15 @@ class FuchsianSystem(object):
         x1, x2 = self.xs[i1], self.xs[i2]
         r1, r2 = self.rs[x1], self.rs[x2]
         v1, v2 = r1.eigenvectors_right()[j1][1], r2.eigenvectors_left()[j2][1]
-        print "x1 = %s" % x1
-        print "x2 = %s" % x2
-        print "v1 = %s" % v1
-        print "v2 = %s" % v2
+        print("x1 = %s" % x1)
+        print("x2 = %s" % x2)
+        print("v1 = %s" % v1)
+        print("v2 = %s" % v2)
 
         sp = simple(dot_product(v1, v2))
-        print "sp = %s" % sp
+        print("sp = %s" % sp)
         P = simple(cross_product(v1, v2) / sp)
-        print "P  =\n%s" % P
+        print("P  =\n%s" % P)
         m = balance_transform(self.m, P, x1, x2, self.x)
         return FuchsianSystem.from_M(m, self.x, self.eps)
 
@@ -1099,9 +1099,9 @@ class FuchsianSystem(object):
         v1, v2 = r1.eigenvectors_right()[j1][1], r2.eigenvectors_left()[j2][1]
 
         sp = simple(dot_product(v1, v2))
-        print "sp = %s" % sp
+        print("sp = %s" % sp)
         P = simple(cross_product(v1, v2) / sp)
-        print "P  =\n%s" % P
+        print("P  =\n%s" % P)
 
         coP = 1-P
         if x1 == oo:
@@ -1290,7 +1290,7 @@ class NormalizeAssistant(object):
             while cmd != None:
                 cmd = cmd()
         except Exception as error:
-            print "UEXPECTED ERROR:\n%s" % (error,)
+            print("UNEXPECTED ERROR:\n%s" % (error,))
             return self.start()
 
     # Helpers
@@ -1298,7 +1298,7 @@ class NormalizeAssistant(object):
         x1, x2 = self.m.xs[i1], self.m.xs[i2]
         bs = self.m.balances2(x1, x2)
         for i, (j1, j2, aux) in enumerate(bs):
-            print "[%s] %s" % (i, aux)
+            print("[%s] %s" % (i, aux))
         n = raw_input("(choose balance) > ")
         try:
             n = int(n)
@@ -1311,7 +1311,7 @@ class NormalizeAssistant(object):
 
     # Commands
     def cmd_balance(self, b):
-        print "balancing with %s" % (b,)
+        print("balancing with %s" % (b,))
 
         mm = apply(self.m.balance, b)
         self.history.append(mm)
@@ -1331,7 +1331,7 @@ class NormalizeAssistant(object):
         return self.cmd_balance(b[0:4])
 
     def cmd_error(self, msg):
-        print "ERROR: %s" % msg
+        print("ERROR: %s" % msg)
         return self.cmd_main
 
     def cmd_main(self):
@@ -1353,7 +1353,7 @@ class NormalizeAssistant(object):
 
     def cmd_print_eigenvalues(self):
         for i, (xi, a) in enumerate(self.m.eigenvalues()):
-            print "[%s] x = %s\n    %s" % (i, xi, a)
+            print("[%s] x = %s\n    %s" % (i, xi, a))
         return self.cmd_main
 
     def cmd_print_help(self):
@@ -1376,11 +1376,11 @@ class NormalizeAssistant(object):
         return self.cmd_main
 
     def cmd_unknown_balance(self, n):
-        print "Unknown balance: '%s'" % n
+        print("Unknown balance: '%s'" % n)
         return self.cmd_main
 
     def cmd_unknown_command(self, cmd):
-        print "Unknown command: '%s'" % cmd
+        print("Unknown command: '%s'" % cmd)
         return self.cmd_print_help
 
 def normalize(m, x, eps, seed=0):
@@ -1906,12 +1906,12 @@ def main():
                 stats.print_stats(50)
 
     def usage():
-        print __doc__
+        print(__doc__)
         exit(0)
 
     try:
-        print '\033[35;1mFuchsia v%s\033[0m' % (__version__)
-        print "Authors: %s\n" % __author__
+        print('\033[35;1mFuchsia v%s\033[0m' % (__version__))
+        print("Authors: %s\n" % __author__)
         mpath = tpath = profpath = fmt = None
         M = T = None
         x, y, epsilon = SR.var("x y eps")
@@ -2003,7 +2003,7 @@ def main():
             if mpath is not None:
                 export_matrix_to_file(mpath, M, fmt=fmt)
             else:
-                print M
+                print(M)
         if tpath is not None and T is not None:
             T = partial_fraction(T, x)
             export_matrix_to_file(tpath, T, fmt=fmt)
