@@ -1794,15 +1794,15 @@ def import_matrix_mathematica(f):
     from a file-like object.
     """
     data =  f.read()
-    data = data.translate(None, ' \n')
+    data = data.translate(str.maketrans('','',' \n'))
     nr = data.count('},{')+1
-    data = data.translate(None, '{}')
+    data = data.translate(str.maketrans('','','{}'))
     data = data.replace(',', '\n')
     data = data.replace('Sqrt[', 'sqrt(').replace(']', ')')
     nc = int((data.count('\n')+1)/nr)
 
-    import StringIO
-    sio = StringIO.StringIO("%d %d\n" % (nc, nr) + data)
+    import io
+    sio = io.StringIO("%d %d\n" % (nc, nr) + data)
     return import_matrix_matrixmarket(sio).T
 
 def import_matrix_matrixmarket(f):
