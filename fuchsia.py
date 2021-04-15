@@ -735,7 +735,7 @@ def fuchsify(M, x, seed=0):
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
                 point2, P, M = min(iter_reductions(point, U), \
-                        key=lambda point2, P, M2: matrix_complexity(M2))
+                        key=lambda point2_P_M2: matrix_complexity(point2_P_M2[2]))
             except ValueError as e:
                 point2 = any_integer(rng, M.base_ring(), poincare_map)
                 P = fuchsia_simplify(U*V, x)
