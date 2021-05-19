@@ -245,7 +245,7 @@ def cmap_add(Cmap, C, p1, k1, p2, k2):
             assert(False)
     Kmap = defaultdict(SR.zero)
     cmap_add_inner(Kmap, SR(1), p1, k1, p2, k2)
-    for key, K in Kmap.iteritems():
+    for key, K in Kmap.items():
         Cmap[key] += C*K
 
 class RationalSystem:
@@ -264,7 +264,7 @@ class RationalSystem:
 
     def __str__(self):
         result = "M ="
-        for (p, k), C in self.Cmap.iteritems():
+        for (p, k), C in self.Cmap.items():
             result += "\n+(x-{})^{}*\n{}".format(p, k, C)
         return result
 
@@ -282,14 +282,14 @@ class RationalSystem:
         if self.c0_oo_cached is not None:
             return self.c0_oo_cached
         Coo = zero_matrix(SR, self.size())
-        for (_, k), C in self.Cmap.iteritems():
+        for (_, k), C in self.Cmap.items():
             if k == -1: Coo -= C
         self.c0_oo_cached = r = fuchsia_simplify_sparse(Coo)
         return r
 
     def singular_points(self):
         result = {}
-        for (p, k), C in self.Cmap.iteritems():
+        for (p, k), C in self.Cmap.items():
             if k >= 0:
                 result[oo] = max(k+1, result.get(oo, 0))
             else:
@@ -300,7 +300,7 @@ class RationalSystem:
 
     def sub_singular_points(self, row, col, nrows, ncols):
         result = {}
-        for (p, k), C in self.Cmap.iteritems():
+        for (p, k), C in self.Cmap.items():
             if C.submatrix(row, col, nrows, ncols).is_zero():
                 continue
             if k >= 0:
@@ -338,20 +338,20 @@ class RationalSystem:
 
     def sub_system(self, n, k):
         Cmap = {}
-        for key, C in self.Cmap.iteritems():
+        for key, C in self.Cmap.items():
             C = C.submatrix(n, n, k, k)
             if not C.is_zero():
                 Cmap[key] = C
         return RationalSystem(Cmap, self.x, identity_matrix(SR, k), [])
 
     def is_factorized(self, epsilon):
-        for key, C in self.Cmap.iteritems():
+        for key, C in self.Cmap.items():
             if not (2*C - C.subs(epsilon==2*epsilon)).is_zero():
                 return False
         return True
 
     def sub_is_factorized(self, row, col, nrows, ncols, epsilon):
-        for key, C in self.Cmap.iteritems():
+        for key, C in self.Cmap.items():
             C = C.submatrix(row, col, nrows, ncols)
             if not (2*C - C.subs(epsilon==2*epsilon)).is_zero():
                 return False
@@ -365,7 +365,7 @@ class RationalSystem:
         coP = 1-P
         if x1 == oo:
             Cmap = defaultdict(SR.zero)
-            for (pi, ki), Ci in self.Cmap.iteritems():
+            for (pi, ki), Ci in self.Cmap.items():
                 assert Ci.is_sparse()
                 assert P.is_sparse()
                 assert coP.is_sparse()
@@ -379,7 +379,7 @@ class RationalSystem:
             Cmap[x2, -1] -= P
         elif x2 == oo:
             Cmap = defaultdict(SR.zero)
-            for (pi, ki), Ci in self.Cmap.iteritems():
+            for (pi, ki), Ci in self.Cmap.items():
                 assert Ci.is_sparse()
                 assert P.is_sparse()
                 assert coP.is_sparse()
@@ -393,7 +393,7 @@ class RationalSystem:
             Cmap[x1, -1] += P
         else:
             Cmap = defaultdict(SR.zero, self.Cmap)
-            for (pi, ki), Ci in self.Cmap.iteritems():
+            for (pi, ki), Ci in self.Cmap.items():
                 assert Ci.is_sparse()
                 assert P.is_sparse()
                 assert coP.is_sparse()
@@ -404,7 +404,7 @@ class RationalSystem:
             # P/(x-x1) - P/(x-x2)
             Cmap[x1, -1] += P
             Cmap[x2, -1] -= P
-        for key, C in Cmap.items():
+        for key, C in list(Cmap.items()):
             Cmap[key] = C = fuchsia_simplify_sparse(C)
             if C.is_zero():
                 del Cmap[key]
@@ -416,7 +416,7 @@ class RationalSystem:
         # assert self.x not in T.variables()
         if invT is None:
             invT = T.inverse()
-        Cmap = {key: invT*C*T for key, C in self.Cmap.iteritems()}
+        Cmap = {key: invT*C*T for key, C in self.Cmap.items()}
         return RationalSystem(Cmap, self.x, self.T*T, self.trace + [("constant", T, invT)])
 
     def apply_off_diagonal_t(self, D, x0, k):
@@ -426,14 +426,14 @@ class RationalSystem:
         def sparse_commutator(A, B):
             # assert B.is_sparse()
             C = zero_matrix(SR, A.nrows(), sparse=True)
-            for (i, j), v in B.dict().iteritems():
+            for (i, j), v in B.dict().items():
                 for k in range(A.nrows()):
                     C[k,j] += A[k,i]*v
                     C[i,k] -= v*A[j,k]
             return C
         dirty = set(D.nonzero_positions())
         if not (x0 == oo):
-            for (pi, ki), Ci in self.Cmap.iteritems():
+            for (pi, ki), Ci in self.Cmap.items():
                 # M += (Ci*D - D*Ci)*(self.x-pi)**ki*(self.x-x0)**(-k)
                 CD = sparse_commutator(Ci, D)
                 dirty.update(CD.nonzero_positions())
@@ -441,14 +441,14 @@ class RationalSystem:
             T = 1 + D*(self.x - x0)**(-k)
             Cmap[x0, -k-1] += -(-k)*D
         else:
-            for (pi, ki), Ci in self.Cmap.iteritems():
+            for (pi, ki), Ci in self.Cmap.items():
                 # M += (Ci*D - D*Ci)*(self.x-pi)**ki*(self.x)**(k)
                 CD = sparse_commutator(Ci, D)
                 dirty.update(CD.nonzero_positions())
                 cmap_add(Cmap, CD, pi, ki, SR(0), k)
             T = 1 + D*(self.x**k)
             Cmap[SR(0), k-1] += -(k)*D
-        for key, C in Cmap.items():
+        for key, C in list(Cmap.items()):
             for ij in dirty:
                 C[ij] = fuchsia_simplify(C[ij])
             if C.is_zero():
@@ -483,7 +483,7 @@ class RationalSystem:
 
     def get_M(self):
         M = zero_matrix(SR, self.size())
-        for (p, k), C in self.Cmap.iteritems():
+        for (p, k), C in self.Cmap.items():
             M += C*(self.x-p)**k
         return M
 
@@ -492,7 +492,7 @@ class RationalSystem:
 
     def get_bool_M(self):
         B = zero_matrix(self.size())
-        for _, C in self.Cmap.iteritems():
+        for _, C in self.Cmap.items():
             for i in range(self.size()):
                 for j in range(self.size()):
                     B[i,j] = bool(B[i,j]) or not C[i,j].is_zero()
@@ -709,7 +709,7 @@ def partial_fraction(M, var):
 def fuchsia_simplify_sparse(M):
     return matrix(SR, M.nrows(), M.ncols(), {
         key: fuchsia_simplify(value)
-        for key, value in M.dict().iteritems()
+        for key, value in M.dict().items()
     }, sparse=True)
 
 def fuchsia_simplify(obj):
@@ -737,7 +737,7 @@ def fuchsia_solve(eqs, var):
                     expr = parse(s)
                     r.append(expr)
                 except SyntaxError as error:
-                    print "ERROR:  \n%s\n  %s\n" % (s, error)
+                    print("ERROR:  \n%s\n  %s\n" % (s, error))
                     continue
             result.append(r)
         return result
@@ -823,7 +823,7 @@ def singularities(m, x):
     result = {}
     for expr in m.list():
         points_expr = singularities_expr(expr, x)
-        for x0, p in points_expr.iteritems():
+        for x0, p in points_expr.items():
             if x0 in result:
                 result[x0] = max(result[x0], p)
             else:
@@ -1008,7 +1008,7 @@ def jordan_cell_sizes(J):
     assert J.is_square()
     sizes = []
     n = 1
-    for i in xrange(J.nrows() - 1):
+    for i in range(J.nrows() - 1):
         if J[i, i+1].is_zero():
             sizes.append(n)
             n = 1
@@ -1067,7 +1067,7 @@ def block_triangular_transform(m):
 
     deps_1_all = {}
     def find_deps_1_all(i):
-        if deps_1_all.has_key(i):
+        if i in deps_1_all:
             return deps_1_all[i]
         deps_1_all[i] = deps_1_1[i]
         for j in deps_1_1[i]:
@@ -1075,11 +1075,11 @@ def block_triangular_transform(m):
                 continue
             find_deps_1_all(j)
             deps_1_all[i] = deps_1_all[i].union(deps_1_all[j])
-    [find_deps_1_all(j) for j in xrange(n)]
+    [find_deps_1_all(j) for j in range(n)]
 
-    deps_coup = dict((i, set([])) for i in xrange(n))
-    for i in xrange(n):
-        for j in xrange(n):
+    deps_coup = dict((i, set([])) for i in range(n))
+    for i in range(n):
+        for j in range(n):
             if (i in deps_1_all[j]) and (j in deps_1_all[i]):
                 deps_coup[i].update([i,j])
                 deps_coup[j].update([i,j])
@@ -1090,8 +1090,8 @@ def block_triangular_transform(m):
         if not deps_coup:
             break
         error = True
-        for i in xrange(n):
-            if not deps_coup.has_key(i):
+        for i in range(n):
+            if i not in deps_coup:
                 continue
             b = deps_coup[i].copy()
             if b != deps_1_all[i]:
@@ -1100,17 +1100,17 @@ def block_triangular_transform(m):
                 b = set([i])
             shuffle += [b]
             for j in deps_1_all[i].copy():
-                if deps_1_all.has_key(j):
+                if j in deps_1_all:
                     del deps_1_all[j]
                     del deps_coup[j]
-            for j in xrange(n):
-                if not deps_coup.has_key(j):
+            for j in range(n):
+                if j not in deps_coup:
                     continue
                 deps_coup[j].difference_update(b)
                 deps_1_all[j].difference_update(b)
-            if deps_coup.has_key(i):
+            if i in deps_coup:
                 del deps_coup[i]
-            if deps_1_all.has_key(i):
+            if i in deps_1_all:
                 del deps_1_all[i]
             error = False
             break
@@ -1156,7 +1156,7 @@ def epsilon_form(M, eps, seed=0):
 #==================================================================================================
 
 def is_fuchsian(M, x):
-    for p, prank in M.singular_points().iteritems():
+    for p, prank in M.singular_points().items():
         if prank != 0:
             return False
     return True
@@ -1174,7 +1174,7 @@ def fuchsify(M, seed=0):
     rng = Random(seed)
     poincare_map = M.singular_points()
     def iter_reductions(p1, U):
-        for p2, prank2 in poincare_map.iteritems():
+        for p2, prank2 in poincare_map.items():
             if bool(p2 == p1): continue
             while prank2 >= 0:
                 B0 = M.c0(p2, prank2)
@@ -1193,7 +1193,7 @@ def fuchsify(M, seed=0):
                     logger.info(" ...let's skip reduction between %s and %s" % (point, point2))
                 else:
                     raise err
-    reduction_points = [pt for pt,p in poincare_map.iteritems() if p >= 1]
+    reduction_points = [pt for pt,p in poincare_map.items() if p >= 1]
     reduction_points.sort()
     if reduction_points == []:
         logger.info("already fuchsian")
@@ -1221,7 +1221,8 @@ def fuchsify(M, seed=0):
                         "%s\nfurther reduction is pointless:\n%s" % (M, e))
                 raise FuchsiaError("matrix cannot be reduced to Fuchsian form")
             try:
-                def complexity((point2, P, M)):
+                def complexity(point_P_M):
+                    point2, P, M = point_P_M
                     c = M.complexity()
                     logger.debug("Reduction to %s yields complexity %s" % (point2, c))
                     return c
@@ -1258,7 +1259,7 @@ def fuchsify_off_diagonal_blocks(M, eps, b=None):
                     b0 = M.sub_c0(ki, kj, ni, nj, x0, p)
                     c0 = M.sub_c0(kj, kj, nj, nj, x0, 0)
 
-                    d_vars = [gensym() for i in xrange(ni*nj)]
+                    d_vars = [gensym() for i in range(ni*nj)]
                     d = matrix(SR, ni, nj, d_vars)
                     eq = d + (a0*d - d*c0 + b0)/p
                     sol = fuchsia_solve(eq.list(), d_vars)
@@ -1320,25 +1321,25 @@ def alg1x(A0, A1):
     A0J, U = A0.jordan_form(transformation=True)
     invU = U.inverse()
     A0J_cs = jordan_cell_sizes(A0J)
-    assert all(A0J_cs[i] >= A0J_cs[i+1] for i in xrange(len(A0J_cs) - 1))
+    assert all(A0J_cs[i] >= A0J_cs[i+1] for i in range(len(A0J_cs) - 1))
     ncells = len(A0J_cs)
-    A0J_css = [sum(A0J_cs[:i]) for i in xrange(ncells + 1)]
+    A0J_css = [sum(A0J_cs[:i]) for i in range(ncells + 1)]
     nsimplecells = sum(1 if s == 1 else 0 for s in A0J_cs)
-    u0 = [U[:,A0J_css[i]] for i in xrange(ncells)]
-    v0t = [invU[A0J_css[i+1]-1,:] for i in xrange(ncells)]
+    u0 = [U[:,A0J_css[i]] for i in range(ncells)]
+    v0t = [invU[A0J_css[i+1]-1,:] for i in range(ncells)]
     L0 = matrix([
-        [(v0t[k]*(A1)*u0[l])[0,0] for l in xrange(ncells)]
-        for k in xrange(ncells)
+        [(v0t[k]*(A1)*u0[l])[0,0] for l in range(ncells)]
+        for k in range(ncells)
     ])
     L0 = fuchsia_simplify(L0)
     L1 = matrix([
-        [(v0t[k]*u0[l])[0,0] for l in xrange(ncells)]
-        for k in xrange(ncells)
+        [(v0t[k]*u0[l])[0,0] for l in range(ncells)]
+        for k in range(ncells)
     ])
     assert (L1 - diagonal_matrix(
             [0]*(ncells-nsimplecells) + [1]*nsimplecells)).is_zero()
-    #zero_rows = [i for i in xrange(A0.nrows()) if A0J[i,:].is_zero()]
-    #zero_cols = [j for j in xrange(A0.nrows()) if A0J[:,j].is_zero()]
+    #zero_rows = [i for i in range(A0.nrows()) if A0J[i,:].is_zero()]
+    #zero_cols = [j for j in range(A0.nrows()) if A0J[:,j].is_zero()]
     #assert len(zero_rows) == len(zero_cols) == ncells
     #_L0 = (invU*A1*U)[zero_rows, zero_cols]
     #assert (L0 - _L0).is_zero()
@@ -1347,12 +1348,12 @@ def alg1x(A0, A1):
         raise FuchsiaError("matrix is Moser-irreducible")
     S, D = alg1(L0, A0J_cs)
     I_E = identity_matrix(D.base_ring(), A0.nrows())
-    for i in xrange(ncells):
-        for j in xrange(ncells):
+    for i in range(ncells):
+        for j in range(ncells):
             if not D[i,j].is_zero():
                 ni = A0J_css[i]
                 nj = A0J_css[j]
-                for k in xrange(min(A0J_cs[i], A0J_cs[j])):
+                for k in range(min(A0J_cs[i], A0J_cs[j])):
                     I_E[ni+k,nj+k] += D[i,j]
     U_t = U*I_E
     invU_t = U_t.inverse()
@@ -1375,7 +1376,7 @@ def alg1(L0, jordan_cellsizes):
             Lx[i, :] = 0
         fi = None
         c = None
-        for i in xrange(0, N):
+        for i in range(0, N):
             if i not in S:
                 try:
                     c = solve_right_fixed(Lx[:,0:i], Lx[:,i])
@@ -1388,7 +1389,7 @@ def alg1(L0, jordan_cellsizes):
         assert c is not None
         D0 = matrix(ring, N)
         invD0 = matrix(ring, N)
-        for j in xrange(fi):
+        for j in range(fi):
             D0[j, fi] = -c[j, 0]
             invD0[j, fi] = -c[j, 0] \
                     if jordan_cellsizes[j] == jordan_cellsizes[fi] else 0
@@ -1398,8 +1399,8 @@ def alg1(L0, jordan_cellsizes):
             break
         S.add(fi)
     # Check Alg.1 promise
-    for j in xrange(N):
-        for k in xrange(N):
+    for j in range(N):
+        for k in range(N):
             if (j not in S) and ((k in S) or k == fi):
                 assert L0[j,k] == 0
     S.add(fi)
@@ -1420,7 +1421,7 @@ def is_normalized(M, x, eps):
     True
     """
     points = singularities(M, x)
-    for x0, p in points.iteritems():
+    for x0, p in points.items():
         M0 = matrix_residue(M, x, x0)
         for ev in M0.eigenvalues():
             ev = limit_fixed(ev, eps, 0)
@@ -1499,7 +1500,7 @@ def normalize(M, eps, seed=0):
             self.x0 = None
 
         def is_normalized(self):
-            for ev in self.ev_cum.itervalues():
+            for ev in self.ev_cum.values():
                 if ev != [0,0]:
                     return False
             return True
@@ -1657,7 +1658,7 @@ def select_balance(balances, eps, state):
 def eigenvectors_left(m):
     if m._cache is None:
         m._cache = {}
-    if not m._cache.has_key("eigenvectors_left"):
+    if "eigenvectors_left" not in m._cache:
         res = simplify(m.eigenvectors_left())
         m._cache["eigenvectors_left"] = res
     return m._cache["eigenvectors_left"]
@@ -1665,7 +1666,7 @@ def eigenvectors_left(m):
 def eigenvectors_right(m):
     if m._cache is None:
         m._cache = {}
-    if not m._cache.has_key("eigenvectors_right"):
+    if "eigenvectors_right" not in m._cache:
         res = m.eigenvectors_right()
         m._cache["eigenvectors_right"] = res
     return m._cache["eigenvectors_right"]
@@ -1690,18 +1691,18 @@ def factorize(M, epsilon, b=None, seed=0):
     rng = Random(seed)
     mu = gensym()
     if b is None:
-        T_symbols = [gensym() for i in xrange(n*n)]
+        T_symbols = [gensym() for i in range(n*n)]
         T = matrix(SR, n, n, T_symbols)
     else:
         T, T_symbols = identity_matrix(SR, n), []
         for ki,ni in b:
-            for i in xrange(ki,ki+ni):
-                for j in xrange(ki+ni):
+            for i in range(ki,ki+ni):
+                for j in range(ki+ni):
                     sym = gensym()
                     T[i,j] = sym
                     T_symbols.append(sym)
     eqs = []
-    for point, prank in M.singular_points().iteritems():
+    for point, prank in M.singular_points().items():
         assert prank == 0
         logger.debug("Processing point x = %s" % point)
         R = M.c0(point, 0)
@@ -1759,7 +1760,7 @@ def simplify_by_jordanification(M, x):
     minM = M
     minC = matrix_complexity(M)
     minT = identity_matrix(M.base_ring(), M.nrows())
-    for point, prank in singularities(M, x).iteritems():
+    for point, prank in singularities(M, x).items():
         R = matrix_c0(M, x, point, prank)
         J, T = R.jordan_form(transformation=True)
         MM = fuchsia_simplify(transform(M, x, T))
@@ -1792,18 +1793,18 @@ def common_factor(expressions, filter):
     factor2exp2count = defaultdict(lambda: defaultdict(lambda: 0))
     for i, expr in enumerate(expressions):
         factors = dict(expr.factor_list())
-        for factor, n in factors.iteritems():
+        for factor, n in factors.items():
             if not filter(factor): continue
             if factor in factor2exp2count:
                 factor2exp2count[factor][n] += 1
             else:
                 if i > 0: factor2exp2count[factor][0] = i
                 factor2exp2count[factor][n] = 1
-        for factor, exps in factor2exp2count.iteritems():
+        for factor, exps in factor2exp2count.items():
             if factor not in factors:
                 exps[0] += 1
     result = SR(1)
-    for factor, exp2count in factor2exp2count.iteritems():
+    for factor, exp2count in factor2exp2count.items():
         exps = exp2count.keys()
         minn = min(exps)
         maxn = max(exps)
@@ -1824,11 +1825,11 @@ def simplify_by_factorization(M, x):
     n = M.nrows()
     T = identity_matrix(SR, n)
     factors = []
-    for i in xrange(n):
+    for i in range(n):
         logger.debug("Looking at row {}".format(i))
         factor = common_factor(
-            [M[i,k] for k in xrange(n) if i != k and not M[i,k].is_zero()] +
-            [1/M[k,i] for k in xrange(n) if k != i and not M[k,i].is_zero()],
+            [M[i,k] for k in range(n) if i != k and not M[i,k].is_zero()] +
+            [1/M[k,i] for k in range(n) if k != i and not M[k,i].is_zero()],
             lambda e: not e.has(x))
         if factor != 1:
             T[i,i] = factor
@@ -1879,14 +1880,18 @@ def import_matrix_mathematica(f):
     from a file-like object.
     """
     data =  f.read()
-    data = data.translate(None, ' \n')
+    data = data.replace(' ', '').replace('\n', '')
     nr = data.count('},{')+1
-    data = data.translate(None, '{}')
+    data = data.replace('{', '').replace('}', '')
     data = data.replace(',', '\n')
+    data = data.replace('Sqrt[', 'sqrt(').replace(']', ')')
     nc = int((data.count('\n')+1)/nr)
 
-    import StringIO
-    sio = StringIO.StringIO("%d %d\n" % (nc, nr) + data)
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
+    sio = StringIO("%d %d\n" % (nc, nr) + data)
     return import_matrix_matrixmarket(sio).T
 
 def import_matrix_matrixmarket(f):
@@ -1990,12 +1995,12 @@ def main():
                 stats.print_stats(50)
 
     def usage():
-        print __doc__
+        print(__doc__)
         exit(0)
 
     try:
-        print '\033[35;1mFuchsia v%s\033[0m' % (__version__)
-        print "Authors: %s\n" % __author__
+        print('\033[35;1mFuchsia v%s\033[0m' % (__version__))
+        print("Authors: %s\n" % __author__)
         mpath = tpath = profpath = fmt = None
         M = None
         x, y, epsilon = SR.var("x y eps")
@@ -2078,7 +2083,7 @@ def main():
                 print("Matrix shape:")
                 print("\n".join(" " + "".join("#" if ex else "." for ex in row) for row in M.get_M()))
                 print("Matrix expansion:")
-                for point, prank in M.singular_points().iteritems():
+                for point, prank in M.singular_points().items():
                     c0 = M.c0(point, prank)
                     print("  C0[%s=%s; %s] = {rank=%s, complexity=%s}" % (
                         x, point, prank, c0.rank(), matrix_complexity(c0)
@@ -2098,7 +2103,7 @@ def main():
             if mpath is not None:
                 export_matrix_to_file(mpath, m, fmt=fmt)
             else:
-                print m
+                print(m)
         if tpath is not None and M is not None:
             T = partial_fraction(M.get_T(), x)
             export_matrix_to_file(tpath, T, fmt=fmt)
